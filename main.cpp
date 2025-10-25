@@ -49,13 +49,10 @@ int main() {
     ammoText.setCharacterSize(56);
     ammoText.setFillColor(sf::Color::Black);
 
-    // --- BUCLA PRINCIPALĂ A JOCULUI ---
     while (window.isOpen()) {
 
-        // --- 1. Calculează Delta Time (dt) ---
         sf::Time dt = clock.restart();
 
-        // --- 2. Procesează Evenimentele ---
         while (auto event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 window.close();
@@ -72,9 +69,8 @@ int main() {
                     player.reload();
                 }
             }
-        } // <-- Sfârșitul buclei de evenimente
+        }
 
-        // --- 3. Logica de Update ---
         sf::Vector2i mousePositionWindow = sf::Mouse::getPosition(window);
         sf::Vector2f mousePositionWorld = window.mapPixelToCoords(mousePositionWindow,camera);
 
@@ -84,12 +80,12 @@ int main() {
             shootTimer.restart();
         }
 
-        player.update(dt.asSeconds(), mousePositionWorld); // Acum 'dt' există
+        player.update(dt.asSeconds(), mousePositionWorld);
         camera.setCenter(player.getPosition());
 
         sf::Vector2f playerPos = player.getPosition();
-        for (auto& enemy : enemies) { // Am scos [[maybe_unused]] ca să poți folosi enemy
-             Enemy::update(dt.asSeconds(), playerPos); // Folosește enemy.update(...) dacă e metodă non-statică
+        for (auto& enemy : enemies) {
+             Enemy::update(dt.asSeconds(), playerPos);
         }
 
         for (auto& bullet : bullets) {
@@ -99,7 +95,6 @@ int main() {
         std::string ammoString = std::to_string(player.getCurrentAmmo())+ " / " + std::to_string(player.getReserveAmmo());
         ammoText.setString(ammoString);
 
-        // --- 4. Logica de Desenare ---
         window.clear(sf::Color(30, 30, 30));
         window.setView(camera);
         gameMap.draw(window);
@@ -111,17 +106,16 @@ int main() {
         for (auto& bullet : bullets) {
             bullet.draw(window);
         }
-        window.setView(window.getDefaultView()); // Reset view pentru UI
+        window.setView(window.getDefaultView());
 
-        // Desenează UI relativ la fereastră, nu la cameră
-        sf::Vector2f viewSize = static_cast<sf::Vector2f>(window.getSize()); // Mărimea ferestrei
+        sf::Vector2f viewSize = static_cast<sf::Vector2f>(window.getSize());
         ammoText.setPosition({10.f, viewSize.y - static_cast<float>(ammoText.getCharacterSize()) - 10.f});
 
         window.draw(ammoText);
-        player.drawUI(window); // Desenează UI-ul playerului (ex: animatia de reload)
+        player.drawUI(window);
 
         window.display();
-    } // --- SFÂRȘITUL BUCLEI PRINCIPALE A JOCULUI ---
+    }
 
     return 0;
 }
