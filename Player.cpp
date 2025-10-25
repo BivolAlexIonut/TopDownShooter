@@ -19,13 +19,13 @@ Player::Player(float startX, float startY) :
     m_reloadAnimSprite(this->m_reloadAnimTexture),
     m_reloadingWeaponIndex(-1)
 {
-    if (!this->playerTexture.loadFromFile("../assets/Premium Content/Examples/Basic Usage.png")) {
+    if (!this->playerTexture.loadFromFile("/home/alex/test/TopDownShooter/assets/Premium Content/Examples/Basic Usage.png")) {
         std::cerr << "EROARE: Nu am putut incarca ../assets/Premium Content/Examples/Basic Usage.png" << std::endl;
     }
-    if (!this->bulletTexture.loadFromFile("../assets/Bullets.png")) {
+    if (!this->bulletTexture.loadFromFile("/home/alex/test/TopDownShooter/assets/Bullets.png")) {
         std::cerr <<"EROARE: Nu am putut incarca ../assets/Bullets.png" << std::endl;
     }
-    if (!this->m_reloadAnimTexture.loadFromFile("../assets/effects/All.png")) {
+    if (!this->m_reloadAnimTexture.loadFromFile("/home/alex/test/TopDownShooter/assets/effects/All.png")) {
         std::cerr<<"EROARE: Nu am putut incarca ../assets/effects/All.png"<<std::endl;
     }
     //---------------------------------------------------------------------------------------------------

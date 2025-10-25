@@ -13,13 +13,14 @@ int main() {
     window.setFramerateLimit(60);
 
     GameMap gameMap;
-    if (!gameMap.load("../assets/Levels/level1.json",
-                      "../assets/Premium Content/Tileset with cell size 256x256.png")) {
+
+    if (!gameMap.load("/home/alex/test/TopDownShooter/assets/Levels/level1.txt",
+                      "/home/alex/test/TopDownShooter/assets/Premium Content/Tileset with cell size 256x256.png")) {
         std::cerr << "EROARE FATALA: Harta nu a putut fi incarcata." << std::endl;
         return -1;
                       }
-    constexpr float mapScale = 0.4f;
-    Player player(1000.f * mapScale, 1000.f * mapScale);
+    constexpr float mapScale = 0.4f; // Poți ajusta scala aici dacă vrei
+    Player player(1000.f * mapScale, 1000.f * mapScale); // Ajustează poziția de start dacă e nevoie
 
     Enemy enemy1(100.f, 200.f);
     std::vector<Enemy> enemies;
@@ -28,7 +29,7 @@ int main() {
     player.takeDamage(25.f);
     enemies[0].takeDamage(10.f);
 
-    sf::Clock clock;
+    sf::Clock clock; // Clock-ul trebuie definit ÎNAINTEA buclei
     sf::View camera;
     camera.setSize({1280,720});
     camera.setCenter(player.getPosition());
@@ -39,8 +40,8 @@ int main() {
 
     //UI Ammo
     sf::Font ammoFont;
-    if (!ammoFont.openFromFile("../fonts/m6x11.ttf")) {
-        std::cerr << "EROARE: Nu am putut incarca fontul assets/arial.ttf" << std::endl;
+    if (!ammoFont.openFromFile("/home/alex/test/TopDownShooter/fonts/m6x11.ttf")) {
+        std::cerr << "EROARE: Nu am putut incarca fontul fonts/m6x11.ttf" << std::endl;
         return -1;
     }
     sf::Text ammoText(ammoFont);
@@ -48,6 +49,13 @@ int main() {
     ammoText.setCharacterSize(56);
     ammoText.setFillColor(sf::Color::Black);
 
+    // --- BUCLA PRINCIPALĂ A JOCULUI ---
+    while (window.isOpen()) {
+
+        // --- 1. Calculează Delta Time (dt) ---
+        sf::Time dt = clock.restart();
+
+        // --- 2. Procesează Evenimentele ---
         while (auto event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 window.close();
@@ -64,24 +72,24 @@ int main() {
                     player.reload();
                 }
             }
-        }
+        } // <-- Sfârșitul buclei de evenimente
 
+        // --- 3. Logica de Update ---
         sf::Vector2i mousePositionWindow = sf::Mouse::getPosition(window);
         sf::Vector2f mousePositionWorld = window.mapPixelToCoords(mousePositionWindow,camera);
+
         if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && shootTimer.getElapsedTime().asSeconds() > player.getCurrentWeaponCooldown()
             && player.canShoot(mousePositionWorld)) {
-            //Creez glnt si trag
             bullets.push_back((player.shoot(mousePositionWorld)));
             shootTimer.restart();
         }
 
-
-        player.update(dt.asSeconds(), mousePositionWorld);
+        player.update(dt.asSeconds(), mousePositionWorld); // Acum 'dt' există
         camera.setCenter(player.getPosition());
 
         sf::Vector2f playerPos = player.getPosition();
-        for ([[maybe_unused]] auto& enemy : enemies) {
-            Enemy::update(dt.asSeconds(), playerPos);
+        for (auto& enemy : enemies) { // Am scos [[maybe_unused]] ca să poți folosi enemy
+             Enemy::update(dt.asSeconds(), playerPos); // Folosește enemy.update(...) dacă e metodă non-statică
         }
 
         for (auto& bullet : bullets) {
@@ -91,6 +99,7 @@ int main() {
         std::string ammoString = std::to_string(player.getCurrentAmmo())+ " / " + std::to_string(player.getReserveAmmo());
         ammoText.setString(ammoString);
 
+        // --- 4. Logica de Desenare ---
         window.clear(sf::Color(30, 30, 30));
         window.setView(camera);
         gameMap.draw(window);
@@ -102,16 +111,17 @@ int main() {
         for (auto& bullet : bullets) {
             bullet.draw(window);
         }
-        window.setView(window.getDefaultView());
+        window.setView(window.getDefaultView()); // Reset view pentru UI
 
-        sf::Vector2f viewSize = window.getDefaultView().getSize();
+        // Desenează UI relativ la fereastră, nu la cameră
+        sf::Vector2f viewSize = static_cast<sf::Vector2f>(window.getSize()); // Mărimea ferestrei
         ammoText.setPosition({10.f, viewSize.y - static_cast<float>(ammoText.getCharacterSize()) - 10.f});
 
         window.draw(ammoText);
-        player.drawUI(window);
+        player.drawUI(window); // Desenează UI-ul playerului (ex: animatia de reload)
 
         window.display();
-    }
+    } // --- SFÂRȘITUL BUCLEI PRINCIPALE A JOCULUI ---
 
     return 0;
 }
