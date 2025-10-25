@@ -1,0 +1,14 @@
+{ "columns":14,
+ "image":"Premium Content\/Tileset with cell size 256x256.png",
+ "imageheight":1792,
+ "imagewidth":3648,
+ "margin":0,
+ "name":"Mapa",
+ "spacing":0,
+ "tilecount":98,
+ "tiledversion":"1.11.2",
+ "tileheight":256,
+ "tilewidth":256,
+ "type":"tileset",
+ "version":"1.10"
+}
