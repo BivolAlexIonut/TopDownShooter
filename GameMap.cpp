@@ -56,9 +56,9 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath) {
     for (unsigned int y = 0; y < m_mapSize.y; ++y) {
         for (unsigned int x = 0; x < m_mapSize.x; ++x) {
             int tileIndex = static_cast<int>(y) * static_cast<int>(m_mapSize.x) + static_cast<int>(x);
-            int tileID = tileIDs[tileIndex];
-            if (tileID == 0) continue;
-            int id = tileID - 1;
+            int currentTileID = tileIDs[tileIndex];
+            if (currentTileID == 0) continue;
+            int id = currentTileID - 1;
             int texX = (id % static_cast<int>(tilesetColumns)) * static_cast<int>(m_tileSize.x);
             int texY = (id / static_cast<int>(tilesetColumns)) * static_cast<int>(m_tileSize.y);
             sf::Sprite tileSprite(m_tilesetTexture);
