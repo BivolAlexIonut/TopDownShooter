@@ -84,9 +84,6 @@ int main() {
         camera.setCenter(player.getPosition());
 
         sf::Vector2f playerPos = player.getPosition();
-        for (auto& enemy : enemies) {
-             Enemy::update(dt.asSeconds(), playerPos);
-        }
 
         for (auto& bullet : bullets) {
             bullet.update(dt.asSeconds());
@@ -100,9 +97,6 @@ int main() {
         gameMap.draw(window);
         player.draw(window);
 
-        for (auto& enemy : enemies) {
-            enemy.draw(window);
-        }
         for (auto& bullet : bullets) {
             bullet.draw(window);
         }
