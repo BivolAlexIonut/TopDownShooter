@@ -14,19 +14,19 @@ int main() {
 
     GameMap gameMap;
 
+    constexpr float mapScale = 0.4f;
     if (!gameMap.load("/home/alex/test/TopDownShooter/assets/Levels/level1.txt",
-                      "/home/alex/test/TopDownShooter/assets/Premium Content/Tileset with cell size 256x256.png")) {
+                      "/home/alex/test/TopDownShooter/assets/Premium Content/Tileset with cell size 256x256.png",mapScale)) {
         std::cerr << "EROARE FATALA: Harta nu a putut fi incarcata." << std::endl;
         return -1;
                       }
-    constexpr float mapScale = 0.4f;
-    Player player(1000.f * mapScale, 1000.f * mapScale);
+    Player player(1640 * mapScale, 1360 * mapScale);
 
     Enemy enemy1(100.f, 200.f);
     std::vector<Enemy> enemies;
     enemies.push_back(enemy1);
 
-    player.takeDamage(25.f);
+    player.takeDamage(25.f);//Testez Ui pentru healthbar
     enemies[0].takeDamage(10.f);
 
     sf::Clock clock;
@@ -92,7 +92,7 @@ int main() {
 
         window.clear(sf::Color(30, 30, 30));
         window.setView(camera);
-        gameMap.draw(window);
+        window.draw(gameMap);
         player.draw(window);
 
         for (auto& bullet : bullets) {

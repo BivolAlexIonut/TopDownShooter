@@ -5,9 +5,7 @@
 
 GameMap::GameMap() : m_tileSize(0, 0), m_mapSize(0, 0) {}
 
-GameMap::~GameMap() = default;
-
-bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath) {
+bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,float mapScale) {
     if (!m_tilesetTexture.loadFromFile(tilesetPath)) {
         std::cerr << "EROARE: Nu am putut incarca tileset-ul: " << tilesetPath << std::endl;
         return false;
@@ -18,8 +16,6 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath) {
         std::cerr << "EROARE: Nu am putut deschide fisierul text al hărții: " << mapPath << std::endl;
         return false;
     }
-
-    const float mapScale = 0.3f;
 
     if (!(f >> m_mapSize.x >> m_mapSize.y)) {
         std::cerr << "EROARE: Nu am putut citi map dimensions din " << mapPath << std::endl;
@@ -33,6 +29,7 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath) {
         return false;
     }
 
+    //citesc id-s dintr un vector temporar
     std::vector<int> tileIDs;
     int tileID;
     unsigned int totalTiles = m_mapSize.x * m_mapSize.y;
@@ -48,40 +45,97 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath) {
     }
     f.close();
 
-    unsigned int tilesetColumns = m_tilesetTexture.getSize().x / m_tileSize.x;
-    m_tiles.clear();
-    m_tiles.reserve(m_mapSize.x * m_mapSize.y);
+    //Numar cate tiles vizibile am
+    size_t visibletileCount = 0;
+    for (const int id : tileIDs) {
+        if (id!=0)
+            visibletileCount++;
+    }
+
+    //Redimensionez vertex arrayul
+    m_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
+    m_vertices.resize(visibletileCount * 6);
+
+    //Incarc in vertexArray
+    const size_t tilesetColumns = m_tilesetTexture.getSize().x/m_tileSize.x;
+    size_t tileIndex = 0;
+
+    const auto fTileSizeX = static_cast<float>(m_tileSize.x);
+    const auto fTileSizeY = static_cast<float>(m_tileSize.y);
+    const float fScaledTileSizeX = fTileSizeX * mapScale;
+    const float fScaledTileSizeY = fTileSizeY * mapScale;
 
     for (unsigned int y = 0; y < m_mapSize.y; ++y) {
         for (unsigned int x = 0; x < m_mapSize.x; ++x) {
-            int tileIndex = static_cast<int>(y) * static_cast<int>(m_mapSize.x) + static_cast<int>(x);
-            int currentTileID = tileIDs[tileIndex];
-            if (currentTileID == 0) continue;
+
+            int currentTileID = tileIDs[y * m_mapSize.x + x];
+            if (currentTileID==0)continue;
+
+
             int id = currentTileID - 1;
-            int texX = (id % static_cast<int>(tilesetColumns)) * static_cast<int>(m_tileSize.x);
-            int texY = (id / static_cast<int>(tilesetColumns)) * static_cast<int>(m_tileSize.y);
-            sf::Sprite tileSprite(m_tilesetTexture);
-            tileSprite.setTextureRect(sf::IntRect({(int)texX, (int)texY}, {(int)m_tileSize.x, (int)m_tileSize.y}));
-            tileSprite.setScale({mapScale, mapScale});
-            tileSprite.setPosition({ static_cast<float>(x) * static_cast<float>(m_tileSize.x) * mapScale,
-                         static_cast<float>(y) * static_cast<float>(m_tileSize.y) * mapScale });
-            m_tiles.push_back(tileSprite);
+
+            const sf::Vector2f topLeftPos(static_cast<float>(x) * fScaledTileSizeX, static_cast<float>(y) * fScaledTileSizeY);
+            const sf::Vector2f topRightPos(topLeftPos.x + fScaledTileSizeX, topLeftPos.y);
+            const sf::Vector2f botRightPos(topLeftPos.x + fScaledTileSizeX, topLeftPos.y + fScaledTileSizeY);
+            const sf::Vector2f botLeftPos(topLeftPos.x, topLeftPos.y + fScaledTileSizeY);
+
+            const size_t u = static_cast<size_t>(id) % tilesetColumns;
+            const size_t v = static_cast<size_t>(id) / tilesetColumns;
+            const auto texX = static_cast<float>(u * m_tileSize.x);
+            const auto texY = static_cast<float>(v * m_tileSize.y);
+
+            const sf::Vector2f topLeftTex(texX, texY);
+            const sf::Vector2f topRightTex(texX + fTileSizeX, texY);
+            const sf::Vector2f botRightTex(texX + fTileSizeX, texY + fTileSizeY);
+            const sf::Vector2f botLeftTex(texX, texY + fTileSizeY);
+
+            sf::Vertex* tileVertices = &m_vertices[tileIndex * 6];
+
+            // Primul triunghi
+            tileVertices[0].position = topLeftPos;
+            tileVertices[1].position = topRightPos;
+            tileVertices[2].position = botRightPos;
+
+            tileVertices[0].texCoords = topLeftTex;
+            tileVertices[1].texCoords = topRightTex;
+            tileVertices[2].texCoords = botRightTex;
+
+            // Al doilea triunghi
+            tileVertices[3].position = topLeftPos;
+            tileVertices[4].position = botRightPos;
+            tileVertices[5].position = botLeftPos;
+
+            tileVertices[3].texCoords = topLeftTex;
+            tileVertices[4].texCoords = botRightTex;
+            tileVertices[5].texCoords = botLeftTex;
+            // -------------------------
+
+            // trec la urmatorul grup de 6 varfuri
+            tileIndex++;
         }
     }
 
     std::cout << "Harta incarcata: " << m_mapSize.x << "x" << m_mapSize.y << " piese." << std::endl;
-    std::cout << "Am creat " << m_tiles.size() << " sprite-uri pentru harta." << std::endl;
+    std::cout << "Am creat " << m_vertices.getVertexCount() << " sprite-uri pentru harta." << std::endl;
     return true;
 }
 
-void GameMap::draw(sf::RenderWindow& window) {
-    for (const auto& tile : m_tiles) {
-        window.draw(tile);
-    }
+void GameMap::draw(sf::RenderTarget& target,sf::RenderStates states) const{
+    states.transform *= getTransform();
+    states.texture = &m_tilesetTexture;
+    target.draw(m_vertices, states);
 }
 
 std::ostream& operator<<(std::ostream& os, const GameMap& map) {
     os << "GameMap( Size: " << map.m_mapSize.x << "x" << map.m_mapSize.y
-       << " | Tiles: " << map.m_tiles.size() << " )";
+       << " | Tiles: " << map.m_vertices.getVertexCount() / 6 << " )";
     return os;
 }
+
+/*
+ * PENTRU METODA CU VERTEX ARRAY AM FOLOSIT https://www.sfml-dev.org/tutorials/3.0/graphics/vertex-array/#creating-an-sfml-like-entity,
+ * documnetatia oficiala de pe siteul sfml,https://www.youtube.com/watch?v=hnjhCFA4GnM
+ * Aceasta varianta este mai eficienta decat incarcarea in 100 spriteuri pentru a incarca o harta mare(se apelau cate 100 functii de draw
+ * ceea ce era ineficient)
+ * Acum mapa este incaracata complet inainte in gameLoad.
+ */

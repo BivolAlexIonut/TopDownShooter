@@ -91,10 +91,10 @@ Player::Player(float startX, float startY) :
     // SMG
     m_weaponBarrelOffsets.emplace_back(100.f, 356.f);
     std::vector<sf::IntRect> smgFrames;
-    smgFrames.push_back(sf::IntRect({181, 278}, {6, 4})); // Cadru 1
-    smgFrames.push_back(sf::IntRect({196, 277}, {8, 6})); // Cadru 2 (EXEMPLU!)
-    smgFrames.push_back(sf::IntRect({208, 278}, {17, 5})); // Cadru 3 (EXEMPLU!)
-    smgFrames.push_back(sf::IntRect({223, 278}, {17, 5})); // Cadru 4 (EXEMPLU!)
+    smgFrames.push_back(sf::IntRect({181, 278}, {6, 4}));
+    smgFrames.push_back(sf::IntRect({196, 277}, {8, 6}));
+    smgFrames.push_back(sf::IntRect({208, 278}, {17, 5}));
+    smgFrames.push_back(sf::IntRect({223, 278}, {17, 5}));
     m_weaponBulletAnimRects.push_back(smgFrames);
     m_weaponBulletAnimSpeeds.push_back(0.1f);
     m_weaponShootCooldowns.push_back(0.02f);
@@ -106,10 +106,10 @@ Player::Player(float startX, float startY) :
     // Shotgun
     m_weaponBarrelOffsets.emplace_back(100.f, 400.f);
     std::vector<sf::IntRect> shotgunFrames;
-    shotgunFrames.push_back(sf::IntRect({452, 264}, {20, 16})); // Cadru 1
-    shotgunFrames.push_back(sf::IntRect({484, 264}, {20, 15})); // Cadru 2 (EXEMPLU!)
-    shotgunFrames.push_back(sf::IntRect({516, 264}, {23, 16})); // Cadru 3 (EXEMPLU!)
-    shotgunFrames.push_back(sf::IntRect({546, 262}, {25, 19})); // Cadru 4 (EXEMPLU!)
+    shotgunFrames.push_back(sf::IntRect({452, 264}, {20, 16}));
+    shotgunFrames.push_back(sf::IntRect({484, 264}, {20, 15}));
+    shotgunFrames.push_back(sf::IntRect({516, 264}, {23, 16}));
+    shotgunFrames.push_back(sf::IntRect({546, 262}, {25, 19}));
     m_weaponBulletAnimRects.push_back(shotgunFrames);
     m_weaponBulletAnimSpeeds.push_back(0.05f);
     m_weaponShootCooldowns.push_back(1.f);
