@@ -83,7 +83,7 @@ int main() {
         player.update(dt.asSeconds(), mousePositionWorld);
         camera.setCenter(player.getPosition());
 
-        sf::Vector2f playerPos = player.getPosition();
+        //sf::Vector2f playerPos = player.getPosition();
 
         for (auto& bullet : bullets) {
             bullet.update(dt.asSeconds());
