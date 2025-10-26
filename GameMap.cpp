@@ -45,40 +45,83 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,fl
     }
     f.close();
 
-    //Numar cate tiles vizibile am
-    size_t visibletileCount = 0;
+    // Numar cate tiles sunt peste podea pentru a putea incarca si alte texturi in afara de
+    //cea a podeleip
+    size_t objectTileCount = 0;
     for (const int id : tileIDs) {
-        if (id!=0)
-            visibletileCount++;
+        if (id > 1) //Aici verific daca textura este sau nu podea si numar
+            objectTileCount++;
     }
 
-    //Redimensionez vertex arrayul
+    // Dimensiunea arrayului ca sa includa podeaua
     m_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
-    m_vertices.resize(visibletileCount * 6);
+    m_vertices.resize((totalTiles + objectTileCount) * 6); //am doua triunghiuri deci 6 varfuri
 
-    //Incarc in vertexArray
-    const size_t tilesetColumns = m_tilesetTexture.getSize().x/m_tileSize.x;
-    size_t tileIndex = 0;
+    const size_t tilesetColumns = m_tilesetTexture.getSize().x / m_tileSize.x;
+    size_t vertexIndex = 0; //index pentryu varf
 
     const auto fTileSizeX = static_cast<float>(m_tileSize.x);
     const auto fTileSizeY = static_cast<float>(m_tileSize.y);
     const float fScaledTileSizeX = fTileSizeX * mapScale;
     const float fScaledTileSizeY = fTileSizeY * mapScale;
 
+
+    const float floorTexX = 0.f;
+    const float floorTexY = 0.f;
+
+    const sf::Vector2f floorTopLeftTex(floorTexX, floorTexY);
+    const sf::Vector2f floorTopRightTex(floorTexX + fTileSizeX, floorTexY);
+    const sf::Vector2f floorBotRightTex(floorTexX + fTileSizeX, floorTexY + fTileSizeY);
+    const sf::Vector2f floorBotLeftTex(floorTexX, floorTexY + fTileSizeY);
+
     for (unsigned int y = 0; y < m_mapSize.y; ++y) {
         for (unsigned int x = 0; x < m_mapSize.x; ++x) {
 
-            int currentTileID = tileIDs[y * m_mapSize.x + x];
-            if (currentTileID==0)continue;
-
-
-            int id = currentTileID - 1;
-
+            //calculez pozitia pe ecran
             const sf::Vector2f topLeftPos(static_cast<float>(x) * fScaledTileSizeX, static_cast<float>(y) * fScaledTileSizeY);
             const sf::Vector2f topRightPos(topLeftPos.x + fScaledTileSizeX, topLeftPos.y);
             const sf::Vector2f botRightPos(topLeftPos.x + fScaledTileSizeX, topLeftPos.y + fScaledTileSizeY);
             const sf::Vector2f botLeftPos(topLeftPos.x, topLeftPos.y + fScaledTileSizeY);
 
+            sf::Vertex* tileVertices = &m_vertices[vertexIndex * 6];
+
+            // Primul triunghi
+            tileVertices[0].position = topLeftPos;
+            tileVertices[1].position = topRightPos;
+            tileVertices[2].position = botRightPos;
+            tileVertices[0].texCoords = floorTopLeftTex;
+            tileVertices[1].texCoords = floorTopRightTex;
+            tileVertices[2].texCoords = floorBotRightTex;
+
+            // Al doilea triunghi
+            tileVertices[3].position = topLeftPos;
+            tileVertices[4].position = botRightPos;
+            tileVertices[5].position = botLeftPos;
+            tileVertices[3].texCoords = floorTopLeftTex;
+            tileVertices[4].texCoords = floorBotRightTex;
+            tileVertices[5].texCoords = floorBotLeftTex;
+
+            vertexIndex++; // tec la urmatorul set de 6 varfuri
+        }
+    }
+
+    //Acum desenex obiectele care sunt deasupra podelei
+    for (unsigned int y = 0; y < m_mapSize.y; ++y) {
+        for (unsigned int x = 0; x < m_mapSize.x; ++x) {
+
+            int currentTileID = tileIDs[y * m_mapSize.x + x];
+
+            if (currentTileID <= 1) continue;
+
+            int id = currentTileID - 1;
+
+            // calculez iar pozitita pe ecran
+            const sf::Vector2f topLeftPos(static_cast<float>(x) * fScaledTileSizeX, static_cast<float>(y) * fScaledTileSizeY);
+            const sf::Vector2f topRightPos(topLeftPos.x + fScaledTileSizeX, topLeftPos.y);
+            const sf::Vector2f botRightPos(topLeftPos.x + fScaledTileSizeX, topLeftPos.y + fScaledTileSizeY);
+            const sf::Vector2f botLeftPos(topLeftPos.x, topLeftPos.y + fScaledTileSizeY);
+
+            // coordonatele texturii obiectului
             const size_t u = static_cast<size_t>(id) % tilesetColumns;
             const size_t v = static_cast<size_t>(id) / tilesetColumns;
             const auto texX = static_cast<float>(u * m_tileSize.x);
@@ -89,13 +132,12 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,fl
             const sf::Vector2f botRightTex(texX + fTileSizeX, texY + fTileSizeY);
             const sf::Vector2f botLeftTex(texX, texY + fTileSizeY);
 
-            sf::Vertex* tileVertices = &m_vertices[tileIndex * 6];
+            sf::Vertex* tileVertices = &m_vertices[vertexIndex * 6];
 
             // Primul triunghi
             tileVertices[0].position = topLeftPos;
             tileVertices[1].position = topRightPos;
             tileVertices[2].position = botRightPos;
-
             tileVertices[0].texCoords = topLeftTex;
             tileVertices[1].texCoords = topRightTex;
             tileVertices[2].texCoords = botRightTex;
@@ -104,14 +146,11 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,fl
             tileVertices[3].position = topLeftPos;
             tileVertices[4].position = botRightPos;
             tileVertices[5].position = botLeftPos;
-
             tileVertices[3].texCoords = topLeftTex;
             tileVertices[4].texCoords = botRightTex;
             tileVertices[5].texCoords = botLeftTex;
-            // -------------------------
 
-            // trec la urmatorul grup de 6 varfuri
-            tileIndex++;
+            vertexIndex++;
         }
     }
 
@@ -134,7 +173,7 @@ std::ostream& operator<<(std::ostream& os, const GameMap& map) {
 
 /*
  * PENTRU METODA CU VERTEX ARRAY AM FOLOSIT https://www.sfml-dev.org/tutorials/3.0/graphics/vertex-array/#creating-an-sfml-like-entity,
- * documnetatia oficiala de pe siteul sfml,https://www.youtube.com/watch?v=hnjhCFA4GnM
+ * documnetatia oficiala de pe siteul SFML,https://www.youtube.com/watch?v=hnjhCFA4GnM
  * Aceasta varianta este mai eficienta decat incarcarea in 100 spriteuri pentru a incarca o harta mare(se apelau cate 100 functii de draw
  * ceea ce era ineficient)
  * Acum mapa este incaracata complet inainte in gameLoad.

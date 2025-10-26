@@ -23,9 +23,9 @@ public:
 
     int getCurrentAmmo() const;
     int getReserveAmmo() const;
+    std::string getCurrentWeaponName() const;
 
     void reload();
-    bool isReloading() const;
     bool canShoot(sf::Vector2f mousePosition) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
@@ -38,7 +38,7 @@ private:
     sf::RectangleShape HealthBarForeground;
     sf::Texture playerTexture;
     sf::Sprite playerSprite;
-    float movementSpeed;
+    std::vector<float> m_movementSpeeds;
     Health m_health;
     GunSwitch m_gunSwitch;
     sf::Texture bulletTexture;
@@ -52,6 +52,7 @@ private:
     std::vector<int> weaponMagSize;
     std::vector<int> weaponCurrentAmmo;
     std::vector<int> weaponReserveAmmo;
+    std::vector<std::string> weaponNames;
 
     std::vector<float> m_weaponReloadTime;
     bool m_isReloading;
@@ -60,7 +61,7 @@ private:
     sf::Texture m_reloadAnimTexture;
     sf::Sprite m_reloadAnimSprite;
     std::vector<sf::IntRect> m_reloadAnimFrames;
-    sf::Vector2f m_reloadAnimPosition;
+    std::vector<sf::Vector2f> m_reloadAnimPosition;
     int m_reloadingWeaponIndex;
     float m_currentReloadTotalTime{};
 };

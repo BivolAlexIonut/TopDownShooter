@@ -34,11 +34,18 @@ Player::Player(float startX, float startY) :
     m_reloadAnimFrames.push_back(sf::IntRect({434, 162}, {44, 44}));
     m_reloadAnimFrames.push_back(sf::IntRect({482, 162}, {44, 44}));
 
-    //Unde apare aniamtia pe ecran
-    m_reloadAnimPosition = sf::Vector2f(210.f, 650.f);
-    m_reloadAnimSprite.setScale(sf::Vector2f(1.4f, 1.4f));
-    m_reloadAnimSprite.setPosition(m_reloadAnimPosition);
+    //Numele armelor
+    //---------------------------
+    weaponNames.emplace_back("PISTOL");
+    weaponNames.emplace_back("TOMMY GUN");
+    weaponNames.emplace_back("RPG");
+    weaponNames.emplace_back("SMG");
+    weaponNames.emplace_back("SHOTGUN");
+    weaponNames.emplace_back("SNIPER");
+    //------------------------------
 
+    //Scalez animatia si incarc textura
+    m_reloadAnimSprite.setScale(sf::Vector2f(1.4f, 1.4f));
     m_reloadAnimSprite.setTextureRect(m_reloadAnimFrames[0]);
     //---------------------------------------------------------------------------------------------------------
 
@@ -49,6 +56,8 @@ Player::Player(float startX, float startY) :
     pistolFrames.push_back(sf::IntRect({356, 22}, {7, 5}));
     pistolFrames.push_back(sf::IntRect({371, 22}, {8, 5}));
     pistolFrames.push_back(sf::IntRect({388, 22}, {7, 5}));
+    m_movementSpeeds.emplace_back(400.f);
+    m_reloadAnimPosition.emplace_back(170.f, 640.f);
     m_weaponBulletAnimRects.push_back(pistolFrames);
     m_weaponBulletAnimSpeeds.push_back(0.1f);
     m_weaponShootCooldowns.push_back(0.5f);
@@ -64,6 +73,8 @@ Player::Player(float startX, float startY) :
     tommyFrames.push_back(sf::IntRect({273, 150}, {14, 4}));
     tommyFrames.push_back(sf::IntRect({290, 151}, {13, 3}));
     tommyFrames.push_back(sf::IntRect({305, 151}, {14, 4}));
+    m_movementSpeeds.emplace_back(280.f);
+    m_reloadAnimPosition.emplace_back(210.f, 640.f);
     m_weaponBulletAnimRects.push_back(tommyFrames);
     m_weaponBulletAnimSpeeds.push_back(0.1f);
     m_weaponShootCooldowns.push_back(0.08f);
@@ -80,6 +91,8 @@ Player::Player(float startX, float startY) :
     rpgFrames.push_back(sf::IntRect({514, 202}, {28, 13}));
     rpgFrames.push_back(sf::IntRect({544, 202}, {32, 13}));
     rpgFrames.push_back(sf::IntRect({575, 199}, {33, 17}));
+    m_movementSpeeds.emplace_back(180.f);
+    m_reloadAnimPosition.emplace_back(140.f, 640.f);
     m_weaponBulletAnimRects.push_back(rpgFrames);
     m_weaponBulletAnimSpeeds.push_back(0.1f);
     m_weaponShootCooldowns.push_back(1.2f);
@@ -95,13 +108,15 @@ Player::Player(float startX, float startY) :
     smgFrames.push_back(sf::IntRect({196, 277}, {8, 6}));
     smgFrames.push_back(sf::IntRect({208, 278}, {17, 5}));
     smgFrames.push_back(sf::IntRect({223, 278}, {17, 5}));
+    m_movementSpeeds.emplace_back(350.f);
+    m_reloadAnimPosition.emplace_back(157.f, 640.f);
     m_weaponBulletAnimRects.push_back(smgFrames);
     m_weaponBulletAnimSpeeds.push_back(0.1f);
     m_weaponShootCooldowns.push_back(0.02f);
     m_weaponReloadTime.emplace_back(0.8f);
     weaponMagSize.push_back(35);
     weaponCurrentAmmo.push_back(35);
-    weaponReserveAmmo.push_back(120);
+    weaponReserveAmmo.push_back(90);
 
     // Shotgun
     m_weaponBarrelOffsets.emplace_back(100.f, 400.f);
@@ -110,6 +125,8 @@ Player::Player(float startX, float startY) :
     shotgunFrames.push_back(sf::IntRect({484, 264}, {20, 15}));
     shotgunFrames.push_back(sf::IntRect({516, 264}, {23, 16}));
     shotgunFrames.push_back(sf::IntRect({546, 262}, {25, 19}));
+    m_movementSpeeds.emplace_back(210.f);
+    m_reloadAnimPosition.emplace_back(170.f, 640.f);
     m_weaponBulletAnimRects.push_back(shotgunFrames);
     m_weaponBulletAnimSpeeds.push_back(0.05f);
     m_weaponShootCooldowns.push_back(1.f);
@@ -126,6 +143,8 @@ Player::Player(float startX, float startY) :
     sniperFrames.push_back(sf::IntRect({31, 244}, {16, 9}));
     sniperFrames.push_back(sf::IntRect({46, 244}, {17, 9}));
     sniperFrames.push_back(sf::IntRect({63, 244}, {17, 9}));
+    m_movementSpeeds.emplace_back(200.f);
+    m_reloadAnimPosition.emplace_back(170.f, 640.f);
     m_weaponBulletAnimRects.push_back(sniperFrames);
     m_weaponBulletAnimSpeeds.push_back(0.1f);
     m_weaponShootCooldowns.push_back(2.f);
@@ -145,10 +164,9 @@ Player::Player(float startX, float startY) :
     updateHealthBar();
     updateHealthBarPosition();
 
-    this->playerSprite.scale({0.2f,0.2f});
+    this->playerSprite.scale({0.25f,0.25f});
     this->playerSprite.setOrigin({static_cast<float>(skinRect.size.x) / 2.f, static_cast<float>(skinRect.size.y) / 2.f});
     this->playerSprite.setPosition({startX, startY});
-    this->movementSpeed = 270.f;
 }
 
 Player::~Player() = default;
@@ -204,8 +222,15 @@ void Player::update(float dt, sf::Vector2f mousePosition) {
     if (length != 0.f) {
         direction /= length;
     }
-    this->playerSprite.move(direction * this->movementSpeed * dt);
+    //Movement speed pentru fiecare arma
+    int currentSpeedIndex = m_gunSwitch.getCurrentWeaponIndex();
+    float currentSpeed = 270.f;
+    if (currentSpeedIndex >=0 && static_cast<size_t>(currentSpeedIndex)<m_movementSpeeds.size()) {
+        currentSpeed = m_movementSpeeds[currentSpeedIndex];
+    }
+    this->playerSprite.move(direction*currentSpeed*dt);
 
+    //Pozitia armei playerului si implicit a playerului dupa mouse
     sf::Vector2f playerPosition = this->playerSprite.getPosition();
     float deltaX = mousePosition.x - playerPosition.x;
     float deltaY = mousePosition.y - playerPosition.y;
@@ -352,6 +377,13 @@ void Player::reload() {
         return;
     }
 
+    if (static_cast<size_t>(index) >= m_reloadAnimPosition.size())
+    {
+        std::cerr << "Eroare: Pozitie de reincarcare invalida pentru indexul " << index << std::endl;
+        return;
+    }
+    m_reloadAnimSprite.setPosition(m_reloadAnimPosition[index]);
+
     m_isReloading = true;
     m_reloadTimer.restart();
     m_reloadingWeaponIndex = index;
@@ -370,4 +402,11 @@ int Player::getReserveAmmo() const {
     int index = m_gunSwitch.getCurrentWeaponIndex();
     if (index < 0 || static_cast<size_t>(index) >= weaponReserveAmmo.size()) return 0;
     return weaponReserveAmmo[index];
+}
+
+std::string Player::getCurrentWeaponName() const {
+    int index = m_gunSwitch.getCurrentWeaponIndex();
+    if (index < 0 || static_cast<size_t>(index) >= weaponNames.size())
+        return "Unknown";
+    return weaponNames[index];
 }

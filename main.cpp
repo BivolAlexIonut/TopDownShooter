@@ -46,7 +46,7 @@ int main() {
     }
     sf::Text ammoText(ammoFont);
     ammoText.setFont(ammoFont);
-    ammoText.setCharacterSize(56);
+    ammoText.setCharacterSize(48);
     ammoText.setFillColor(sf::Color::Black);
 
     while (window.isOpen()) {
@@ -88,7 +88,10 @@ int main() {
         }
 
         std::string ammoString = std::to_string(player.getCurrentAmmo())+ " / " + std::to_string(player.getReserveAmmo());
-        ammoText.setString(ammoString);
+        std::string weaponNameString = player.getCurrentWeaponName();
+        std::string uiText = weaponNameString + '\n';
+        std::string ammoFinal = uiText+ammoString;
+        ammoText.setString(ammoFinal);
 
         window.clear(sf::Color(30, 30, 30));
         window.setView(camera);
@@ -100,11 +103,18 @@ int main() {
         }
         window.setView(window.getDefaultView());
 
-        sf::Vector2f viewSize = static_cast<sf::Vector2f>(window.getSize());
-        ammoText.setPosition({10.f, viewSize.y - static_cast<float>(ammoText.getCharacterSize()) - 10.f});
+        ammoText.setOrigin({0.f, 0.f});
 
-        window.draw(ammoText);
+        sf::Vector2f viewSize = static_cast<sf::Vector2f>(window.getSize());
+
+        auto charSize = static_cast<float>(ammoText.getCharacterSize());
+        float numLines = 2.f;
+        float totalTextHeight = (charSize * numLines) * 1.1f;
+        float positionY = viewSize.y - totalTextHeight - 10.f;
+        ammoText.setPosition({10.f, positionY});
+
         player.drawUI(window);
+        window.draw(ammoText);
 
         window.display();
     }
