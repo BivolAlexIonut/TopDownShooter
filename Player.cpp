@@ -40,9 +40,7 @@ Player::Player(float startX, float startY) :
     m_reloadAnimSprite.setScale(sf::Vector2f(1.4f, 1.4f));
     m_reloadAnimSprite.setPosition(m_reloadAnimPosition);
 
-    if (!m_reloadAnimFrames.empty()) {
-        m_reloadAnimSprite.setTextureRect(m_reloadAnimFrames[0]);
-    }
+    m_reloadAnimSprite.setTextureRect(m_reloadAnimFrames[0]);
     //---------------------------------------------------------------------------------------------------------
 
     // Pistol
@@ -329,9 +327,11 @@ bool Player::canShoot(sf::Vector2f mousePosition) const{
     return weaponCurrentAmmo[index] > 0;
 }
 
-bool Player::isReloading() const {
+/*
+ bool Player::isReloading() const {
     return m_isReloading;
 }
+*/
 
 
 void Player::reload() {
