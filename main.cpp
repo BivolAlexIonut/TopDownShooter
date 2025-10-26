@@ -19,8 +19,8 @@ int main() {
         std::cerr << "EROARE FATALA: Harta nu a putut fi incarcata." << std::endl;
         return -1;
                       }
-    constexpr float mapScale = 0.4f; // Poți ajusta scala aici dacă vrei
-    Player player(1000.f * mapScale, 1000.f * mapScale); // Ajustează poziția de start dacă e nevoie
+    constexpr float mapScale = 0.4f;
+    Player player(1000.f * mapScale, 1000.f * mapScale);
 
     Enemy enemy1(100.f, 200.f);
     std::vector<Enemy> enemies;
@@ -29,7 +29,7 @@ int main() {
     player.takeDamage(25.f);
     enemies[0].takeDamage(10.f);
 
-    sf::Clock clock; // Clock-ul trebuie definit ÎNAINTEA buclei
+    sf::Clock clock;
     sf::View camera;
     camera.setSize({1280,720});
     camera.setCenter(player.getPosition());
@@ -82,8 +82,6 @@ int main() {
 
         player.update(dt.asSeconds(), mousePositionWorld);
         camera.setCenter(player.getPosition());
-
-        //sf::Vector2f playerPos = player.getPosition();
 
         for (auto& bullet : bullets) {
             bullet.update(dt.asSeconds());

@@ -1,4 +1,3 @@
-// Player.cpp
 #include "Player.h"
 #include <cmath>
 #include <iostream>
@@ -326,13 +325,6 @@ bool Player::canShoot(sf::Vector2f mousePosition) const{
         return false;
     return weaponCurrentAmmo[index] > 0;
 }
-
-/*
- bool Player::isReloading() const {
-    return m_isReloading;
-}
-*/
-
 
 void Player::reload() {
     if (m_isReloading) {

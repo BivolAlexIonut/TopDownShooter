@@ -7,7 +7,6 @@ GameMap::GameMap() : m_tileSize(0, 0), m_mapSize(0, 0) {}
 
 GameMap::~GameMap() = default;
 
-// Am schimbat jsonPath cu mapPath ca sa incarc mapa
 bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath) {
     if (!m_tilesetTexture.loadFromFile(tilesetPath)) {
         std::cerr << "EROARE: Nu am putut incarca tileset-ul: " << tilesetPath << std::endl;
@@ -20,7 +19,7 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath) {
         return false;
     }
 
-    const float mapScale = 0.3f; // Ai folosit 0.3f în codul tău
+    const float mapScale = 0.3f;
 
     if (!(f >> m_mapSize.x >> m_mapSize.y)) {
         std::cerr << "EROARE: Nu am putut citi map dimensions din " << mapPath << std::endl;

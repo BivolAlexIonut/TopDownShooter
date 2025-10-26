@@ -4,7 +4,7 @@
 
 class GunSwitch {
 public:
-    GunSwitch(); // Constructor
+    GunSwitch();
     ~GunSwitch();
 
     void nextWeapon();
