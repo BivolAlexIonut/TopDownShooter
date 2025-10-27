@@ -1,5 +1,45 @@
 # TopDownShooter
 
+Un joc 2D de tip top-down shooter, plin de actiune, construit in C++ si SFML. Supravietuieste hoardelor de inamici folosind un arsenal variat de arme, fiecare cu propriile statistici si stil de joc.
+
+Caracteristici
+
+    Sistem Avansat de Arme: Schimba intre 6 arme unice: PISTOL, TOMMY GUN, RPG, SMG, SHOTGUN si SNIPER.
+
+    Statistici Unice: Fiecare arma afecteaza direct stilul de joc, avand atribute proprii pentru:
+
+        Viteza de miscare a jucatorului.
+
+        Marimea magaziei si munitia de rezerva.
+
+        Timpul de reincarcare.
+
+        Cadenta de tragere (cooldown).
+
+    Reincarcare Vizuala: Sistem de reincarcare functional, cu animatie vizuala si sunet.
+
+    Control Fluid: Miscare clasica (W, A, S, D) si tintire precisa cu mouse-ul, unde jucatorul se roteste urmarind cursorul.
+
+    Interfata (UI) Adaptabila: Afiseaza arma curenta si munitia ramasa, fiind ancorata de ecran. Interfata se adapteaza corect la redimensionarea ferestrei si la modul fullscreen.
+
+    Harti Bazate pe Tile-uri: Incarca niveluri complexe din fisiere text si un tileset grafic.
+
+    Camera si Gloante: Jocul foloseste o camera (sf::View) care urmareste jucatorul si un sistem de management al gloantelor.
+
+Controale
+
+    Miscare: W, A, S, D
+
+    Tintire: Mouse
+
+    Trage: Click Stanga
+
+    Schimba Arma Urmatoare: E
+
+    Schimba Arma Anterioara: Q
+
+    Reincarca: R
+
 ### Folosiți template-ul corespunzător grupei voastre!
 
 | Laborant  | Link template                                |
