@@ -4,10 +4,9 @@
 #include <ostream>
 #include <algorithm>
 
-const float PI = 3.14159265358979323846f;
-const float HEALTHBAR_WIDTH = 300.f;
-const float HEALTHBAR_HEIGHT = 7.f;
-const float HEALTHBAR_OFFSET_Y = -360.f;
+constexpr float PI = 3.14159265358979323846f;
+constexpr float HEALTHBAR_WIDTH = 300.f;
+constexpr float HEALTHBAR_HEIGHT = 7.f;
 
 Player::Player(float startX, float startY) :
     m_health(100.f),
