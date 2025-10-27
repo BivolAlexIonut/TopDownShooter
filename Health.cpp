@@ -14,8 +14,6 @@ Health::Health(float currentHealth, float maxHealth)
     }
 }
 
-Health::~Health() = default;
-
 Health::Health(const Health &other) : m_currentHealth(other.m_currentHealth), m_maxHealth(other.m_maxHealth) {
     std::cout << "Health construcoitr de copiere apelat" << std::endl;
 }

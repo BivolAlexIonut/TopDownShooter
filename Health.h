@@ -7,7 +7,7 @@ public:
     Health();
     explicit Health(float maxHealth);
     Health(float currentHealth, float maxHealth);
-    ~Health();
+    ~Health() = default;
 
     Health(const Health& other);//Constructor de copiere
     Health& operator=(const Health& other);//Operator= de copiere

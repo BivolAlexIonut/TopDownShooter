@@ -7,7 +7,7 @@ public:
     GameMap();
     ~GameMap() override = default;
 
-    bool load(const std::string& jsonPath, const std::string& tilesetPath,float mapScale);
+    bool load(const std::string& mapPath, const std::string& tilesetPath,float mapScale);
 
     sf::FloatRect getPixelBounds() const;
 
