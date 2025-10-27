@@ -1,7 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <string>
-#include <vector>
 
 class GameMap : public sf::Drawable ,public sf::Transformable {
 public:
@@ -9,6 +8,8 @@ public:
     ~GameMap() override = default;
 
     bool load(const std::string& jsonPath, const std::string& tilesetPath,float mapScale);
+
+    sf::FloatRect getPixelBounds() const;
 
     friend std::ostream& operator<<(std::ostream& os, const GameMap& map);
 
@@ -20,4 +21,5 @@ private:
 
     sf::Vector2u m_tileSize;
     sf::Vector2u m_mapSize;
+    sf::Vector2f m_mapPixelSize;
 };

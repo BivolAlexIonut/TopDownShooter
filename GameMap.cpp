@@ -65,6 +65,10 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,fl
     const float fScaledTileSizeX = fTileSizeX * mapScale;
     const float fScaledTileSizeY = fTileSizeY * mapScale;
 
+    //pentru calculul si memorarea dimensiunilor ca ,camera sa nu iasa din harta
+    m_mapPixelSize.x = static_cast<float>(m_mapSize.x) * fScaledTileSizeX;
+    m_mapPixelSize.y = static_cast<float>(m_mapSize.y) * fScaledTileSizeY;
+
     const float floorTexX = 0.f;
     const float floorTexY = 0.f;
 
@@ -169,6 +173,11 @@ std::ostream& operator<<(std::ostream& os, const GameMap& map) {
        << " | Tiles: " << map.m_vertices.getVertexCount() / 6 << " )";
     return os;
 }
+
+sf::FloatRect GameMap::getPixelBounds() const {
+    return {{0.f,0.f},m_mapPixelSize};
+}
+
 
 /*
  * PENTRU METODA CU VERTEX ARRAY AM FOLOSIT https://www.sfml-dev.org/tutorials/3.0/graphics/vertex-array/#creating-an-sfml-like-entity,

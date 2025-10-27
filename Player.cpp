@@ -172,10 +172,8 @@ Player::Player(float startX, float startY) :
 Player::~Player() = default;
 
 //Functie afisare player
-void Player::draw(sf::RenderWindow& window) const {
+void Player::drawWorld(sf::RenderWindow& window) const {
     window.draw(this->playerSprite);
-    window.draw(this->HealthBarBackground);
-    window.draw(this->HealthBarForeground);
 }
 
 //Functie afisare aniamtie de reload
@@ -183,6 +181,8 @@ void Player::drawUI(sf::RenderWindow& window) {
     if (m_isReloading) {
         window.draw(m_reloadAnimSprite);
     }
+    window.draw(this->HealthBarBackground);
+    window.draw(this->HealthBarForeground);
 }
 
 //Functie pentru damage(va fi folosita mai mult cand voi adauga inamici)
@@ -200,6 +200,14 @@ void Player::updateHealthBar() {
     updateHealthBarPosition();
 }
 
+//Update la pozitia healthbarului
+void Player::updateHealthBarPosition() {
+    float x = (1280.f / 2.f) - (HEALTHBAR_WIDTH / 2.f);
+    float y = 10.f;
+    this->HealthBarBackground.setPosition({x,y});
+    this->HealthBarForeground.setPosition({x,y});
+}
+
 //Cooldown pentru fiecare arma in aprte
 float Player::getCurrentWeaponCooldown() const {
     int index = m_gunSwitch.getCurrentWeaponIndex();
@@ -207,15 +215,6 @@ float Player::getCurrentWeaponCooldown() const {
         return 0.3f;
     }
     return m_weaponShootCooldowns[index];
-}
-
-//Update la pozitia healthbarului
-void Player::updateHealthBarPosition() {
-    sf::Vector2f playerPos = this->playerSprite.getPosition();
-    float x = playerPos.x - (HEALTHBAR_WIDTH/2);
-    float y = playerPos.y + HEALTHBAR_OFFSET_Y;
-    this->HealthBarBackground.setPosition({x,y});
-    this->HealthBarForeground.setPosition({x,y});
 }
 
 //Update pentru player,include movementul,rotatia,reloadul si animatii
@@ -246,7 +245,6 @@ void Player::update(float dt, sf::Vector2f mousePosition) {
     float angleInDegrees = angleInRadians * (180.f / PI);
 
     this->playerSprite.setRotation(sf::degrees(angleInDegrees - 90.f));
-    updateHealthBarPosition();
 
     if (m_isReloading) {
         if (m_reloadingWeaponIndex < 0 || m_reloadAnimFrames.empty()) {

@@ -11,7 +11,7 @@ public:
 
     //Functiile triviale ale playerului
     void update(float dt, sf::Vector2f mousePosition);
-    void draw(sf::RenderWindow& window) const;
+    void drawWorld(sf::RenderWindow& window) const;
     void drawUI(sf::RenderWindow& window);
     void takeDamage(float damage);
     sf::Vector2f getPosition() const;

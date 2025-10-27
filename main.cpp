@@ -81,7 +81,28 @@ int main() {
         }
 
         player.update(dt.asSeconds(), mousePositionWorld);
-        camera.setCenter(player.getPosition());
+        //Obtin pozitiile si dimensiunile
+        sf::Vector2f playerPos = player.getPosition();
+        sf::Vector2f viewSizeBlockedCamera = camera.getSize();
+        sf::FloatRect mapBounds = gameMap.getPixelBounds();
+
+        sf::Vector2f viewCenter = playerPos;
+        float halfViewX = viewSizeBlockedCamera.x / 2.0f;
+        float halfViewY = viewSizeBlockedCamera.y / 2.0f;
+        if (viewCenter.x < halfViewX) {
+            viewCenter.x = halfViewX;
+        }
+        if (viewCenter.x > mapBounds.size.x - halfViewX) {
+            viewCenter.x = mapBounds.size.x - halfViewX;
+        }
+        if (viewCenter.y < halfViewY) {
+            viewCenter.y = halfViewY;
+        }
+        if (viewCenter.y > mapBounds.size.y - halfViewY) {
+            viewCenter.y = mapBounds.size.y - halfViewY;
+        }
+
+        camera.setCenter(viewCenter);
 
         for (auto& bullet : bullets) {
             bullet.update(dt.asSeconds());
@@ -96,7 +117,7 @@ int main() {
         window.clear(sf::Color(30, 30, 30));
         window.setView(camera);
         window.draw(gameMap);
-        player.draw(window);
+        player.drawWorld(window);
 
         for (auto& bullet : bullets) {
             bullet.draw(window);
