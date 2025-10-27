@@ -9,6 +9,9 @@ public:
     Health(float currentHealth, float maxHealth);
     ~Health();
 
+    Health(const Health& other);//Constructor de copiere
+    Health& operator=(const Health& other);//Operator= de copiere
+
     [[maybe_unused]] void takeDamage(float amount) {
         m_currentHealth -= amount;
         m_currentHealth = std::max(0.f, m_currentHealth);

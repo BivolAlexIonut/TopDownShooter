@@ -10,6 +10,8 @@ public:
     void draw(sf::RenderWindow& window);
     void update(float dt);
 
+    friend std::ostream& operator<<(std::ostream& os, const Bullet& b);
+
 private:
     sf::Sprite bulletSprite;
     sf::Vector2f bulletVelocity;

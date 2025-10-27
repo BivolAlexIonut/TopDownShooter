@@ -1,5 +1,6 @@
 #include "Bullet.h"
 #include <cmath>
+#include <ostream>
 
 const float PI = 3.14159265358979323846f;
 
@@ -51,4 +52,11 @@ void Bullet::update(float dt) {
 
 void Bullet::draw(sf::RenderWindow &window) {
     window.draw(bulletSprite);
+}
+
+std::ostream& operator<<(std::ostream& os,const Bullet& bullet) {
+    sf::Vector2f pos = bullet.bulletSprite.getPosition();
+    os << "Bullet( Poz: " << pos.x << ", " << pos.y
+       << " | Vel: " << bullet.bulletVelocity.x << ", " << bullet.bulletVelocity.y << " )";
+    return os;
 }

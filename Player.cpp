@@ -84,7 +84,7 @@ Player::Player(float startX, float startY) :
     weaponReserveAmmo.push_back(150);
 
     // RPG
-    m_weaponBarrelOffsets.emplace_back(100.f, 470.f);
+    m_weaponBarrelOffsets.emplace_back(80.f, 520.f);
     std::vector<sf::IntRect> rpgFrames;
     rpgFrames.push_back(sf::IntRect({454, 205}, {20, 7}));
     rpgFrames.push_back(sf::IntRect({484, 202}, {24, 13}));
@@ -136,7 +136,7 @@ Player::Player(float startX, float startY) :
     weaponReserveAmmo.push_back(16);
 
     // Sniper
-    m_weaponBarrelOffsets.emplace_back(107.f, 470.f);
+    m_weaponBarrelOffsets.emplace_back(107.f, 500.f);
     std::vector<sf::IntRect> sniperFrames;
     sniperFrames.push_back(sf::IntRect({0, 244}, {16, 9}));
     sniperFrames.push_back(sf::IntRect({14, 244}, {18, 9}));
@@ -331,7 +331,7 @@ Bullet Player::shoot(sf::Vector2f mousePosition) {
     float animSpeed = m_weaponBulletAnimSpeeds[currentIndex];
 
     //cosntante pentru a aseza corect punctul de plecare a gloantelor
-    //armele nu sunt centrate cu originea playerului el le tine pe partea dreapta
+    //armele nu sunt centrate cu originea playerului el le tine pe partea dreapta+
     const float localBarrelOffsetX = barrelOffset.x;
     const float localBarrelOffsetY = barrelOffset.y;
 
