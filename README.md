@@ -16,7 +16,7 @@ Caracteristici
 
         Cadenta de tragere (cooldown).
 
-    Reincarcare Vizuala: Sistem de reincarcare functional, cu animatie vizuala si sunet.
+    Reincarcare Vizuala: Sistem de reincarcare functional, cu animatie vizuala si sunet(inca nu e implementat).
 
     Control Fluid: Miscare clasica (W, A, S, D) si tintire precisa cu mouse-ul, unde jucatorul se roteste urmarind cursorul.
 
