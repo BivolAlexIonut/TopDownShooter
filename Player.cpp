@@ -10,9 +10,9 @@ const float HEALTHBAR_HEIGHT = 7.f;
 const float HEALTHBAR_OFFSET_Y = -360.f;
 
 Player::Player(float startX, float startY) :
+    m_health(100.f),
     playerTexture(),
     playerSprite(this->playerTexture),
-    m_health(100.f),
     m_gunSwitch(),
     m_isReloading(false),//Incep prin a nu reincarca
     m_reloadAnimSprite(this->m_reloadAnimTexture),
@@ -119,7 +119,7 @@ Player::Player(float startX, float startY) :
     weaponReserveAmmo.push_back(90);
 
     // Shotgun
-    m_weaponBarrelOffsets.emplace_back(100.f, 400.f);
+    m_weaponBarrelOffsets.emplace_back(100.f, 460.f);
     std::vector<sf::IntRect> shotgunFrames;
     shotgunFrames.push_back(sf::IntRect({452, 264}, {20, 16}));
     shotgunFrames.push_back(sf::IntRect({484, 264}, {20, 15}));
@@ -171,23 +171,28 @@ Player::Player(float startX, float startY) :
 
 Player::~Player() = default;
 
+//Functie afisare player
 void Player::draw(sf::RenderWindow& window) const {
     window.draw(this->playerSprite);
     window.draw(this->HealthBarBackground);
     window.draw(this->HealthBarForeground);
 }
 
+//Functie afisare aniamtie de reload
 void Player::drawUI(sf::RenderWindow& window) {
     if (m_isReloading) {
         window.draw(m_reloadAnimSprite);
     }
 }
 
+//Functie pentru damage(va fi folosita mai mult cand voi adauga inamici)
+//Momentan o folosesc pentru test la healthbar
 void Player::takeDamage(float damage) {
     this->m_health.takeDamage(damage);
     updateHealthBar();
 }
 
+//Updateaza healthbarul
 void Player::updateHealthBar() {
     float healthpercent = m_health.getPercentage();
     float netWidth = HEALTHBAR_WIDTH * healthpercent;
@@ -195,6 +200,7 @@ void Player::updateHealthBar() {
     updateHealthBarPosition();
 }
 
+//Cooldown pentru fiecare arma in aprte
 float Player::getCurrentWeaponCooldown() const {
     int index = m_gunSwitch.getCurrentWeaponIndex();
     if (index < 0 || static_cast<size_t>(index) >= m_weaponShootCooldowns.size()) {
@@ -203,6 +209,7 @@ float Player::getCurrentWeaponCooldown() const {
     return m_weaponShootCooldowns[index];
 }
 
+//Update la pozitia healthbarului
 void Player::updateHealthBarPosition() {
     sf::Vector2f playerPos = this->playerSprite.getPosition();
     float x = playerPos.x - (HEALTHBAR_WIDTH/2);
@@ -211,6 +218,7 @@ void Player::updateHealthBarPosition() {
     this->HealthBarForeground.setPosition({x,y});
 }
 
+//Update pentru player,include movementul,rotatia,reloadul si animatii
 void Player::update(float dt, sf::Vector2f mousePosition) {
     sf::Vector2f direction(0.f, 0.f);
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) direction.y = -1.f;
@@ -306,7 +314,7 @@ void Player::switchWeaponPrev() {
     this->playerSprite.setOrigin({static_cast<float>(newRect.size.x) / 2.f, static_cast<float>(newRect.size.y) / 2.f});
 }
 
-
+//Functia pentru tras(shooting)
 Bullet Player::shoot(sf::Vector2f mousePosition) {
     int currentIndex = m_gunSwitch.getCurrentWeaponIndex();
     if (currentIndex >= 0 && static_cast<size_t>(currentIndex) < weaponCurrentAmmo.size() ) {
@@ -322,6 +330,8 @@ Bullet Player::shoot(sf::Vector2f mousePosition) {
     sf::Vector2f barrelOffset = m_weaponBarrelOffsets[currentIndex];
     float animSpeed = m_weaponBulletAnimSpeeds[currentIndex];
 
+    //cosntante pentru a aseza corect punctul de plecare a gloantelor
+    //armele nu sunt centrate cu originea playerului el le tine pe partea dreapta
     const float localBarrelOffsetX = barrelOffset.x;
     const float localBarrelOffsetY = barrelOffset.y;
 

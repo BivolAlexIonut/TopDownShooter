@@ -13,7 +13,7 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,fl
 
     std::ifstream f(mapPath);
     if (!f.is_open()) {
-        std::cerr << "EROARE: Nu am putut deschide fisierul text al hărții: " << mapPath << std::endl;
+        std::cerr << "EROARE: Nu am putut deschide fisierul text al harții: " << mapPath << std::endl;
         return false;
     }
 
@@ -64,7 +64,6 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,fl
     const auto fTileSizeY = static_cast<float>(m_tileSize.y);
     const float fScaledTileSizeX = fTileSizeX * mapScale;
     const float fScaledTileSizeY = fTileSizeY * mapScale;
-
 
     const float floorTexX = 0.f;
     const float floorTexY = 0.f;
