@@ -15,8 +15,8 @@ int main() {
     GameMap gameMap;
 
     constexpr float mapScale = 0.4f;
-    if (!gameMap.load("/home/alex/test/TopDownShooter/assets/Levels/level1.txt",
-                      "/home/alex/test/TopDownShooter/assets/Premium Content/Tileset with cell size 256x256.png",mapScale)) {
+    if (!gameMap.load("assets/Levels/level1.txt",
+                      "assets/Premium Content/Tileset with cell size 256x256.png",mapScale)) {
         std::cerr << "EROARE FATALA: Harta nu a putut fi incarcata." << std::endl;
         return -1;
                       }
@@ -40,7 +40,7 @@ int main() {
 
     //UI Ammo
     sf::Font ammoFont;
-    if (!ammoFont.openFromFile("/home/alex/test/TopDownShooter/fonts/m6x11.ttf")) {
+    if (!ammoFont.openFromFile("fonts/m6x11.ttf")) {
         std::cerr << "EROARE: Nu am putut incarca fontul fonts/m6x11.ttf" << std::endl;
         return -1;
     }
