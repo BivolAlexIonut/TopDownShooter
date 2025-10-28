@@ -229,24 +229,6 @@ jobs:
         # Use CMake to "install" build artifacts (only interested in CMake registered targets) to our custom artifacts directory
         run: |
           bash ./scripts/cmake.sh install -c ${{ env.BUILD_TYPE }} -i artifacts
-
-      - name: Copy assets for Release package
-        run: |
-          echo "Copying assets and fonts for release package..."
-          # Destinația este folderul 'artifacts/bin', unde pasul de 'Install' a pus executabilul
-          DEST_DIR="artifacts/${{ env.BIN_DIR }}"
-          
-          mkdir -p "${DEST_DIR}/assets"
-          mkdir -p "${DEST_DIR}/fonts"
-          
-          echo "Copying from ${{ github.workspace }}/assets to ${DEST_DIR}/assets"
-          cp -r ${{ github.workspace }}/assets/* "${DEST_DIR}/assets/"
-          
-          echo "Copying from ${{ github.workspace }}/fonts to ${DEST_DIR}/fonts"
-          cp -r ${{ github.workspace }}/fonts/* "${DEST_DIR}/fonts/"
-          
-          echo "Release directory structure:"
-          ls -la "${DEST_DIR}"
   
       - name: Move artifacts
         run: |
@@ -266,24 +248,6 @@ jobs:
           include-hidden-files: true
           path: ${{ env.ZIP_NAME }}
           retention-days: 30
-
-      - name: Copy assets for Runtime checks
-        run: |
-          echo "Copying assets and fonts for runtime checks..."
-          # Destinația este folderul de build, de unde rulează testele
-          DEST_DIR="${{ env.BUILD_DIR }}/${{ env.BIN_DIR }}"
-          
-          mkdir -p "${DEST_DIR}/assets"
-          mkdir -p "${DEST_DIR}/fonts"
-          
-          echo "Copying from ${{ github.workspace }}/assets to ${DEST_DIR}/assets"
-          cp -r ${{ github.workspace }}/assets/* "${DEST_DIR}/assets/"
-          
-          echo "Copying from ${{ github.workspace }}/fonts to ${DEST_DIR}/fonts"
-          cp -r ${{ github.workspace }}/fonts/* "${DEST_DIR}/fonts/"
-          
-          echo "Test directory structure:"
-          ls -la "${DEST_DIR}"
 
       - name: Runtime checks
         uses: ./.github/actions/runtime-checks
