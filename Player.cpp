@@ -6,13 +6,13 @@
 
 constexpr float PI = 3.14159265358979323846f;
 
-Player::Player(float startX, float startY) : m_healthBarSprite(this->m_reloadAnimTexture),
-                                             m_health(100.f),
+Player::Player(float startX, float startY) : m_health(100.f),
                                              playerTexture(),
                                              playerSprite(this->playerTexture),
                                              m_gunSwitch(),
                                              m_isReloading(false), //Incep prin a nu reincarca
                                              m_reloadAnimSprite(this->m_reloadAnimTexture),
+m_healthBarSprite(this->m_reloadAnimTexture),
                                              m_reloadingWeaponIndex(-1) {
     if (!this->playerTexture.loadFromFile("assets/Premium Content/Examples/Basic Usage.png")) {
         std::cerr << "EROARE: Nu am putut incarca ../assets/Premium Content/Examples/Basic Usage.png" << std::endl;
@@ -23,6 +23,7 @@ Player::Player(float startX, float startY) : m_healthBarSprite(this->m_reloadAni
     if (!this->m_reloadAnimTexture.loadFromFile("assets/effects/All.png")) {
         std::cerr << "EROARE: Nu am putut incarca ../assets/effects/All.png" << std::endl;
     }
+    m_healthBarSprite.setTexture(m_reloadAnimTexture);
     //---------------------------------------------------------------------------------------------------
     m_reloadAnimFrames.push_back(sf::IntRect({290, 162}, {44, 44}));
     m_reloadAnimFrames.push_back(sf::IntRect({338, 162}, {44, 44}));
@@ -43,8 +44,6 @@ Player::Player(float startX, float startY) : m_healthBarSprite(this->m_reloadAni
     //Scalez animatia si incarc textura
     m_reloadAnimSprite.setScale(sf::Vector2f(1.4f, 1.4f));
     m_reloadAnimSprite.setTextureRect(m_reloadAnimFrames[0]);
-
-    m_healthBarSprite.setTexture(m_reloadAnimTexture);
     //---------------------------------------------------------------------------------------------------------
 
     // Pistol

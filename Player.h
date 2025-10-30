@@ -36,7 +36,6 @@ private:
     //Healthbar
     void updateHealthBar();
     void updateHealthBarPosition();
-    sf::Sprite m_healthBarSprite;
     std::vector<sf::IntRect> m_healthBarFrames;
 
     Health m_health;
@@ -64,6 +63,7 @@ private:
     sf::Clock m_reloadTimer;
     sf::Texture m_reloadAnimTexture;
     sf::Sprite m_reloadAnimSprite;
+    sf::Sprite m_healthBarSprite;
     std::vector<sf::IntRect> m_reloadAnimFrames;
     std::vector<sf::Vector2f> m_reloadAnimPosition;
     int m_reloadingWeaponIndex;
