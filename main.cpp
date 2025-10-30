@@ -80,7 +80,7 @@ int main() {
             shootTimer.restart();
         }
 
-        player.update(dt.asSeconds(), mousePositionWorld);
+        player.update(dt.asSeconds(), mousePositionWorld,gameMap);
         //Obtin pozitiile si dimensiunile
         sf::Vector2f playerPos = player.getPosition();
         sf::Vector2f viewSizeBlockedCamera = camera.getSize();

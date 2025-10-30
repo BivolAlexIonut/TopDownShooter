@@ -65,6 +65,8 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,fl
     const float fScaledTileSizeX = fTileSizeX * mapScale;
     const float fScaledTileSizeY = fTileSizeY * mapScale;
 
+    m_scaledTileSize = {fScaledTileSizeX, fScaledTileSizeY};
+
     //pentru calculul si memorarea dimensiunilor ca ,camera sa nu iasa din harta
     m_mapPixelSize.x = static_cast<float>(m_mapSize.x) * fScaledTileSizeX;
     m_mapPixelSize.y = static_cast<float>(m_mapSize.y) * fScaledTileSizeY;
@@ -156,6 +158,7 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,fl
             vertexIndex++;
         }
     }
+    m_tileIDs = std::move(tileIDs);
 
     std::cout << "Harta incarcata: " << m_mapSize.x << "x" << m_mapSize.y << " piese." << std::endl;
     std::cout << "Am creat " << m_vertices.getVertexCount() << " sprite-uri pentru harta." << std::endl;
@@ -176,6 +179,31 @@ std::ostream& operator<<(std::ostream& os, const GameMap& map) {
 
 sf::FloatRect GameMap::getPixelBounds() const {
     return {{0.f,0.f},m_mapPixelSize};
+}
+
+int GameMap::getTileID(sf::Vector2u tileCoords) const {
+    if (tileCoords.x >m_mapSize.x || tileCoords.y >m_mapSize.y) {
+        return 0; //practic outofbons
+    }
+    return m_tileIDs[tileCoords.y * m_mapSize.x + tileCoords.x];
+}
+
+bool GameMap::isSolid(sf::Vector2f mousePosition) const {
+    if (m_scaledTileSize.x == 0.0f || m_scaledTileSize.y == 0.0f) {
+        return false;
+    }
+
+    if (!getPixelBounds().contains(mousePosition)) {
+        return true;
+    }
+
+    sf::Vector2u tileCoords;
+    tileCoords.x = static_cast<unsigned int>(mousePosition.x / m_scaledTileSize.x);
+    tileCoords.y = static_cast<unsigned int>(mousePosition.y / m_scaledTileSize.y);
+
+    int tileID = getTileID(tileCoords);
+
+    return tileID > 1;
 }
 
 
