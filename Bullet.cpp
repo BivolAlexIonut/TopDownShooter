@@ -70,11 +70,7 @@ sf::Vector2f Bullet::getVelocity() const {
 }
 
 void Bullet::hit() {
-    //opresc miscarea
-    if (!m_isImpacting) {
-        m_isImpacting = true;
-        //aici adadug animatii
-    }
+    m_isImpacting = true;
 }
 
 bool Bullet::isDead() const {

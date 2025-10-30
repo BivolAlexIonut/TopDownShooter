@@ -5,8 +5,6 @@
 #include <algorithm>
 
 constexpr float PI = 3.14159265358979323846f;
-constexpr float HEALTHBAR_WIDTH = 300.f;
-constexpr float HEALTHBAR_HEIGHT = 7.f;
 
 Player::Player(float startX, float startY) : m_healthBarSprite(this->m_reloadAnimTexture),
                                              m_health(100.f),
@@ -45,6 +43,8 @@ Player::Player(float startX, float startY) : m_healthBarSprite(this->m_reloadAni
     //Scalez animatia si incarc textura
     m_reloadAnimSprite.setScale(sf::Vector2f(1.4f, 1.4f));
     m_reloadAnimSprite.setTextureRect(m_reloadAnimFrames[0]);
+
+    m_healthBarSprite.setTexture(m_reloadAnimTexture);
     //---------------------------------------------------------------------------------------------------------
 
     // Pistol
