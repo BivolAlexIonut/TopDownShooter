@@ -8,23 +8,22 @@ constexpr float PI = 3.14159265358979323846f;
 constexpr float HEALTHBAR_WIDTH = 300.f;
 constexpr float HEALTHBAR_HEIGHT = 7.f;
 
-Player::Player(float startX, float startY) :
-    m_health(100.f),
-    playerTexture(),
-    playerSprite(this->playerTexture),
-    m_gunSwitch(),
-    m_isReloading(false),//Incep prin a nu reincarca
-    m_reloadAnimSprite(this->m_reloadAnimTexture),
-    m_reloadingWeaponIndex(-1)
-{
+Player::Player(float startX, float startY) : m_healthBarSprite(this->m_reloadAnimTexture),
+                                             m_health(100.f),
+                                             playerTexture(),
+                                             playerSprite(this->playerTexture),
+                                             m_gunSwitch(),
+                                             m_isReloading(false), //Incep prin a nu reincarca
+                                             m_reloadAnimSprite(this->m_reloadAnimTexture),
+                                             m_reloadingWeaponIndex(-1) {
     if (!this->playerTexture.loadFromFile("assets/Premium Content/Examples/Basic Usage.png")) {
         std::cerr << "EROARE: Nu am putut incarca ../assets/Premium Content/Examples/Basic Usage.png" << std::endl;
     }
     if (!this->bulletTexture.loadFromFile("assets/Bullets.png")) {
-        std::cerr <<"EROARE: Nu am putut incarca ../assets/Bullets.png" << std::endl;
+        std::cerr << "EROARE: Nu am putut incarca ../assets/Bullets.png" << std::endl;
     }
     if (!this->m_reloadAnimTexture.loadFromFile("assets/effects/All.png")) {
-        std::cerr<<"EROARE: Nu am putut incarca ../assets/effects/All.png"<<std::endl;
+        std::cerr << "EROARE: Nu am putut incarca ../assets/effects/All.png" << std::endl;
     }
     //---------------------------------------------------------------------------------------------------
     m_reloadAnimFrames.push_back(sf::IntRect({290, 162}, {44, 44}));
@@ -56,6 +55,7 @@ Player::Player(float startX, float startY) :
     pistolFrames.push_back(sf::IntRect({371, 22}, {8, 5}));
     pistolFrames.push_back(sf::IntRect({388, 22}, {7, 5}));
     m_movementSpeeds.emplace_back(400.f);
+    m_weaponBulletScales.emplace_back(4.f, 2.f);
     m_reloadAnimPosition.emplace_back(170.f, 640.f);
     m_weaponBulletAnimRects.push_back(pistolFrames);
     m_weaponBulletAnimSpeeds.push_back(0.1f);
@@ -66,17 +66,18 @@ Player::Player(float startX, float startY) :
     weaponReserveAmmo.push_back(35);
 
     // TommyGun
-    m_weaponBarrelOffsets.emplace_back(115.f, 400.f);
+    m_weaponBarrelOffsets.emplace_back(115.f, 470.f);
     std::vector<sf::IntRect> tommyFrames;
     tommyFrames.push_back(sf::IntRect({256, 149}, {15, 6}));
     tommyFrames.push_back(sf::IntRect({273, 150}, {14, 4}));
     tommyFrames.push_back(sf::IntRect({290, 151}, {13, 3}));
     tommyFrames.push_back(sf::IntRect({305, 151}, {14, 4}));
     m_movementSpeeds.emplace_back(280.f);
+    m_weaponBulletScales.emplace_back(3.f, 1.f);
     m_reloadAnimPosition.emplace_back(210.f, 640.f);
     m_weaponBulletAnimRects.push_back(tommyFrames);
     m_weaponBulletAnimSpeeds.push_back(0.1f);
-    m_weaponShootCooldowns.push_back(0.08f);
+    m_weaponShootCooldowns.push_back(0.1f);
     m_weaponReloadTime.emplace_back(1.f);
     weaponMagSize.push_back(75);
     weaponCurrentAmmo.push_back(75);
@@ -91,7 +92,8 @@ Player::Player(float startX, float startY) :
     rpgFrames.push_back(sf::IntRect({544, 202}, {32, 13}));
     rpgFrames.push_back(sf::IntRect({575, 199}, {33, 17}));
     m_movementSpeeds.emplace_back(180.f);
-    m_reloadAnimPosition.emplace_back(140.f, 640.f);
+    m_weaponBulletScales.emplace_back(3.f, 3.f);
+    m_reloadAnimPosition.emplace_back(140.f, 800.f);
     m_weaponBulletAnimRects.push_back(rpgFrames);
     m_weaponBulletAnimSpeeds.push_back(0.1f);
     m_weaponShootCooldowns.push_back(1.2f);
@@ -108,10 +110,11 @@ Player::Player(float startX, float startY) :
     smgFrames.push_back(sf::IntRect({208, 278}, {17, 5}));
     smgFrames.push_back(sf::IntRect({223, 278}, {17, 5}));
     m_movementSpeeds.emplace_back(350.f);
+    m_weaponBulletScales.emplace_back(3.f, 1.f);
     m_reloadAnimPosition.emplace_back(157.f, 640.f);
     m_weaponBulletAnimRects.push_back(smgFrames);
     m_weaponBulletAnimSpeeds.push_back(0.1f);
-    m_weaponShootCooldowns.push_back(0.02f);
+    m_weaponShootCooldowns.push_back(0.05f);
     m_weaponReloadTime.emplace_back(0.8f);
     weaponMagSize.push_back(35);
     weaponCurrentAmmo.push_back(35);
@@ -125,6 +128,7 @@ Player::Player(float startX, float startY) :
     shotgunFrames.push_back(sf::IntRect({516, 264}, {23, 16}));
     shotgunFrames.push_back(sf::IntRect({546, 262}, {25, 19}));
     m_movementSpeeds.emplace_back(210.f);
+    m_weaponBulletScales.emplace_back(2.f, 3.f);
     m_reloadAnimPosition.emplace_back(170.f, 640.f);
     m_weaponBulletAnimRects.push_back(shotgunFrames);
     m_weaponBulletAnimSpeeds.push_back(0.05f);
@@ -135,7 +139,7 @@ Player::Player(float startX, float startY) :
     weaponReserveAmmo.push_back(16);
 
     // Sniper
-    m_weaponBarrelOffsets.emplace_back(107.f, 500.f);
+    m_weaponBarrelOffsets.emplace_back(107.f, 620.f);
     std::vector<sf::IntRect> sniperFrames;
     sniperFrames.push_back(sf::IntRect({0, 244}, {16, 9}));
     sniperFrames.push_back(sf::IntRect({14, 244}, {18, 9}));
@@ -143,6 +147,7 @@ Player::Player(float startX, float startY) :
     sniperFrames.push_back(sf::IntRect({46, 244}, {17, 9}));
     sniperFrames.push_back(sf::IntRect({63, 244}, {17, 9}));
     m_movementSpeeds.emplace_back(200.f);
+    m_weaponBulletScales.emplace_back(2.f, 1.f);
     m_reloadAnimPosition.emplace_back(170.f, 640.f);
     m_weaponBulletAnimRects.push_back(sniperFrames);
     m_weaponBulletAnimSpeeds.push_back(0.1f);
@@ -156,15 +161,26 @@ Player::Player(float startX, float startY) :
     this->playerSprite.setTextureRect(skinRect);
 
     //HealthBar
-    HealthBarBackground.setSize(sf::Vector2f(HEALTHBAR_WIDTH, HEALTHBAR_HEIGHT));
-    HealthBarBackground.setFillColor(sf::Color(50,50,50));
-    HealthBarForeground.setSize(sf::Vector2f(HEALTHBAR_WIDTH, HEALTHBAR_HEIGHT));
-    HealthBarForeground.setFillColor(sf::Color::Green);
+    m_healthBarSprite.setTexture(m_reloadAnimTexture);
+    m_healthBarFrames.push_back(sf::IntRect({627, 6}, {42, 5}));
+    m_healthBarFrames.push_back(sf::IntRect({675, 6}, {42, 5}));
+    m_healthBarFrames.push_back(sf::IntRect({723, 6}, {42, 5}));
+    m_healthBarFrames.push_back(sf::IntRect({771, 6}, {42, 5}));
+    m_healthBarFrames.push_back(sf::IntRect({819, 6}, {42, 5}));
+    m_healthBarFrames.push_back(sf::IntRect({867, 6}, {42, 5}));
+
+
+    m_healthBarSprite.setTextureRect(m_healthBarFrames[0]);
+
+    m_healthBarSprite.setScale({10.f, 5.f});
     updateHealthBar();
     updateHealthBarPosition();
+    // -------------------------------
 
-    this->playerSprite.scale({0.25f,0.25f});
-    this->playerSprite.setOrigin({static_cast<float>(skinRect.size.x) / 2.f, static_cast<float>(skinRect.size.y) / 2.f});
+    this->playerSprite.scale({0.25f, 0.25f});
+    this->playerSprite.setOrigin({
+        static_cast<float>(skinRect.size.x) / 2.f, static_cast<float>(skinRect.size.y) / 2.f
+    });
     this->playerSprite.setPosition({startX, startY});
 }
 
@@ -180,8 +196,7 @@ void Player::drawUI(sf::RenderWindow& window) {
     if (m_isReloading) {
         window.draw(m_reloadAnimSprite);
     }
-    window.draw(this->HealthBarBackground);
-    window.draw(this->HealthBarForeground);
+    window.draw(this->m_healthBarSprite);
 }
 
 sf::FloatRect Player::getCollisionBounds() const {
@@ -203,18 +218,21 @@ void Player::takeDamage(float damage) {
 
 //Updateaza healthbarul
 void Player::updateHealthBar() {
-    float healthpercent = m_health.getPercentage();
-    float netWidth = HEALTHBAR_WIDTH * healthpercent;
-    this->HealthBarForeground.setSize(sf::Vector2f(netWidth,HEALTHBAR_HEIGHT));
-    updateHealthBarPosition();
+    float healthPercent = m_health.getPercentage();
+    int frameCount = static_cast<int>(m_healthBarFrames.size());
+    int frameIndex = static_cast<int>(std::ceil((1.f - healthPercent) * static_cast<float>(frameCount - 1)));
+    if (frameIndex < 0)
+        frameIndex = 0;
+    if (frameIndex >= frameCount) frameIndex = frameCount - 1;
+    m_healthBarSprite.setTextureRect(m_healthBarFrames[frameIndex]);
 }
 
 //Update la pozitia healthbarului
 void Player::updateHealthBarPosition() {
-    float x = (1280.f / 2.f) - (HEALTHBAR_WIDTH / 2.f);
+    float barWidth = m_healthBarSprite.getGlobalBounds().size.x;
+    float x = (1280.f / 2.f) - (barWidth / 2.f);
     float y = 10.f;
-    this->HealthBarBackground.setPosition({x,y});
-    this->HealthBarForeground.setPosition({x,y});
+    m_healthBarSprite.setPosition({x, y});
 }
 
 //Cooldown pentru fiecare arma in aprte
@@ -247,42 +265,36 @@ void Player::update(float dt, sf::Vector2f mousePosition,const GameMap& gameMap)
     sf::Vector2f currentPos = getPosition();
     sf::Vector2f velocity(direction.x * currentSpeed * dt, direction.y * currentSpeed * dt);
 
-    // --- Verifică axa X ---
     sf::FloatRect bounds = getCollisionBounds();
-    bounds.position.x += velocity.x; // Proiectează noua poziție X
+    bounds.position.x += velocity.x;
 
-    // Punctele de coliziune pentru mișcarea X
     float topY = bounds.position.y;
     float bottomY = bounds.position.y + bounds.size.y;
 
-    if (velocity.x > 0) { // Mergi la dreapta
+    if (velocity.x > 0) {
         float rightX = bounds.position.x + bounds.size.x;
         if (gameMap.isSolid({rightX, topY}) || gameMap.isSolid({rightX, bottomY})) {
-            velocity.x = 0; // Oprește mișcarea pe X
+            velocity.x = 0;
         }
-    } else if (velocity.x < 0) { // Mergi la stânga
+    } else if (velocity.x < 0) {
         float leftX = bounds.position.x;
         if (gameMap.isSolid({leftX, topY}) || gameMap.isSolid({leftX, bottomY})) {
-            velocity.x = 0; // Oprește mișcarea pe X
+            velocity.x = 0;
         }
     }
 
-    // Aplică mișcarea pe X (fie 0, fie valoarea completă)
     currentPos.x += velocity.x;
-    this->playerSprite.setPosition(currentPos); // Setează noua poziție X
+    this->playerSprite.setPosition(currentPos);
+    bounds = getCollisionBounds();
+    bounds.position.y += velocity.y;
 
-    // --- Verifică axa Y ---
-    bounds = getCollisionBounds(); // Ia noile coordonate (cu X-ul actualizat)
-    bounds.position.y += velocity.y; // Proiectează noua poziție Y
-
-    // Punctele de coliziune pentru mișcarea Y
     float leftX = bounds.position.x;
     float rightX = bounds.position.x + bounds.size.x;
 
-    if (velocity.y > 0) { // Mergi în jos
+    if (velocity.y > 0) {
         float bottomY1 = bounds.position.y + bounds.size.y;
         if (gameMap.isSolid({leftX, bottomY1}) || gameMap.isSolid({rightX, bottomY1})) {
-            velocity.y = 0; // Oprește mișcarea pe Y
+            velocity.y = 0;
         }
     } else if (velocity.y < 0) { // Mergi în sus
         float topY1 = bounds.position.y;
@@ -384,6 +396,8 @@ Bullet Player::shoot(sf::Vector2f mousePosition) {
     sf::Vector2f barrelOffset = m_weaponBarrelOffsets[currentIndex];
     float animSpeed = m_weaponBulletAnimSpeeds[currentIndex];
 
+    sf::Vector2f bulletScale = m_weaponBulletScales[currentIndex];
+
     //cosntante pentru a aseza corect punctul de plecare a gloantelor
     //armele nu sunt centrate cu originea playerului el le tine pe partea dreapta+
     const float localBarrelOffsetX = barrelOffset.x;
@@ -397,7 +411,7 @@ Bullet Player::shoot(sf::Vector2f mousePosition) {
     sf::Vector2f direction = mousePosition - barrelPosition;
 
     return {bulletTexture, bulletAnimRects, barrelPosition, direction,
-        animSpeed};
+        animSpeed, bulletScale};
 }
 
 bool Player::canShoot(sf::Vector2f mousePosition) const{

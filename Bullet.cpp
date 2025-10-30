@@ -5,21 +5,24 @@
 const float PI = 3.14159265358979323846f;
 
 Bullet::Bullet(sf::Texture &texture, const std::vector<sf::IntRect> &animRects, sf::Vector2f startPos, sf::Vector2f direction,
-    float animSpeed)
-    : bulletSprite(texture),
-      bulletVelocity{},
-      bulletRect{},
-      bulletTimer{},
-      m_animRects(animRects),
-      bulletCurrentFrame(0),
-      bulletAnimSpeed(animSpeed),
-      m_animFrames(static_cast<int>(animRects.size()))
+    float animSpeed,sf::Vector2f scale)
+: bulletSprite(texture),
+  bulletVelocity{},
+  bulletRect{},
+  bulletTimer{},
+  m_animRects(animRects),
+  bulletCurrentFrame(0),
+  bulletAnimSpeed(animSpeed),
+  m_animFrames(static_cast<int>(animRects.size())),
+  m_isDead(false),
+  m_isImpacting(false)
 {
     bulletSprite.setTextureRect(m_animRects[0]);
 
     float originX = static_cast<float>(m_animRects[0].size.x) / 2.f;
     float originY = static_cast<float>(m_animRects[0].size.y) / 2.f;
     bulletSprite.setOrigin({originX, originY});
+    bulletSprite.setScale(scale);
 
     float angleInRadians = std::atan2(direction.y, direction.x);
     float angleInDegrees = angleInRadians * (180.f / PI);
@@ -37,7 +40,11 @@ Bullet::~Bullet()= default;
 
 void Bullet::update(float dt) {
     //miscarea glontului
-    bulletSprite.move(bulletVelocity*dt);
+    if (!m_isImpacting) {
+        bulletSprite.move(bulletVelocity * dt);
+    } else {
+        m_isDead = true;
+    }
 
     if (bulletTimer.getElapsedTime().asSeconds() > bulletAnimSpeed){
         bulletCurrentFrame++;
@@ -52,6 +59,30 @@ void Bullet::update(float dt) {
 
 void Bullet::draw(sf::RenderWindow &window) {
     window.draw(bulletSprite);
+}
+
+sf::Vector2f Bullet::getPosition() const {
+    return bulletSprite.getPosition();
+}
+
+sf::Vector2f Bullet::getVelocity() const {
+    return bulletVelocity;
+}
+
+void Bullet::hit() {
+    //opresc miscarea
+    if (!m_isImpacting) {
+        m_isImpacting = true;
+        //aici adadug animatii
+    }
+}
+
+bool Bullet::isDead() const {
+    return m_isDead;
+}
+
+bool Bullet::isImpacting() const {
+    return m_isImpacting;
 }
 
 std::ostream& operator<<(std::ostream& os,const Bullet& bullet) {

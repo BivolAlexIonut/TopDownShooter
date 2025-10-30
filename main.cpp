@@ -6,6 +6,7 @@
 #include <vector>
 #include "Enemy.h"
 #include <ostream>
+#include <cmath>
 
 
 int main() {
@@ -26,7 +27,7 @@ int main() {
     std::vector<Enemy> enemies;
     enemies.push_back(enemy1);
 
-    player.takeDamage(25.f);//Testez Ui pentru healthbar
+    player.takeDamage(0.f);//Testez Ui pentru healthbar
     enemies[0].takeDamage(10.f);
 
     sf::Clock clock;
@@ -78,7 +79,7 @@ int main() {
             && player.canShoot(mousePositionWorld)) {
             bullets.push_back((player.shoot(mousePositionWorld)));
             shootTimer.restart();
-        }
+            }
 
         player.update(dt.asSeconds(), mousePositionWorld,gameMap);
         //Obtin pozitiile si dimensiunile
@@ -121,24 +122,52 @@ int main() {
 
         for (auto& bullet : bullets) {
             bullet.draw(window);
+
+            if (!bullet.isImpacting()) {
+
+                sf::Vector2f pos = bullet.getPosition();
+                sf::Vector2f vel = bullet.getVelocity();
+
+                float length = std::sqrt(vel.x * vel.x + vel.y * vel.y);
+                sf::Vector2f normVel(0.f, 0.f);
+                if (length != 0.f) {
+                    normVel = vel / length;
+                }
+                float checkOffset = 25.f;
+
+                sf::Vector2f checkPosition = pos + normVel * checkOffset;
+                if (gameMap.isSolid(checkPosition)) {
+                    bullet.hit();
+                }
+            }
         }
-        window.setView(window.getDefaultView());
 
-        ammoText.setOrigin({0.f, 0.f});
+        bullets.erase(
+            std::remove_if(bullets.begin(), bullets.end(),
+                [](const Bullet& bullet) {
+                    return bullet.isDead();
+                }
+            ),
+            bullets.end()
+        );
 
-        sf::Vector2f viewSize = static_cast<sf::Vector2f>(window.getSize());
+            window.setView(window.getDefaultView());
 
-        auto charSize = static_cast<float>(ammoText.getCharacterSize());
-        float numLines = 2.f;
-        float totalTextHeight = (charSize * numLines) * 1.1f;
-        float positionY = viewSize.y - totalTextHeight - 10.f;
-        ammoText.setPosition({10.f, positionY});
+            ammoText.setOrigin({0.f, 0.f});
 
-        player.drawUI(window);
-        window.draw(ammoText);
+            sf::Vector2f viewSize = static_cast<sf::Vector2f>(window.getSize());
 
-        window.display();
-    }
+            auto charSize = static_cast<float>(ammoText.getCharacterSize());
+            float numLines = 2.f;
+            float totalTextHeight = (charSize * numLines) * 1.1f;
+            float positionY = viewSize.y - totalTextHeight - 10.f;
+            ammoText.setPosition({10.f, positionY});
 
-    return 0;
+            player.drawUI(window);
+            window.draw(ammoText);
+
+            window.display();
+        }
+
+        return 0;
 }

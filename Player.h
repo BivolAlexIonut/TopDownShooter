@@ -36,8 +36,9 @@ private:
     //Healthbar
     void updateHealthBar();
     void updateHealthBarPosition();
-    sf::RectangleShape HealthBarBackground;
-    sf::RectangleShape HealthBarForeground;
+    sf::Sprite m_healthBarSprite;
+    std::vector<sf::IntRect> m_healthBarFrames;
+
     Health m_health;
 
     sf::Texture playerTexture;
@@ -67,5 +68,7 @@ private:
     std::vector<sf::Vector2f> m_reloadAnimPosition;
     int m_reloadingWeaponIndex;
     float m_currentReloadTotalTime{};
+
+    std::vector<sf::Vector2f> m_weaponBulletScales;
     //--------------------------------------------------
 };
