@@ -39,7 +39,7 @@ sf::IntRect GunSwitch::getCurrentWeaponRect() const {
     return m_weaponRects[m_currentWeaponIndex];
 }
 
-std::ostream& operator<<(std::ostream& os, const GunSwitch& switcher) {
+std::ostream &operator<<(std::ostream &os, const GunSwitch &switcher) {
     os << "GunSwitch( Arma curenta:  " << switcher.m_currentWeaponIndex << " )";
     return os;
 }

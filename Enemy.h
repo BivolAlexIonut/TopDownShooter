@@ -4,14 +4,18 @@
 class Enemy {
 public:
     Enemy(float startX, float startY);
+
     ~Enemy();
-    void draw(sf::RenderWindow& window);
+
+    void draw(sf::RenderWindow &window);
 
     static void update(float dt, sf::Vector2f playerPosition);
 
     void takeDamage(float damage);
+
     sf::Vector2f getPosition() const;
-    friend std::ostream& operator<<(std::ostream& os, const Enemy& enemy);
+
+    friend std::ostream &operator<<(std::ostream &os, const Enemy &enemy);
 
 private:
     float health;

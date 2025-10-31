@@ -4,19 +4,19 @@
 
 const float PI = 3.14159265358979323846f;
 
-Bullet::Bullet(sf::Texture &texture, const std::vector<sf::IntRect> &animRects, sf::Vector2f startPos, sf::Vector2f direction,
-    float animSpeed,sf::Vector2f scale)
-: bulletSprite(texture),
-  bulletVelocity{},
-  bulletRect{},
-  bulletTimer{},
-  m_animRects(animRects),
-  bulletCurrentFrame(0),
-  bulletAnimSpeed(animSpeed),
-  m_animFrames(static_cast<int>(animRects.size())),
-  m_isDead(false),
-  m_isImpacting(false)
-{
+Bullet::Bullet(sf::Texture &texture, const std::vector<sf::IntRect> &animRects, sf::Vector2f startPos,
+               sf::Vector2f direction,
+               float animSpeed, sf::Vector2f scale)
+    : bulletSprite(texture),
+      bulletVelocity{},
+      bulletRect{},
+      bulletTimer{},
+      m_animRects(animRects),
+      bulletCurrentFrame(0),
+      bulletAnimSpeed(animSpeed),
+      m_animFrames(static_cast<int>(animRects.size())),
+      m_isDead(false),
+      m_isImpacting(false) {
     bulletSprite.setTextureRect(m_animRects[0]);
 
     float originX = static_cast<float>(m_animRects[0].size.x) / 2.f;
@@ -36,7 +36,7 @@ Bullet::Bullet(sf::Texture &texture, const std::vector<sf::IntRect> &animRects, 
     bulletVelocity = direction * speed;
 }
 
-Bullet::~Bullet()= default;
+Bullet::~Bullet() = default;
 
 void Bullet::update(float dt) {
     //miscarea glontului
@@ -46,7 +46,7 @@ void Bullet::update(float dt) {
         m_isDead = true;
     }
 
-    if (bulletTimer.getElapsedTime().asSeconds() > bulletAnimSpeed){
+    if (bulletTimer.getElapsedTime().asSeconds() > bulletAnimSpeed) {
         bulletCurrentFrame++;
         bulletTimer.restart();
     }
@@ -81,9 +81,9 @@ bool Bullet::isImpacting() const {
     return m_isImpacting;
 }
 
-std::ostream& operator<<(std::ostream& os,const Bullet& bullet) {
+std::ostream &operator<<(std::ostream &os, const Bullet &bullet) {
     sf::Vector2f pos = bullet.bulletSprite.getPosition();
     os << "Bullet( Poz: " << pos.x << ", " << pos.y
-       << " | Vel: " << bullet.bulletVelocity.x << ", " << bullet.bulletVelocity.y << " )";
+            << " | Vel: " << bullet.bulletVelocity.x << ", " << bullet.bulletVelocity.y << " )";
     return os;
 }

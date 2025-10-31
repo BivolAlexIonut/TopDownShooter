@@ -3,9 +3,10 @@
 #include <iostream>
 #include <ostream>
 
-GameMap::GameMap() : m_tileSize(0, 0), m_mapSize(0, 0) {}
+GameMap::GameMap() : m_tileSize(0, 0), m_mapSize(0, 0) {
+}
 
-bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,float mapScale) {
+bool GameMap::load(const std::string &mapPath, const std::string &tilesetPath, float mapScale) {
     if (!m_tilesetTexture.loadFromFile(tilesetPath)) {
         std::cerr << "EROARE: Nu am putut incarca tileset-ul: " << tilesetPath << std::endl;
         return false;
@@ -48,7 +49,7 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,fl
     // Numar cate tiles sunt peste podea pentru a putea incarca si alte texturi in afara de
     //cea a podeleip
     size_t objectTileCount = 0;
-    for (const int id : tileIDs) {
+    for (const int id: tileIDs) {
         if (id > 1) //Aici verific daca textura este sau nu podea si numar
             objectTileCount++;
     }
@@ -81,14 +82,14 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,fl
 
     for (unsigned int y = 0; y < m_mapSize.y; ++y) {
         for (unsigned int x = 0; x < m_mapSize.x; ++x) {
-
             //calculez pozitia pe ecran
-            const sf::Vector2f topLeftPos(static_cast<float>(x) * fScaledTileSizeX, static_cast<float>(y) * fScaledTileSizeY);
+            const sf::Vector2f topLeftPos(static_cast<float>(x) * fScaledTileSizeX,
+                                          static_cast<float>(y) * fScaledTileSizeY);
             const sf::Vector2f topRightPos(topLeftPos.x + fScaledTileSizeX, topLeftPos.y);
             const sf::Vector2f botRightPos(topLeftPos.x + fScaledTileSizeX, topLeftPos.y + fScaledTileSizeY);
             const sf::Vector2f botLeftPos(topLeftPos.x, topLeftPos.y + fScaledTileSizeY);
 
-            sf::Vertex* tileVertices = &m_vertices[vertexIndex * 6];
+            sf::Vertex *tileVertices = &m_vertices[vertexIndex * 6];
 
             // Primul triunghi
             tileVertices[0].position = topLeftPos;
@@ -113,7 +114,6 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,fl
     //Acum desenex obiectele care sunt deasupra podelei
     for (unsigned int y = 0; y < m_mapSize.y; ++y) {
         for (unsigned int x = 0; x < m_mapSize.x; ++x) {
-
             int currentTileID = tileIDs[y * m_mapSize.x + x];
 
             if (currentTileID <= 1) continue;
@@ -121,7 +121,8 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,fl
             int id = currentTileID - 1;
 
             // calculez iar pozitita pe ecran
-            const sf::Vector2f topLeftPos(static_cast<float>(x) * fScaledTileSizeX, static_cast<float>(y) * fScaledTileSizeY);
+            const sf::Vector2f topLeftPos(static_cast<float>(x) * fScaledTileSizeX,
+                                          static_cast<float>(y) * fScaledTileSizeY);
             const sf::Vector2f topRightPos(topLeftPos.x + fScaledTileSizeX, topLeftPos.y);
             const sf::Vector2f botRightPos(topLeftPos.x + fScaledTileSizeX, topLeftPos.y + fScaledTileSizeY);
             const sf::Vector2f botLeftPos(topLeftPos.x, topLeftPos.y + fScaledTileSizeY);
@@ -137,7 +138,7 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,fl
             const sf::Vector2f botRightTex(texX + fTileSizeX, texY + fTileSizeY);
             const sf::Vector2f botLeftTex(texX, texY + fTileSizeY);
 
-            sf::Vertex* tileVertices = &m_vertices[vertexIndex * 6];
+            sf::Vertex *tileVertices = &m_vertices[vertexIndex * 6];
 
             // Primul triunghi
             tileVertices[0].position = topLeftPos;
@@ -165,24 +166,24 @@ bool GameMap::load(const std::string& mapPath, const std::string& tilesetPath,fl
     return true;
 }
 
-void GameMap::draw(sf::RenderTarget& target,sf::RenderStates states) const{
+void GameMap::draw(sf::RenderTarget &target, sf::RenderStates states) const {
     states.transform *= getTransform();
     states.texture = &m_tilesetTexture;
     target.draw(m_vertices, states);
 }
 
-std::ostream& operator<<(std::ostream& os, const GameMap& map) {
+std::ostream &operator<<(std::ostream &os, const GameMap &map) {
     os << "GameMap( Size: " << map.m_mapSize.x << "x" << map.m_mapSize.y
-       << " | Tiles: " << map.m_vertices.getVertexCount() / 6 << " )";
+            << " | Tiles: " << map.m_vertices.getVertexCount() / 6 << " )";
     return os;
 }
 
 sf::FloatRect GameMap::getPixelBounds() const {
-    return {{0.f,0.f},m_mapPixelSize};
+    return {{0.f, 0.f}, m_mapPixelSize};
 }
 
 int GameMap::getTileID(sf::Vector2u tileCoords) const {
-    if (tileCoords.x >m_mapSize.x || tileCoords.y >m_mapSize.y) {
+    if (tileCoords.x > m_mapSize.x || tileCoords.y > m_mapSize.y) {
         return 0; //practic outofbons
     }
     return m_tileIDs[tileCoords.y * m_mapSize.x + tileCoords.x];

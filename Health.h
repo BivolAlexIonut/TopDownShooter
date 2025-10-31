@@ -5,12 +5,15 @@
 class Health {
 public:
     Health();
+
     explicit Health(float maxHealth);
+
     Health(float currentHealth, float maxHealth);
+
     ~Health() = default;
 
-    Health(const Health& other);//Constructor de copiere
-    Health& operator=(const Health& other);//Operator= de copiere
+    Health(const Health &other); //Constructor de copiere
+    Health &operator=(const Health &other); //Operator= de copiere
 
     [[maybe_unused]] void takeDamage(float amount) {
         m_currentHealth -= amount;
@@ -23,7 +26,7 @@ public:
     }
 
 
-    friend std::ostream& operator<<(std::ostream& os, const Health& health);
+    friend std::ostream &operator<<(std::ostream &os, const Health &health);
 
 private:
     float m_currentHealth;

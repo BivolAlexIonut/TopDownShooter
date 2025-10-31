@@ -12,7 +12,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
                                              m_gunSwitch(),
                                              m_isReloading(false), //Incep prin a nu reincarca
                                              m_reloadAnimSprite(this->m_reloadAnimTexture),
-m_healthBarSprite(this->m_reloadAnimTexture),
+                                             m_healthBarSprite(this->m_reloadAnimTexture),
                                              m_reloadingWeaponIndex(-1) {
     if (!this->playerTexture.loadFromFile("assets/Premium Content/Examples/Basic Usage.png")) {
         std::cerr << "EROARE: Nu am putut incarca ../assets/Premium Content/Examples/Basic Usage.png" << std::endl;
@@ -186,12 +186,12 @@ m_healthBarSprite(this->m_reloadAnimTexture),
 Player::~Player() = default;
 
 //Functie afisare player
-void Player::drawWorld(sf::RenderWindow& window) const {
+void Player::drawWorld(sf::RenderWindow &window) const {
     window.draw(this->playerSprite);
 }
 
 //Functie afisare aniamtie de reload
-void Player::drawUI(sf::RenderWindow& window) {
+void Player::drawUI(sf::RenderWindow &window) {
     if (m_isReloading) {
         window.draw(m_reloadAnimSprite);
     }
@@ -203,8 +203,8 @@ sf::FloatRect Player::getCollisionBounds() const {
     float boxHeight = 25.f;
     sf::Vector2f pos = getPosition();
     return {
-                {pos.x - boxWidth / 2.f, pos.y - boxHeight / 2.f},
-                {boxWidth, boxHeight}
+        {pos.x - boxWidth / 2.f, pos.y - boxHeight / 2.f},
+        {boxWidth, boxHeight}
     };
 }
 
@@ -244,7 +244,7 @@ float Player::getCurrentWeaponCooldown() const {
 }
 
 //Update pentru player,include movementul,rotatia,reloadul si animatii
-void Player::update(float dt, sf::Vector2f mousePosition,const GameMap& gameMap) {
+void Player::update(float dt, sf::Vector2f mousePosition, const GameMap &gameMap) {
     sf::Vector2f direction(0.f, 0.f);
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) direction.y = -1.f;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) direction.y = 1.f;
@@ -258,7 +258,7 @@ void Player::update(float dt, sf::Vector2f mousePosition,const GameMap& gameMap)
     //Movement speed pentru fiecare arma
     int currentSpeedIndex = m_gunSwitch.getCurrentWeaponIndex();
     float currentSpeed = 270.f;
-    if (currentSpeedIndex >=0 && static_cast<size_t>(currentSpeedIndex)<m_movementSpeeds.size()) {
+    if (currentSpeedIndex >= 0 && static_cast<size_t>(currentSpeedIndex) < m_movementSpeeds.size()) {
         currentSpeed = m_movementSpeeds[currentSpeedIndex];
     }
     sf::Vector2f currentPos = getPosition();
@@ -295,7 +295,8 @@ void Player::update(float dt, sf::Vector2f mousePosition,const GameMap& gameMap)
         if (gameMap.isSolid({leftX, bottomY1}) || gameMap.isSolid({rightX, bottomY1})) {
             velocity.y = 0;
         }
-    } else if (velocity.y < 0) { // Mergi în sus
+    } else if (velocity.y < 0) {
+        // Mergi în sus
         float topY1 = bounds.position.y;
         if (gameMap.isSolid({leftX, topY1}) || gameMap.isSolid({rightX, topY1})) {
             velocity.y = 0; // Oprește mișcarea pe Y
@@ -332,7 +333,6 @@ void Player::update(float dt, sf::Vector2f mousePosition,const GameMap& gameMap)
         m_reloadAnimSprite.setTextureRect(m_reloadAnimFrames[currentFrameIndex]);
 
         if (elapsedTime >= m_currentReloadTotalTime) {
-
             m_isReloading = false;
             int index = m_reloadingWeaponIndex;
 
@@ -357,7 +357,7 @@ sf::Vector2f Player::getPosition() const {
     return this->playerSprite.getPosition();
 }
 
-std::ostream& operator<<(std::ostream& os, const Player& player) {
+std::ostream &operator<<(std::ostream &os, const Player &player) {
     sf::Vector2f pos = player.getPosition();
     os << "Player( Poz: " << pos.x << ", " << pos.y << " | " << player.m_health << " | " << player.m_gunSwitch << ")";
     return os;
@@ -369,7 +369,8 @@ void Player::switchWeaponNext() {
     m_gunSwitch.nextWeapon();
     sf::IntRect newRect = m_gunSwitch.getCurrentWeaponRect();
     this->playerSprite.setTextureRect(newRect);
-this->playerSprite.setOrigin({static_cast<float>(newRect.size.x) / 2.f, static_cast<float>(newRect.size.y) / 2.f});}
+    this->playerSprite.setOrigin({static_cast<float>(newRect.size.x) / 2.f, static_cast<float>(newRect.size.y) / 2.f});
+}
 
 void Player::switchWeaponPrev() {
     if (m_isReloading)return;
@@ -377,20 +378,21 @@ void Player::switchWeaponPrev() {
     m_gunSwitch.previousWeapon();
     sf::IntRect newRect = m_gunSwitch.getCurrentWeaponRect();
     this->playerSprite.setTextureRect(newRect);
-this->playerSprite.setOrigin({static_cast<float>(newRect.size.x) / 2.f, static_cast<float>(newRect.size.y) / 2.f});}
+    this->playerSprite.setOrigin({static_cast<float>(newRect.size.x) / 2.f, static_cast<float>(newRect.size.y) / 2.f});
+}
 
 //Functia pentru tras(shooting)
 Bullet Player::shoot(sf::Vector2f mousePosition) {
     int currentIndex = m_gunSwitch.getCurrentWeaponIndex();
-    if (currentIndex >= 0 && static_cast<size_t>(currentIndex) < weaponCurrentAmmo.size() ) {
-        weaponCurrentAmmo[currentIndex] --;
+    if (currentIndex >= 0 && static_cast<size_t>(currentIndex) < weaponCurrentAmmo.size()) {
+        weaponCurrentAmmo[currentIndex]--;
     }
 
     if (currentIndex < 0 || static_cast<size_t>(currentIndex) >= m_weaponBulletAnimRects.size()) {
         currentIndex = 0;
     }
 
-    const std::vector<sf::IntRect>& bulletAnimRects = m_weaponBulletAnimRects[currentIndex];
+    const std::vector<sf::IntRect> &bulletAnimRects = m_weaponBulletAnimRects[currentIndex];
 
     sf::Vector2f barrelOffset = m_weaponBarrelOffsets[currentIndex];
     float animSpeed = m_weaponBulletAnimSpeeds[currentIndex];
@@ -409,11 +411,13 @@ Bullet Player::shoot(sf::Vector2f mousePosition) {
 
     sf::Vector2f direction = mousePosition - barrelPosition;
 
-    return {bulletTexture, bulletAnimRects, barrelPosition, direction,
-        animSpeed, bulletScale};
+    return {
+        bulletTexture, bulletAnimRects, barrelPosition, direction,
+        animSpeed, bulletScale
+    };
 }
 
-bool Player::canShoot(sf::Vector2f mousePosition) const{
+bool Player::canShoot(sf::Vector2f mousePosition) const {
     if (m_isReloading) {
         return false;
     }
@@ -436,11 +440,10 @@ void Player::reload() {
     int index = m_gunSwitch.getCurrentWeaponIndex();
 
     if (index < 0 ||
-    static_cast<size_t>(index) >= m_weaponReloadTime.size() ||
-    static_cast<size_t>(index) >= weaponMagSize.size() ||
-    static_cast<size_t>(index) >= weaponCurrentAmmo.size() ||
-    static_cast<size_t>(index) >= weaponReserveAmmo.size())
-    {
+        static_cast<size_t>(index) >= m_weaponReloadTime.size() ||
+        static_cast<size_t>(index) >= weaponMagSize.size() ||
+        static_cast<size_t>(index) >= weaponCurrentAmmo.size() ||
+        static_cast<size_t>(index) >= weaponReserveAmmo.size()) {
         std::cerr << "Eroare: Date de reincarcare invalide pentru indexul " << index << std::endl;
         return;
     }
@@ -454,8 +457,7 @@ void Player::reload() {
         return;
     }
 
-    if (static_cast<size_t>(index) >= m_reloadAnimPosition.size())
-    {
+    if (static_cast<size_t>(index) >= m_reloadAnimPosition.size()) {
         std::cerr << "Eroare: Pozitie de reincarcare invalida pentru indexul " << index << std::endl;
         return;
     }
