@@ -30,8 +30,8 @@ private:
 
     void updateAnimation();
 
-    sf::Sprite m_sprite;
     sf::Texture m_texture;
+    sf::Sprite m_sprite;
     State m_currentState;
 
     std::map<State,std::vector<sf::IntRect>> m_animations;

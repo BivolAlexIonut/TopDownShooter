@@ -94,7 +94,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
     rpgFrames.push_back(sf::IntRect({514, 202}, {28, 13}));
     rpgFrames.push_back(sf::IntRect({544, 202}, {32, 13}));
     rpgFrames.push_back(sf::IntRect({575, 199}, {33, 17}));
-    m_movementSpeeds.emplace_back(100.f);
+    m_movementSpeeds.emplace_back(180.f);
     m_weaponBulletScales.emplace_back(3.f, 3.f);
     m_reloadAnimPosition.emplace_back(140.f, 800.f);
     m_weaponBulletAnimRects.push_back(rpgFrames);
