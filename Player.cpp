@@ -13,7 +13,11 @@ Player::Player(float startX, float startY) : m_health(100.f),
                                              m_isReloading(false), //Incep prin a nu reincarca
                                              m_reloadAnimSprite(this->m_reloadAnimTexture),
                                              m_healthBarSprite(this->m_reloadAnimTexture),
-                                             m_reloadingWeaponIndex(-1) {
+                                             m_reloadingWeaponIndex(-1),
+                                             m_isKnockedBack(false),
+                                             m_knockbackDuration(0.15f),
+                                             m_knockbackVelocity(0.f,0.f)
+{
     if (!this->playerTexture.loadFromFile("assets/Premium Content/Examples/Basic Usage.png")) {
         std::cerr << "EROARE: Nu am putut incarca ../assets/Premium Content/Examples/Basic Usage.png" << std::endl;
     }
@@ -90,7 +94,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
     rpgFrames.push_back(sf::IntRect({514, 202}, {28, 13}));
     rpgFrames.push_back(sf::IntRect({544, 202}, {32, 13}));
     rpgFrames.push_back(sf::IntRect({575, 199}, {33, 17}));
-    m_movementSpeeds.emplace_back(180.f);
+    m_movementSpeeds.emplace_back(100.f);
     m_weaponBulletScales.emplace_back(3.f, 3.f);
     m_reloadAnimPosition.emplace_back(140.f, 800.f);
     m_weaponBulletAnimRects.push_back(rpgFrames);
@@ -210,9 +214,17 @@ sf::FloatRect Player::getCollisionBounds() const {
 
 //Functie pentru damage(va fi folosita mai mult cand voi adauga inamici)
 //Momentan o folosesc pentru test la healthbar
-void Player::takeDamage(float damage) {
+void Player::takeDamage(float damage,sf::Vector2f knockbackDirection) {
+    if (m_isKnockedBack)return;
+
     this->m_health.takeDamage(damage);
     updateHealthBar();
+
+    m_isKnockedBack = true;
+    m_knockbackTimer.restart();
+
+    const float knockbackSpeed = 400.f;
+    m_knockbackVelocity = knockbackSpeed * knockbackDirection;
 }
 
 //Updateaza healthbarul
@@ -245,27 +257,44 @@ float Player::getCurrentWeaponCooldown() const {
 
 //Update pentru player,include movementul,rotatia,reloadul si animatii
 void Player::update(float dt, sf::Vector2f mousePosition, const GameMap &gameMap) {
-    sf::Vector2f direction(0.f, 0.f);
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) direction.y = -1.f;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) direction.y = 1.f;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) direction.x = -1.f;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) direction.x = 1.f;
+    sf::Vector2f velocity;
 
-    float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-    if (length != 0.f) {
-        direction /= length;
+    if (m_isKnockedBack)
+    {
+        if (m_knockbackTimer.getElapsedTime().asSeconds() > m_knockbackDuration)
+        {
+            m_isKnockedBack = false;
+        } else {
+            velocity = m_knockbackVelocity;
+        }
     }
-    //Movement speed pentru fiecare arma
-    int currentSpeedIndex = m_gunSwitch.getCurrentWeaponIndex();
-    float currentSpeed = 270.f;
-    if (currentSpeedIndex >= 0 && static_cast<size_t>(currentSpeedIndex) < m_movementSpeeds.size()) {
-        currentSpeed = m_movementSpeeds[currentSpeedIndex];
+    if (!m_isKnockedBack)
+    {
+        sf::Vector2f direction(0.f, 0.f);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) direction.y = -1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) direction.y = 1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) direction.x = -1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) direction.x = 1.f;
+
+        float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+        if (length != 0.f) {
+            direction /= length;
+        }
+
+        int currentSpeedIndex = m_gunSwitch.getCurrentWeaponIndex();
+        float currentSpeed = 270.f;
+        if (currentSpeedIndex >= 0 && static_cast<size_t>(currentSpeedIndex) < m_movementSpeeds.size()) {
+            currentSpeed = m_movementSpeeds[currentSpeedIndex];
+        }
+        velocity = direction * currentSpeed;
     }
+
     sf::Vector2f currentPos = getPosition();
-    sf::Vector2f velocity(direction.x * currentSpeed * dt, direction.y * currentSpeed * dt);
+    sf::Vector2f frameVelocity = velocity * dt;
+
 
     sf::FloatRect bounds = getCollisionBounds();
-    bounds.position.x += velocity.x;
+    bounds.position.x += frameVelocity.x;
 
     float topY = bounds.position.y;
     float bottomY = bounds.position.y + bounds.size.y;
@@ -273,41 +302,39 @@ void Player::update(float dt, sf::Vector2f mousePosition, const GameMap &gameMap
     if (velocity.x > 0) {
         float rightX = bounds.position.x + bounds.size.x;
         if (gameMap.isSolid({rightX, topY}) || gameMap.isSolid({rightX, bottomY})) {
-            velocity.x = 0;
+            frameVelocity.x = 0;
         }
     } else if (velocity.x < 0) {
         float leftX = bounds.position.x;
         if (gameMap.isSolid({leftX, topY}) || gameMap.isSolid({leftX, bottomY})) {
-            velocity.x = 0;
+            frameVelocity.x = 0;
         }
     }
 
-    currentPos.x += velocity.x;
-    this->playerSprite.setPosition(currentPos);
+    currentPos.x += frameVelocity.x;
+    this->playerSprite.setPosition({currentPos.x, currentPos.y});
+
     bounds = getCollisionBounds();
-    bounds.position.y += velocity.y;
+    bounds.position.y += frameVelocity.y;
 
     float leftX = bounds.position.x;
     float rightX = bounds.position.x + bounds.size.x;
 
     if (velocity.y > 0) {
-        float bottomY1 = bounds.position.y + bounds.size.y;
-        if (gameMap.isSolid({leftX, bottomY1}) || gameMap.isSolid({rightX, bottomY1})) {
-            velocity.y = 0;
+        float bottomY_check = bounds.position.y + bounds.size.y;
+        if (gameMap.isSolid({leftX, bottomY_check}) || gameMap.isSolid({rightX, bottomY_check})) {
+            frameVelocity.y = 0;
         }
     } else if (velocity.y < 0) {
-        // Mergi în sus
-        float topY1 = bounds.position.y;
-        if (gameMap.isSolid({leftX, topY1}) || gameMap.isSolid({rightX, topY1})) {
-            velocity.y = 0; // Oprește mișcarea pe Y
+        float topY_check = bounds.position.y;
+        if (gameMap.isSolid({leftX, topY_check}) || gameMap.isSolid({rightX, topY_check})) {
+            frameVelocity.y = 0;
         }
     }
 
-    // Aplică mișcarea pe Y
-    currentPos.y += velocity.y;
-    this->playerSprite.setPosition(currentPos);
+    currentPos.y += frameVelocity.y;
+    this->playerSprite.setPosition({currentPos.x, currentPos.y});
 
-    //Pozitia armei playerului si implicit a playerului dupa mouse
     sf::Vector2f playerPosition = this->playerSprite.getPosition();
     float deltaX = mousePosition.x - playerPosition.x;
     float deltaY = mousePosition.y - playerPosition.y;
@@ -352,6 +379,7 @@ void Player::update(float dt, sf::Vector2f mousePosition, const GameMap &gameMap
         }
     }
 }
+// ... până la această acoladă
 
 sf::Vector2f Player::getPosition() const {
     return this->playerSprite.getPosition();

@@ -16,7 +16,7 @@ public:
 
     void drawWorld(sf::RenderWindow& window) const;
     void drawUI(sf::RenderWindow& window);
-    void takeDamage(float damage);
+    void takeDamage(float damage,sf::Vector2f knockbackDirection);
     sf::Vector2f getPosition() const;
 
     //Functii triviale pentru uzul armelor
@@ -70,5 +70,10 @@ private:
     float m_currentReloadTotalTime{};
 
     std::vector<sf::Vector2f> m_weaponBulletScales;
+
+    bool m_isKnockedBack;
+    float m_knockbackDuration;
+    sf::Vector2f m_knockbackVelocity;
+    sf::Clock m_knockbackTimer;
     //--------------------------------------------------
 };

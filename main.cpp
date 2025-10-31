@@ -1,12 +1,13 @@
-#include <SFML/Graphics.hpp>
-#include "Player.h"
-#include "GameMap.h"
-#include "Bullet.h"
-#include <iostream>
-#include <vector>
-#include "Enemy.h"
-#include <ostream>
 #include <cmath>
+#include <iostream>
+#include <ostream>
+#include <vector>
+#include <SFML/Graphics.hpp>
+#include "Bullet.h"
+#include "ChaserEnemy.h"
+#include "Enemy.h"
+#include "GameMap.h"
+#include "Player.h"
 
 
 int main() {
@@ -23,11 +24,14 @@ int main() {
     }
     Player player(1640 * mapScale, 1360 * mapScale);
 
+    ChaserEnemy chaser1;
+    chaser1.setPosition({player.getPosition().x + 200.f, player.getPosition().y});
+
+
     Enemy enemy1(100.f, 200.f);
     std::vector<Enemy> enemies;
     enemies.push_back(enemy1);
 
-    player.takeDamage(0.f); //Testez Ui pentru healthbar
     enemies[0].takeDamage(10.f);
 
     sf::Clock clock;
@@ -49,6 +53,13 @@ int main() {
     ammoText.setFont(ammoFont);
     ammoText.setCharacterSize(48);
     ammoText.setFillColor(sf::Color::Black);
+
+    //Timer pentru damage
+    sf::Clock playerDamageTimer;
+    const float PLAYER_IFRAME_DURATION = 0.3f;//am o secunda invincibilitate
+    sf::RectangleShape debugHitbox;
+    debugHitbox.setFillColor(sf::Color::Transparent); // Fără umplere
+    debugHitbox.setOutlineThickness(2.f);
 
     while (window.isOpen()) {
         sf::Time dt = clock.restart();
@@ -82,6 +93,27 @@ int main() {
         }
 
         player.update(dt.asSeconds(), mousePositionWorld, gameMap);
+        chaser1.update(dt,player.getPosition());
+
+        //atacul inamicului
+        if (chaser1.didAttackLand())
+        {
+            sf::FloatRect attackBox = chaser1.getAttackHitbox();
+            if (attackBox.findIntersection(player.getCollisionBounds()) &&
+                playerDamageTimer.getElapsedTime().asSeconds() > PLAYER_IFRAME_DURATION)
+            {
+                sf::Vector2f knockbackDir = player.getPosition() - chaser1.getPosition();
+                float length = std::sqrt(knockbackDir.x * knockbackDir.x + knockbackDir.y * knockbackDir.y);
+                if (length != 0.f) {
+                    knockbackDir /= length;
+                } else {
+                    knockbackDir = {1.f, 0.f};
+                }
+                player.takeDamage(10.f, knockbackDir);
+                playerDamageTimer.restart();
+            }
+        }
+
         //Obtin pozitiile si dimensiunile
         sf::Vector2f playerPos = player.getPosition();
         sf::Vector2f viewSizeBlockedCamera = camera.getSize();
@@ -120,6 +152,30 @@ int main() {
         window.setView(camera);
         window.draw(gameMap);
         player.drawWorld(window);
+        chaser1.draw(window);
+
+
+        //DEBUG PENTRU HITBOX
+        /*
+        sf::FloatRect playerBounds = player.getCollisionBounds();
+        debugHitbox.setPosition(playerBounds.position);
+        debugHitbox.setSize(playerBounds.size);
+        debugHitbox.setOutlineColor(sf::Color::Blue);
+        window.draw(debugHitbox);
+
+        sf::FloatRect attackBox = chaser1.getAttackHitbox();
+        debugHitbox.setPosition(attackBox.position);
+        debugHitbox.setSize(attackBox.size);
+
+        if (chaser1.isAttacking()) {
+            if (chaser1.didAttackLand()) {
+                debugHitbox.setOutlineColor(sf::Color::Red);
+            } else {
+                debugHitbox.setOutlineColor(sf::Color::Green);
+            }
+            window.draw(debugHitbox);
+        }
+        */
 
         for (auto &bullet: bullets) {
             bullet.draw(window);
@@ -171,3 +227,4 @@ int main() {
 
     return 0;
 }
+
