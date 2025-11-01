@@ -27,13 +27,15 @@ int main() {
     ChaserEnemy::initAssets();
 
     std::vector<std::unique_ptr<EnemyBase>> enemies;
-    const int NUM_ENEMIES = 7;
+    const int MAX_ENEMIES = 10;
+    const float RESPAWN_DELAY = 5.0f;
+    sf::Clock respawnTimer;
 
-    for (int i = 0; i < NUM_ENEMIES; ++i)
+    //Pentru spawnul iniitaial
+    for (int i = 0; i < MAX_ENEMIES; ++i)
     {
         sf::Vector2f randomPos;
         do {
-            // Folosim noul generator "curat"
             float x = RandomGenerator::getFloat(mapBounds.position.x, mapBounds.position.x + mapBounds.size.x);
             float y = RandomGenerator::getFloat(mapBounds.position.y, mapBounds.position.y + mapBounds.size.y);
             randomPos = {x, y};
@@ -42,6 +44,7 @@ int main() {
         enemies.push_back(std::make_unique<ChaserEnemy>());
         enemies.back()->setPosition(randomPos);
     }
+
     sf::Clock clock;
     sf::View camera;
     camera.setSize({1280, 720});
@@ -66,8 +69,9 @@ int main() {
     sf::Clock playerDamageTimer;
     const float PLAYER_IFRAME_DURATION = 0.3f;//am o secunda invincibilitate
     sf::RectangleShape debugHitbox;
-    debugHitbox.setFillColor(sf::Color::Transparent); // Fără umplere
-    debugHitbox.setOutlineThickness(2.f);
+
+    //debugHitbox.setFillColor(sf::Color::Transparent);
+    //debugHitbox.setOutlineThickness(2.f);
 
     while (window.isOpen()) {
         sf::Time dt = clock.restart();
@@ -101,6 +105,27 @@ int main() {
         }
 
         player.update(dt.asSeconds(), mousePositionWorld, gameMap);
+        if (respawnTimer.getElapsedTime().asSeconds() > RESPAWN_DELAY)
+        {
+            if (enemies.size() < MAX_ENEMIES)
+            {
+                int enemiesToSpawn = MAX_ENEMIES - static_cast<int>(enemies.size());
+
+                for (int i = 0; i < enemiesToSpawn; ++i)
+                {
+                    sf::Vector2f randomPos;
+                    do {
+                        float x = RandomGenerator::getFloat(mapBounds.position.x, mapBounds.position.x + mapBounds.size.x);
+                        float y = RandomGenerator::getFloat(mapBounds.position.y, mapBounds.position.y + mapBounds.size.y);
+                        randomPos = {x, y};
+                    } while (gameMap.isSolid(randomPos));
+
+                    enemies.push_back(std::make_unique<ChaserEnemy>());
+                    enemies.back()->setPosition(randomPos);
+                }
+            }
+            respawnTimer.restart();
+        }
         for (auto& enemy : enemies)
     {
         if (!enemy->isDead())
