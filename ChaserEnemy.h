@@ -3,6 +3,7 @@
 #include <vector>
 #include "EnemyBase.h"
 #include "Player.h"
+#include "Health.h"
 
 class ChaserEnemy : public EnemyBase
 {
@@ -15,11 +16,15 @@ public:
 
     ChaserEnemy();
 
-    void update(sf::Time dt, sf::Vector2f playerPosition) override;
+    void update(sf::Time dt, sf::Vector2f playerPosition,const GameMap &gameMap) override;
     void draw(sf::RenderWindow& window) override;
     void setPosition(sf::Vector2f position) override;
     sf::Vector2f getPosition() const override;
     sf::FloatRect getBounds() const override;
+
+    //Inamic
+    void takeDamage(float damage);
+    bool isDead() const;
 
     bool isAttacking() const override;
     bool didAttackLand() override;
@@ -29,6 +34,7 @@ private:
     float m_speed;
 
     void updateAnimation();
+    void updateHealthBar();
 
     sf::Texture m_texture;
     sf::Sprite m_sprite;
@@ -43,4 +49,8 @@ private:
     bool m_didAttackLand;
     int m_damageFrame;
     float m_currentAngleRad;
+
+    Health m_health;
+    sf::RectangleShape m_healthBarBackground;
+    sf::RectangleShape m_healthBarForeground;
 };

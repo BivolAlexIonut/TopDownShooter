@@ -6,7 +6,7 @@ class Bullet {
 public:
     Bullet(sf::Texture &texture, const std::vector<sf::IntRect> &animRects, sf::Vector2f startPos,
            sf::Vector2f direction,
-           float animSpeed, sf::Vector2f scale);
+           float animSpeed, sf::Vector2f scale,float damage);
 
     ~Bullet();
 
@@ -24,6 +24,10 @@ public:
 
     [[nodiscard]] bool isImpacting() const;
 
+    [[nodiscard]] sf::FloatRect getBounds() const;
+
+    float getDamage() const;
+
     friend std::ostream &operator<<(std::ostream &os, const Bullet &b);
 
 private:
@@ -40,4 +44,5 @@ private:
 
     bool m_isDead;
     bool m_isImpacting;
+    float m_damage;
 };

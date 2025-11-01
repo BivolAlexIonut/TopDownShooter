@@ -25,6 +25,9 @@ public:
         return m_currentHealth / m_maxHealth;
     }
 
+    [[nodiscard]] bool isDead() const {
+        return m_currentHealth <= 0.f;
+    }
 
     friend std::ostream &operator<<(std::ostream &os, const Health &health);
 

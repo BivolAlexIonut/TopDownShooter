@@ -58,6 +58,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
     pistolFrames.push_back(sf::IntRect({371, 22}, {8, 5}));
     pistolFrames.push_back(sf::IntRect({388, 22}, {7, 5}));
     m_movementSpeeds.emplace_back(400.f);
+    m_weaponDamage.push_back(10.f);
     m_weaponBulletScales.emplace_back(4.f, 2.f);
     m_reloadAnimPosition.emplace_back(170.f, 640.f);
     m_weaponBulletAnimRects.push_back(pistolFrames);
@@ -76,6 +77,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
     tommyFrames.push_back(sf::IntRect({290, 151}, {13, 3}));
     tommyFrames.push_back(sf::IntRect({305, 151}, {14, 4}));
     m_movementSpeeds.emplace_back(280.f);
+    m_weaponDamage.push_back(35.f);
     m_weaponBulletScales.emplace_back(3.f, 1.f);
     m_reloadAnimPosition.emplace_back(210.f, 640.f);
     m_weaponBulletAnimRects.push_back(tommyFrames);
@@ -95,6 +97,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
     rpgFrames.push_back(sf::IntRect({544, 202}, {32, 13}));
     rpgFrames.push_back(sf::IntRect({575, 199}, {33, 17}));
     m_movementSpeeds.emplace_back(180.f);
+    m_weaponDamage.push_back(90.f);
     m_weaponBulletScales.emplace_back(3.f, 3.f);
     m_reloadAnimPosition.emplace_back(140.f, 800.f);
     m_weaponBulletAnimRects.push_back(rpgFrames);
@@ -113,6 +116,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
     smgFrames.push_back(sf::IntRect({208, 278}, {17, 5}));
     smgFrames.push_back(sf::IntRect({223, 278}, {17, 5}));
     m_movementSpeeds.emplace_back(350.f);
+    m_weaponDamage.push_back(15.f);
     m_weaponBulletScales.emplace_back(3.f, 1.f);
     m_reloadAnimPosition.emplace_back(157.f, 640.f);
     m_weaponBulletAnimRects.push_back(smgFrames);
@@ -131,6 +135,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
     shotgunFrames.push_back(sf::IntRect({516, 264}, {23, 16}));
     shotgunFrames.push_back(sf::IntRect({546, 262}, {25, 19}));
     m_movementSpeeds.emplace_back(210.f);
+    m_weaponDamage.push_back(70.f);
     m_weaponBulletScales.emplace_back(2.f, 3.f);
     m_reloadAnimPosition.emplace_back(170.f, 640.f);
     m_weaponBulletAnimRects.push_back(shotgunFrames);
@@ -150,6 +155,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
     sniperFrames.push_back(sf::IntRect({46, 244}, {17, 9}));
     sniperFrames.push_back(sf::IntRect({63, 244}, {17, 9}));
     m_movementSpeeds.emplace_back(200.f);
+    m_weaponDamage.push_back(150.f);
     m_weaponBulletScales.emplace_back(2.f, 1.f);
     m_reloadAnimPosition.emplace_back(170.f, 640.f);
     m_weaponBulletAnimRects.push_back(sniperFrames);
@@ -427,6 +433,7 @@ Bullet Player::shoot(sf::Vector2f mousePosition) {
 
     sf::Vector2f bulletScale = m_weaponBulletScales[currentIndex];
 
+    float currentDamage = m_weaponDamage[currentIndex];
     //cosntante pentru a aseza corect punctul de plecare a gloantelor
     //armele nu sunt centrate cu originea playerului el le tine pe partea dreapta+
     const float localBarrelOffsetX = barrelOffset.x;
@@ -441,7 +448,7 @@ Bullet Player::shoot(sf::Vector2f mousePosition) {
 
     return {
         bulletTexture, bulletAnimRects, barrelPosition, direction,
-        animSpeed, bulletScale
+        animSpeed, bulletScale,currentDamage
     };
 }
 

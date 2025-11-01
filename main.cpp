@@ -5,7 +5,6 @@
 #include <SFML/Graphics.hpp>
 #include "Bullet.h"
 #include "ChaserEnemy.h"
-#include "Enemy.h"
 #include "GameMap.h"
 #include "Player.h"
 
@@ -28,11 +27,6 @@ int main() {
     chaser1.setPosition({player.getPosition().x + 200.f, player.getPosition().y});
 
 
-    Enemy enemy1(100.f, 200.f);
-    std::vector<Enemy> enemies;
-    enemies.push_back(enemy1);
-
-    enemies[0].takeDamage(10.f);
 
     sf::Clock clock;
     sf::View camera;
@@ -93,7 +87,10 @@ int main() {
         }
 
         player.update(dt.asSeconds(), mousePositionWorld, gameMap);
-        chaser1.update(dt,player.getPosition());
+        if (!chaser1.isDead())
+        {
+            chaser1.update(dt, player.getPosition(), gameMap);
+        }
 
         //atacul inamicului
         if (chaser1.didAttackLand())
@@ -139,6 +136,14 @@ int main() {
 
         for (auto &bullet: bullets) {
             bullet.update(dt.asSeconds());
+            if (!bullet.isImpacting() && !chaser1.isDead())
+            {
+                if (chaser1.getBounds().findIntersection(bullet.getBounds()))
+                {
+                    chaser1.takeDamage(bullet.getDamage());
+                    bullet.hit();
+                }
+            }
         }
 
         std::string ammoString = std::to_string(player.getCurrentAmmo()) + " / " + std::to_string(
@@ -152,7 +157,9 @@ int main() {
         window.setView(camera);
         window.draw(gameMap);
         player.drawWorld(window);
-        chaser1.draw(window);
+        if (!chaser1.isDead()) {
+            chaser1.draw(window);
+        }
 
 
         //DEBUG PENTRU HITBOX
@@ -208,7 +215,6 @@ int main() {
         );
 
         window.setView(window.getDefaultView());
-
         ammoText.setOrigin({0.f, 0.f});
 
         sf::Vector2f viewSize = static_cast<sf::Vector2f>(window.getSize());

@@ -6,7 +6,7 @@ const float PI = 3.14159265358979323846f;
 
 Bullet::Bullet(sf::Texture &texture, const std::vector<sf::IntRect> &animRects, sf::Vector2f startPos,
                sf::Vector2f direction,
-               float animSpeed, sf::Vector2f scale)
+               float animSpeed, sf::Vector2f scale,float damage)
     : bulletSprite(texture),
       bulletVelocity{},
       bulletRect{},
@@ -16,7 +16,7 @@ Bullet::Bullet(sf::Texture &texture, const std::vector<sf::IntRect> &animRects, 
       bulletAnimSpeed(animSpeed),
       m_animFrames(static_cast<int>(animRects.size())),
       m_isDead(false),
-      m_isImpacting(false) {
+      m_isImpacting(false),m_damage(damage) {
     bulletSprite.setTextureRect(m_animRects[0]);
 
     float originX = static_cast<float>(m_animRects[0].size.x) / 2.f;
@@ -79,6 +79,15 @@ bool Bullet::isDead() const {
 
 bool Bullet::isImpacting() const {
     return m_isImpacting;
+}
+
+float Bullet::getDamage() const {
+    return m_damage;
+}
+
+sf::FloatRect Bullet::getBounds() const
+{
+    return bulletSprite.getGlobalBounds();
 }
 
 std::ostream &operator<<(std::ostream &os, const Bullet &bullet) {

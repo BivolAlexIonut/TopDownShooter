@@ -75,5 +75,7 @@ private:
     float m_knockbackDuration;
     sf::Vector2f m_knockbackVelocity;
     sf::Clock m_knockbackTimer;
+
+    std::vector<float> m_weaponDamage;
     //--------------------------------------------------
 };

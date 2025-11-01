@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-
+#include "GameMap.h"
 
 
 class EnemyBase
@@ -8,7 +8,7 @@ class EnemyBase
 public:
     virtual ~EnemyBase() = default;
 
-    virtual void update(sf::Time dt, sf::Vector2f playerPosition) = 0;
+    virtual void update(sf::Time dt, sf::Vector2f playerPosition,const GameMap &gameMap) = 0;
     virtual void draw(sf::RenderWindow& window) = 0;
     virtual void setPosition(sf::Vector2f position) = 0;
 
