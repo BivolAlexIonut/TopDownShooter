@@ -11,10 +11,13 @@ public:
     enum class State {
         IDLE,
         MOVING,
-        ATTACKING
+        ATTACKING,
+        ALERTED
     };
 
     ChaserEnemy();
+
+    static bool initAssets();
 
     void update(sf::Time dt, sf::Vector2f playerPosition,const GameMap &gameMap) override;
     void draw(sf::RenderWindow& window) override;
@@ -23,8 +26,8 @@ public:
     sf::FloatRect getBounds() const override;
 
     //Inamic
-    void takeDamage(float damage);
-    bool isDead() const;
+    void takeDamage(float damage) override;
+    bool isDead() const override;
 
     bool isAttacking() const override;
     bool didAttackLand() override;
@@ -36,7 +39,6 @@ private:
     void updateAnimation();
     void updateHealthBar();
 
-    sf::Texture m_texture;
     sf::Sprite m_sprite;
     State m_currentState;
 
@@ -53,4 +55,13 @@ private:
     Health m_health;
     sf::RectangleShape m_healthBarBackground;
     sf::RectangleShape m_healthBarForeground;
+
+    State m_previousState;
+
+    sf::Sprite m_alertSprite;
+    sf::Clock m_alertTimer;
+    float m_alertDuration;
+
+    static sf::Texture s_texture;
+    static sf::Texture s_alertTexture;
 };

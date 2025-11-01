@@ -1,5 +1,7 @@
 #pragma once
+#ifndef __clangd__
 #include <SFML/Graphics.hpp>
+#endif
 #include "GameMap.h"
 
 
@@ -18,4 +20,7 @@ public:
     [[nodiscard]] virtual bool isAttacking() const = 0;
     virtual bool didAttackLand() = 0;
     [[nodiscard]] virtual sf::FloatRect getAttackHitbox() const = 0;
+
+    virtual void takeDamage(float damage) = 0;
+    [[nodiscard]] virtual bool isDead() const = 0;
 };

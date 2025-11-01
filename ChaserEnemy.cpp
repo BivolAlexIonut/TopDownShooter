@@ -2,17 +2,38 @@
 #include <cmath>
 #include <stdexcept>
 
-ChaserEnemy::ChaserEnemy()
-    : m_speed(270.f),
-      m_sprite(this->m_texture),
-      m_currentState(State::IDLE),
-      m_currentFrame(0), m_frameTime(0.05f),m_didAttackLand(false),m_damageFrame(8),m_currentAngleRad(0.f),
-      m_health(100.f,100.f){
+sf::Texture ChaserEnemy::s_texture;
+sf::Texture ChaserEnemy::s_alertTexture;
 
-    if (!m_texture.loadFromFile("assets/enemies/chaser_spritesheet_bun_final.png")) {
+bool ChaserEnemy::initAssets()
+{
+    if (!s_texture.loadFromFile("assets/enemies/chaser_spritesheet_bun_final.png"))
+    {
         throw std::runtime_error("EROARE: Nu am putut incarca chaser_spritesheet.png!");
     }
-    m_sprite.setTexture(m_texture);
+    if (!s_alertTexture.loadFromFile("assets/ui/alert_icon.png"))
+    {
+        throw std::runtime_error("EROARE: Nu am putut incarca alert_icon.png!");
+    }
+
+    return true;
+}
+
+ChaserEnemy::ChaserEnemy()
+    : m_speed(270.f),
+      m_sprite(ChaserEnemy::s_texture),
+      m_currentState(State::IDLE),
+      m_currentFrame(0), m_frameTime(0.05f), m_didAttackLand(false), m_damageFrame(8), m_currentAngleRad(0.f),
+      m_health(100.f, 100.f), m_previousState(m_currentState), m_alertSprite(ChaserEnemy::s_alertTexture),
+      m_alertDuration(0.8f)
+    {
+
+    m_sprite.setTexture(s_texture);
+    m_alertSprite.setTexture(s_alertTexture);
+    sf::FloatRect iconBounds = m_alertSprite.getLocalBounds();
+    m_alertSprite.setOrigin({iconBounds.size.x / 2.f, iconBounds.size.y});
+    m_alertSprite.setScale({0.15f, 0.15f});
+    m_alertSprite.setColor(sf::Color::Yellow);
 
     constexpr int FRAME_WIDTH = 288;
     constexpr int FRAME_HEIGHT = 311;
@@ -59,7 +80,7 @@ ChaserEnemy::ChaserEnemy()
 }
 
 
-void ChaserEnemy::update(const sf::Time dt, sf::Vector2f playerPosition, const GameMap& gameMap)
+void ChaserEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap& gameMap)
 {
     sf::Vector2f currentPosition = m_sprite.getPosition();
     sf::Vector2f direction = playerPosition - currentPosition;
@@ -68,17 +89,31 @@ void ChaserEnemy::update(const sf::Time dt, sf::Vector2f playerPosition, const G
     const float attackRange = 60.f;
     const float moveRange = 500.f;
 
-    if (m_currentState != State::ATTACKING)
+    if (m_currentState == State::IDLE)
     {
-        if (length < attackRange) {
-            m_currentState = State::ATTACKING;
-            m_currentFrame = 0;
-            m_animationTimer.restart();
-        } else if (length < moveRange) {
-            m_currentState = State::MOVING;
-        } else {
-            m_currentState = State::IDLE;
+        if (length < moveRange)
+        {
+            m_currentState = State::ALERTED;
+            m_alertTimer.restart();
         }
+    }
+    else if (m_currentState == State::ALERTED)
+    {
+        if (m_alertTimer.getElapsedTime().asSeconds() > m_alertDuration)
+        {
+            m_currentState = State::MOVING;
+        }
+    }
+    else if (m_currentState == State::MOVING)
+    {
+        if (length < attackRange)
+        {
+            m_currentState = State::ATTACKING;
+        }
+    }
+    else if (m_currentState == State::ATTACKING)
+    {
+
     }
 
     sf::Vector2f velocity(0.f, 0.f);
@@ -130,6 +165,7 @@ void ChaserEnemy::update(const sf::Time dt, sf::Vector2f playerPosition, const G
         }
     }
     m_sprite.move({0.f, frameVelocity.y});
+
     sf::Vector2f dir = playerPosition - getPosition();
     m_currentAngleRad = std::atan2(dir.y, dir.x);
     float angleInDegrees = m_currentAngleRad * (180.f / 3.14159265f);
@@ -175,6 +211,18 @@ void ChaserEnemy::draw(sf::RenderWindow& window){
     window.draw(m_sprite);
     window.draw(m_healthBarBackground);
     window.draw(m_healthBarForeground);
+
+    if (m_currentState == State::ALERTED)
+    {
+        sf::FloatRect spriteBounds = m_sprite.getGlobalBounds();
+        float alertOffsetY = (spriteBounds.size.y / 2.f) + 20.f;
+
+        m_alertSprite.setPosition({
+            m_sprite.getPosition().x,
+            m_sprite.getPosition().y - alertOffsetY
+        });
+        window.draw(m_alertSprite);
+    }
 }
 
 void ChaserEnemy::takeDamage(float damage) {
@@ -222,11 +270,9 @@ sf::FloatRect ChaserEnemy::getAttackHitbox() const {
 
 void ChaserEnemy::updateAnimation()
 {
-    static State previousState = m_currentState;
-
-    if (m_currentState != previousState) {
+    if (m_currentState != m_previousState) {
         m_currentFrame = 0;
-        previousState = m_currentState;
+        m_previousState = m_currentState;
         m_animationTimer.restart();
     }
 
@@ -237,19 +283,17 @@ void ChaserEnemy::updateAnimation()
     if (m_animationTimer.getElapsedTime().asSeconds() > m_frameTime)
     {
         m_currentFrame++;
-
         if (m_currentState == State::ATTACKING && m_currentFrame == m_damageFrame)
         {
             m_didAttackLand = true;
         }
 
         size_t frameCount = m_animations[m_currentState].size();
-
         if (static_cast<size_t>(m_currentFrame) >= frameCount)
         {
             if (m_currentState == State::ATTACKING)
             {
-                m_currentState = State::IDLE;
+                m_currentState = State::MOVING;
                 m_currentFrame = 0;
             }
             else

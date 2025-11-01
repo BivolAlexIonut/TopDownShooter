@@ -7,6 +7,7 @@
 #include "ChaserEnemy.h"
 #include "GameMap.h"
 #include "Player.h"
+#include "RandomGenerator.h"
 
 
 int main() {
@@ -21,13 +22,26 @@ int main() {
         std::cerr << "EROARE FATALA: Harta nu a putut fi incarcata." << std::endl;
         return -1;
     }
+    sf::FloatRect mapBounds = gameMap.getPixelBounds();
     Player player(1640 * mapScale, 1360 * mapScale);
+    ChaserEnemy::initAssets();
 
-    ChaserEnemy chaser1;
-    chaser1.setPosition({player.getPosition().x + 200.f, player.getPosition().y});
+    std::vector<std::unique_ptr<EnemyBase>> enemies;
+    const int NUM_ENEMIES = 7;
 
+    for (int i = 0; i < NUM_ENEMIES; ++i)
+    {
+        sf::Vector2f randomPos;
+        do {
+            // Folosim noul generator "curat"
+            float x = RandomGenerator::getFloat(mapBounds.position.x, mapBounds.position.x + mapBounds.size.x);
+            float y = RandomGenerator::getFloat(mapBounds.position.y, mapBounds.position.y + mapBounds.size.y);
+            randomPos = {x, y};
+        } while (gameMap.isSolid(randomPos));
 
-
+        enemies.push_back(std::make_unique<ChaserEnemy>());
+        enemies.back()->setPosition(randomPos);
+    }
     sf::Clock clock;
     sf::View camera;
     camera.setSize({1280, 720});
@@ -87,34 +101,43 @@ int main() {
         }
 
         player.update(dt.asSeconds(), mousePositionWorld, gameMap);
-        if (!chaser1.isDead())
+        for (auto& enemy : enemies)
+    {
+        if (!enemy->isDead())
         {
-            chaser1.update(dt, player.getPosition(), gameMap);
+            enemy->update(dt, player.getPosition(), gameMap);
         }
+    }
 
-        //atacul inamicului
-        if (chaser1.didAttackLand())
+        for (auto& enemy : enemies)
         {
-            sf::FloatRect attackBox = chaser1.getAttackHitbox();
-            if (attackBox.findIntersection(player.getCollisionBounds()) &&
-                playerDamageTimer.getElapsedTime().asSeconds() > PLAYER_IFRAME_DURATION)
+            if (enemy->isDead()) continue;
+
+            if (enemy->didAttackLand())
             {
-                sf::Vector2f knockbackDir = player.getPosition() - chaser1.getPosition();
-                float length = std::sqrt(knockbackDir.x * knockbackDir.x + knockbackDir.y * knockbackDir.y);
-                if (length != 0.f) {
-                    knockbackDir /= length;
-                } else {
-                    knockbackDir = {1.f, 0.f};
+                sf::FloatRect attackBox = enemy->getAttackHitbox();
+                if (attackBox.findIntersection(player.getCollisionBounds()) &&
+                    playerDamageTimer.getElapsedTime().asSeconds() > PLAYER_IFRAME_DURATION)
+                {
+                    sf::Vector2f knockbackDir = player.getPosition() - enemy->getPosition();
+                    float length = std::sqrt(knockbackDir.x * knockbackDir.x + knockbackDir.y * knockbackDir.y);
+                    if (length != 0.f) {
+                        knockbackDir /= length;
+                    } else {
+                        knockbackDir = {1.f, 0.f};
+                    }
+                    player.takeDamage(10.f, knockbackDir);
+                    playerDamageTimer.restart();
+
+                    break;
                 }
-                player.takeDamage(10.f, knockbackDir);
-                playerDamageTimer.restart();
             }
         }
 
         //Obtin pozitiile si dimensiunile
         sf::Vector2f playerPos = player.getPosition();
         sf::Vector2f viewSizeBlockedCamera = camera.getSize();
-        sf::FloatRect mapBounds = gameMap.getPixelBounds();
+
 
         sf::Vector2f viewCenter = playerPos;
         float halfViewX = viewSizeBlockedCamera.x / 2.0f;
@@ -136,12 +159,19 @@ int main() {
 
         for (auto &bullet: bullets) {
             bullet.update(dt.asSeconds());
-            if (!bullet.isImpacting() && !chaser1.isDead())
+            if (!bullet.isImpacting())
             {
-                if (chaser1.getBounds().findIntersection(bullet.getBounds()))
+                // Verifică dacă glonțul lovește VREUN inamic
+                for (auto& enemy : enemies)
                 {
-                    chaser1.takeDamage(bullet.getDamage());
-                    bullet.hit();
+                    if (enemy->isDead()) continue;
+
+                    if (enemy->getBounds().findIntersection(bullet.getBounds()))
+                    {
+                        enemy->takeDamage(bullet.getDamage());
+                        bullet.hit();
+                        break; // Glonțul lovește un singur inamic și se oprește
+                    }
                 }
             }
         }
@@ -157,8 +187,9 @@ int main() {
         window.setView(camera);
         window.draw(gameMap);
         player.drawWorld(window);
-        if (!chaser1.isDead()) {
-            chaser1.draw(window);
+        for (auto& enemy : enemies)
+        {
+            enemy->draw(window);
         }
 
 
@@ -213,6 +244,9 @@ int main() {
             ),
             bullets.end()
         );
+        std::erase_if(enemies, [](const auto& enemy) {
+        return enemy->isDead();
+    });
 
         window.setView(window.getDefaultView());
         ammoText.setOrigin({0.f, 0.f});

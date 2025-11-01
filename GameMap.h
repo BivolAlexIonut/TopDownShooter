@@ -1,5 +1,7 @@
 #pragma once
+#ifndef __clangd__
 #include <SFML/Graphics.hpp>
+#endif
 #include <string>
 
 class GameMap : public sf::Drawable, public sf::Transformable {

@@ -1,5 +1,7 @@
 #pragma once
+#ifndef __clangd__
 #include <SFML/Graphics.hpp>
+#endif
 #include "Health.h"
 #include "GunSwitch.h"
 #include "Bullet.h"

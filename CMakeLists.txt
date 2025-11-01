@@ -66,6 +66,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         GunSwitch.cpp
         ChaserEnemy.cpp
         EnemyBase.h
+        RandomGenerator.h
+        RandomGenerator.cpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
