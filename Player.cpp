@@ -99,7 +99,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
     m_movementSpeeds.emplace_back(180.f);
     m_weaponDamage.push_back(90.f);
     m_weaponBulletScales.emplace_back(3.f, 3.f);
-    m_reloadAnimPosition.emplace_back(140.f, 800.f);
+    m_reloadAnimPosition.emplace_back(140.f, 640.f);
     m_weaponBulletAnimRects.push_back(rpgFrames);
     m_weaponBulletAnimSpeeds.push_back(0.1f);
     m_weaponShootCooldowns.push_back(1.2f);
