@@ -12,7 +12,8 @@ public:
         IDLE,
         MOVING,
         ATTACKING,
-        ALERTED
+        ALERTED,
+        DYING
     };
 
     ChaserEnemy();
@@ -62,6 +63,9 @@ private:
     sf::Clock m_alertTimer;
     float m_alertDuration;
 
+    bool m_isReadyForRemoval;
+
     static sf::Texture s_texture;
     static sf::Texture s_alertTexture;
+    static sf::Texture s_deathTexture;
 };

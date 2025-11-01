@@ -13,6 +13,15 @@
 int main() {
     sf::RenderWindow window(sf::VideoMode({1280, 720}), "Top-Down Shooter");
     window.setFramerateLimit(60);
+    window.setMouseCursorVisible(false);
+    sf::Texture crosshairTexture;
+    if (!crosshairTexture.loadFromFile("assets/ui/crosshair.png")) {
+        std::cerr << "NU AM PUTUT INCARCA ui/crosshair.png" << std::endl;
+    }
+    sf::Sprite crosshairSprite(crosshairTexture);
+    crosshairSprite.setTextureRect(sf::IntRect({static_cast<int>(20.f),static_cast<int>(30.f)},{13,13}));
+    crosshairSprite.setOrigin({6.5f, 6.5f});
+    crosshairSprite.setScale(sf::Vector2f(2.f,2.f));
 
     GameMap gameMap;
 
@@ -274,6 +283,7 @@ int main() {
     });
 
         window.setView(window.getDefaultView());
+        crosshairSprite.setPosition(sf::Vector2f(sf::Mouse::getPosition(window)));
         ammoText.setOrigin({0.f, 0.f});
 
         sf::Vector2f viewSize = static_cast<sf::Vector2f>(window.getSize());
@@ -286,6 +296,7 @@ int main() {
 
         player.drawUI(window);
         window.draw(ammoText);
+        window.draw(crosshairSprite);
 
         window.display();
     }

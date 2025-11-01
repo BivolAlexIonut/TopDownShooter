@@ -4,6 +4,7 @@
 
 sf::Texture ChaserEnemy::s_texture;
 sf::Texture ChaserEnemy::s_alertTexture;
+sf::Texture ChaserEnemy::s_deathTexture;
 
 bool ChaserEnemy::initAssets()
 {
@@ -15,6 +16,10 @@ bool ChaserEnemy::initAssets()
     {
         throw std::runtime_error("EROARE: Nu am putut incarca alert_icon.png!");
     }
+    if (!s_deathTexture.loadFromFile("assets/enemies/death_animation.png"))
+    {
+        throw std::runtime_error("EROARE: Nu am putut incarca death_animation.png!");
+    }
 
     return true;
 }
@@ -25,7 +30,7 @@ ChaserEnemy::ChaserEnemy()
       m_currentState(State::IDLE),
       m_currentFrame(0), m_frameTime(0.05f), m_didAttackLand(false), m_damageFrame(8), m_currentAngleRad(0.f),
       m_health(100.f, 100.f), m_previousState(m_currentState), m_alertSprite(ChaserEnemy::s_alertTexture),
-      m_alertDuration(0.8f)
+      m_alertDuration(0.8f),m_isReadyForRemoval(false)
     {
 
     m_sprite.setTexture(s_texture);
@@ -39,6 +44,20 @@ ChaserEnemy::ChaserEnemy()
     constexpr int FRAME_HEIGHT = 311;
     const float HEALTH_BAR_WIDTH = 50.f;
     const float HEALTH_BAR_HEIGHT = 5.f;
+    const int DEATH_FRAME_WIDTH = 256;
+    const int DEATH_FRAME_HEIGHT = 256;
+    const int DEATH_FRAMES_PER_ROW = 5;
+    const int TOTAL_DEATH_FRAMES = 20;
+    m_animations[State::DYING].clear();
+    for (int i = 0; i < TOTAL_DEATH_FRAMES; ++i) {
+        int row = i / DEATH_FRAMES_PER_ROW;
+        int col = i % DEATH_FRAMES_PER_ROW;
+
+        m_animations[State::DYING].push_back(
+            sf::IntRect({col * DEATH_FRAME_WIDTH, row * DEATH_FRAME_HEIGHT},
+                        {DEATH_FRAME_WIDTH, DEATH_FRAME_HEIGHT})
+        );
+    }
 
     m_healthBarBackground.setSize({HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT});
     m_healthBarBackground.setFillColor(sf::Color(100, 100, 100, 150));
@@ -82,6 +101,12 @@ ChaserEnemy::ChaserEnemy()
 
 void ChaserEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap& gameMap)
 {
+    if (m_currentState == State::DYING)
+    {
+        updateAnimation();
+        return;
+    }
+
     sf::Vector2f currentPosition = m_sprite.getPosition();
     sf::Vector2f direction = playerPosition - currentPosition;
     float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
@@ -209,28 +234,46 @@ sf::FloatRect ChaserEnemy::getBounds() const {
 
 void ChaserEnemy::draw(sf::RenderWindow& window){
     window.draw(m_sprite);
-    window.draw(m_healthBarBackground);
-    window.draw(m_healthBarForeground);
-
-    if (m_currentState == State::ALERTED)
+    if (m_currentState != State::DYING)
     {
-        sf::FloatRect spriteBounds = m_sprite.getGlobalBounds();
-        float alertOffsetY = (spriteBounds.size.y / 2.f) + 20.f;
+        window.draw(m_healthBarBackground);
+        window.draw(m_healthBarForeground);
 
-        m_alertSprite.setPosition({
-            m_sprite.getPosition().x,
-            m_sprite.getPosition().y - alertOffsetY
-        });
-        window.draw(m_alertSprite);
+        if (m_currentState == State::ALERTED)
+        {
+            sf::FloatRect spriteBounds = m_sprite.getGlobalBounds();
+            float alertOffsetY = (spriteBounds.size.y / 2.f) + 20.f;
+
+            m_alertSprite.setPosition({
+                m_sprite.getPosition().x,
+                m_sprite.getPosition().y - alertOffsetY
+            });
+            window.draw(m_alertSprite);
+        }
     }
 }
 
 void ChaserEnemy::takeDamage(float damage) {
+    if (m_currentState == State::DYING) return;
+
     m_health.takeDamage(damage);
+    if (m_health.isDead())
+    {
+        m_currentState = State::DYING;
+        m_currentFrame = 0;
+        m_animationTimer.restart();
+
+        m_sprite.setTexture(s_deathTexture);
+        m_sprite.setOrigin({128.f, 128.f});
+
+        float scaleValue = 1.f;
+        m_sprite.setScale({scaleValue, scaleValue});
+        m_sprite.setRotation(sf::degrees(0.f));
+    }
 }
 
 bool ChaserEnemy::isDead() const {
-    return m_health.isDead();
+    return m_isReadyForRemoval;
 }
 
 void ChaserEnemy::setPosition(sf::Vector2f position) {
@@ -275,26 +318,37 @@ void ChaserEnemy::updateAnimation()
         m_previousState = m_currentState;
         m_animationTimer.restart();
     }
-
     if (m_animations[m_currentState].empty()) {
         return;
     }
+    float currentFrameTime = m_frameTime;
 
-    if (m_animationTimer.getElapsedTime().asSeconds() > m_frameTime)
+    if (m_currentState == State::DYING)
+    {
+        currentFrameTime = 0.025f;
+    }
+    if (m_animationTimer.getElapsedTime().asSeconds() > currentFrameTime)
     {
         m_currentFrame++;
+
         if (m_currentState == State::ATTACKING && m_currentFrame == m_damageFrame)
         {
             m_didAttackLand = true;
         }
 
         size_t frameCount = m_animations[m_currentState].size();
+
         if (static_cast<size_t>(m_currentFrame) >= frameCount)
         {
             if (m_currentState == State::ATTACKING)
             {
                 m_currentState = State::MOVING;
                 m_currentFrame = 0;
+            }
+            else if (m_currentState == State::DYING)
+            {
+                m_currentFrame = static_cast<int>(frameCount - 1);
+                m_isReadyForRemoval = true;
             }
             else
             {
