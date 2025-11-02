@@ -30,7 +30,7 @@ void Effect::update() {
     }
 }
 
-void Effect::draw(sf::RenderWindow& window) {
+void Effect::draw(sf::RenderWindow& window) const {
     if (!m_isDead) {
         window.draw(m_sprite);
     }

@@ -3,6 +3,7 @@
 #include <ostream>
 #include <vector>
 #include <memory>
+#include <algorithm>
 #include <SFML/Graphics.hpp>
 #include "Bullet.h"
 #include "ChaserEnemy.h"
@@ -74,7 +75,7 @@ int main() {
     ammoText.setFillColor(sf::Color::Black);
 
     sf::Clock playerDamageTimer;
-    const float PLAYER_IFRAME_DURATION = 0.3f;
+    constexpr float PLAYER_IFRAME_DURATION = 0.3f;
     sf::RectangleShape debugHitbox;
 
     sf::Texture bloodEffectTexture;
@@ -138,14 +139,19 @@ int main() {
 
                     if (enemy->getBounds().findIntersection(bullet.getBounds()))
                     {
-                        enemy->takeDamage(bullet.getDamage());
+                        float damage = bullet.getDamage();
+                        enemy->takeDamage(damage);
                         bullet.hit();
+                        float effectScale = 0.25f + (damage / 200.f);
+                        effectScale = std::clamp(effectScale, 0.2f, 2.0f);
                         effects.push_back(std::make_unique<Effect>(
                             bloodEffectTexture,
                             bloodEffectFrames,
                             bullet.getPosition(),
                             0.01f,
-                            sf::Vector2f(0.25f, 0.25f)));
+                            sf::Vector2f(effectScale, effectScale)
+                        ));
+
                         break;
                     }
                 }

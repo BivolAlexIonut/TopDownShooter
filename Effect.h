@@ -11,7 +11,7 @@ public:
            sf::Vector2f scale);
 
     void update();
-    void draw(sf::RenderWindow& window);
+    void draw(sf::RenderWindow& window) const;
     [[nodiscard]] bool isDead() const;
 
 private:
