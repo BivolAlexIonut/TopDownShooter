@@ -29,6 +29,11 @@ public:
         return m_currentHealth <= 0.f;
     }
 
+    void addHealth(float amount) {
+        m_currentHealth += amount;
+        m_currentHealth = std::min(m_maxHealth, m_currentHealth);
+    }
+
     friend std::ostream &operator<<(std::ostream &os, const Health &health);
 
 private:

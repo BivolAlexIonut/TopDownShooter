@@ -21,6 +21,11 @@ public:
     void takeDamage(float damage,sf::Vector2f knockbackDirection);
     sf::Vector2f getPosition() const;
 
+    //------------------
+    void addHealth(float amount);
+    void addAmmo(int amount);
+    //-------------------
+
     //Functii triviale pentru uzul armelor
     void switchWeaponNext();
     void switchWeaponPrev();
@@ -79,5 +84,13 @@ private:
     sf::Clock m_knockbackTimer;
 
     std::vector<float> m_weaponDamage;
+
+    bool m_isInteracting;
+    int m_interactionTileID;
+    float m_interactionDuration;
+    sf::Clock m_interactionTimer;
+
+    sf::RectangleShape m_progressBarBackground;
+    sf::RectangleShape m_progressBarFront;
     //--------------------------------------------------
 };

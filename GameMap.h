@@ -16,6 +16,10 @@ public:
 
     bool isSolid(sf::Vector2f mousePosition) const;
 
+    sf::Vector2f getTileCenter(sf::Vector2f worldPosition) const;
+
+    [[nodiscard]] int getTileIDAt(sf::Vector2f worldPosition) const;
+
     friend std::ostream &operator<<(std::ostream &os, const GameMap &map);
 
 private:

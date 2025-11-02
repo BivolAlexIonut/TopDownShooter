@@ -16,7 +16,10 @@ Player::Player(float startX, float startY) : m_health(100.f),
                                              m_reloadingWeaponIndex(-1),
                                              m_isKnockedBack(false),
                                              m_knockbackDuration(0.15f),
-                                             m_knockbackVelocity(0.f,0.f)
+                                             m_knockbackVelocity(0.f,0.f),
+                                             m_isInteracting(false),
+                                             m_interactionTileID(0),
+                                             m_interactionDuration(2.0f)
 {
     if (!this->playerTexture.loadFromFile("assets/Premium Content/Examples/Basic Usage.png")) {
         std::cerr << "EROARE: Nu am putut incarca ../assets/Premium Content/Examples/Basic Usage.png" << std::endl;
@@ -191,6 +194,17 @@ Player::Player(float startX, float startY) : m_health(100.f),
         static_cast<float>(skinRect.size.x) / 2.f, static_cast<float>(skinRect.size.y) / 2.f
     });
     this->playerSprite.setPosition({startX, startY});
+
+    const float BAR_WIDTH = 60.f;
+    const float BAR_HEIGHT = 8.f;
+
+    m_progressBarBackground.setSize({BAR_WIDTH, BAR_HEIGHT});
+    m_progressBarBackground.setFillColor(sf::Color(100, 100, 100, 150)); // Gri
+    m_progressBarBackground.setOrigin({BAR_WIDTH / 2.f, BAR_HEIGHT / 2.f});
+
+    m_progressBarFront.setSize({0, BAR_HEIGHT});
+    m_progressBarFront.setFillColor(sf::Color(50, 255, 50, 200));
+    m_progressBarFront.setOrigin({BAR_WIDTH / 2.f, BAR_HEIGHT / 2.f});
 }
 
 Player::~Player() = default;
@@ -200,12 +214,23 @@ void Player::drawWorld(sf::RenderWindow &window) const {
     window.draw(this->playerSprite);
 }
 
-//Functie afisare aniamtie de reload
 void Player::drawUI(sf::RenderWindow &window) {
     if (m_isReloading) {
         window.draw(m_reloadAnimSprite);
     }
     window.draw(this->m_healthBarSprite);
+
+    if (m_isInteracting) {
+        sf::Vector2f viewCenter = window.getView().getCenter();
+
+        sf::Vector2f barPos = {viewCenter.x, viewCenter.y + 100.f};
+
+        m_progressBarBackground.setPosition(barPos);
+        m_progressBarFront.setPosition(barPos);
+
+        window.draw(m_progressBarBackground);
+        window.draw(m_progressBarFront);
+    }
 }
 
 sf::FloatRect Player::getCollisionBounds() const {
@@ -231,6 +256,21 @@ void Player::takeDamage(float damage,sf::Vector2f knockbackDirection) {
 
     const float knockbackSpeed = 400.f;
     m_knockbackVelocity = knockbackSpeed * knockbackDirection;
+}
+
+void Player::addHealth(float amount)
+{
+    m_health.addHealth(amount);
+    updateHealthBar();
+}
+
+void Player::addAmmo(int amount)
+{
+    int currentIndex = m_gunSwitch.getCurrentWeaponIndex();
+    if (currentIndex >= 0 && static_cast<size_t>(currentIndex) < weaponReserveAmmo.size())
+    {
+        weaponReserveAmmo[currentIndex] += amount;
+    }
 }
 
 //Updateaza healthbarul
@@ -263,6 +303,50 @@ float Player::getCurrentWeaponCooldown() const {
 
 //Update pentru player,include movementul,rotatia,reloadul si animatii
 void Player::update(float dt, sf::Vector2f mousePosition, const GameMap &gameMap) {
+    if (m_isInteracting)
+    {
+        if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::X))
+        {
+            m_isInteracting = false;
+            return;
+        }
+
+        float elapsed = m_interactionTimer.getElapsedTime().asSeconds();
+        float progress = elapsed / m_interactionDuration;
+
+        float barWidth = m_progressBarBackground.getSize().x;
+        m_progressBarFront.setSize({barWidth * progress, m_progressBarFront.getSize().y});
+
+        if (elapsed >= m_interactionDuration)
+        {
+            m_isInteracting = false;
+            if (m_interactionTileID == 71) {
+                addHealth(50.f);
+            } else if (m_interactionTileID == 72) {
+                addAmmo(20);
+            }
+        }
+
+        return;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::X) && !m_isReloading && !m_isKnockedBack)
+    {
+        sf::Vector2f playerCenter = getPosition();
+        int tileID = gameMap.getTileIDAt(playerCenter);
+
+        if (tileID == 71 || tileID == 72)
+        {
+            m_isInteracting = true;
+            m_interactionTimer.restart();
+            m_interactionTileID = tileID;
+
+            sf::Vector2f tileCenter = gameMap.getTileCenter(playerCenter);
+            this->playerSprite.setPosition(tileCenter);
+            return;
+        }
+    }
+
     sf::Vector2f velocity;
 
     if (m_isKnockedBack)
@@ -385,7 +469,7 @@ void Player::update(float dt, sf::Vector2f mousePosition, const GameMap &gameMap
         }
     }
 }
-// ... până la această acoladă
+
 
 sf::Vector2f Player::getPosition() const {
     return this->playerSprite.getPosition();

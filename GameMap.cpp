@@ -72,8 +72,8 @@ bool GameMap::load(const std::string &mapPath, const std::string &tilesetPath, f
     m_mapPixelSize.x = static_cast<float>(m_mapSize.x) * fScaledTileSizeX;
     m_mapPixelSize.y = static_cast<float>(m_mapSize.y) * fScaledTileSizeY;
 
-    const float floorTexX = 0.f;
-    const float floorTexY = 0.f;
+    constexpr float floorTexX = 0.f;
+    constexpr float floorTexY = 0.f;
 
     const sf::Vector2f floorTopLeftTex(floorTexX, floorTexY);
     const sf::Vector2f floorTopRightTex(floorTexX + fTileSizeX, floorTexY);
@@ -178,13 +178,39 @@ std::ostream &operator<<(std::ostream &os, const GameMap &map) {
     return os;
 }
 
+sf::Vector2f GameMap::getTileCenter(sf::Vector2f worldPosition) const
+{
+    auto tileX = static_cast<unsigned int>(worldPosition.x / m_scaledTileSize.x);
+    auto tileY = static_cast<unsigned int>(worldPosition.y / m_scaledTileSize.y);
+
+    float centerX = (static_cast<float>(tileX) * m_scaledTileSize.x) + (m_scaledTileSize.x / 2.f);
+    float centerY = (static_cast<float>(tileY) * m_scaledTileSize.y) + (m_scaledTileSize.y / 2.f);
+    return {centerX, centerY};
+}
+
 sf::FloatRect GameMap::getPixelBounds() const {
     return {{0.f, 0.f}, m_mapPixelSize};
 }
 
+int GameMap::getTileIDAt(sf::Vector2f worldPosition) const
+{
+    if (m_scaledTileSize.x == 0.0f || m_scaledTileSize.y == 0.0f) {
+        return 0;
+    }
+    if (!getPixelBounds().contains(worldPosition)) {
+        return 0;
+    }
+
+    sf::Vector2u tileCoords;
+    tileCoords.x = static_cast<unsigned int>(worldPosition.x / m_scaledTileSize.x);
+    tileCoords.y = static_cast<unsigned int>(worldPosition.y / m_scaledTileSize.y);
+
+    return getTileID(tileCoords);
+}
+
 int GameMap::getTileID(sf::Vector2u tileCoords) const {
     if (tileCoords.x > m_mapSize.x || tileCoords.y > m_mapSize.y) {
-        return 0; //practic outofbons
+        return 0;
     }
     return m_tileIDs[tileCoords.y * m_mapSize.x + tileCoords.x];
 }
@@ -203,6 +229,9 @@ bool GameMap::isSolid(sf::Vector2f mousePosition) const {
     tileCoords.y = static_cast<unsigned int>(mousePosition.y / m_scaledTileSize.y);
 
     int tileID = getTileID(tileCoords);
+    if (tileID == 72 || tileID == 71) {
+        return false;
+    }
 
     return tileID > 1;
 }
