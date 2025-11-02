@@ -254,12 +254,8 @@ sf::FloatRect Player::getCollisionBounds() const {
 void Player::takeDamage(float damage,sf::Vector2f knockbackDirection) {
     if (m_isKnockedBack)return;
 
-    if (m_isInteracting) {
-        m_isInteracting= false;
-    }
-    if (m_isReloading) {
-        m_isReloading = false;
-    }
+    m_isInteracting = false;
+    m_isReloading = false;
 
     this->m_health.takeDamage(damage);
     updateHealthBar();
