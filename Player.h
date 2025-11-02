@@ -89,6 +89,7 @@ private:
     int m_interactionTileID;
     float m_interactionDuration;
     sf::Clock m_interactionTimer;
+    std::vector<int> m_weaponMaxReserveAmmo;
 
     sf::RectangleShape m_progressBarBackground;
     sf::RectangleShape m_progressBarFront;

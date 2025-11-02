@@ -53,6 +53,13 @@ Player::Player(float startX, float startY) : m_health(100.f),
     m_reloadAnimSprite.setTextureRect(m_reloadAnimFrames[0]);
     //---------------------------------------------------------------------------------------------------------
 
+    m_weaponMaxReserveAmmo.push_back(70);
+    m_weaponMaxReserveAmmo.push_back(300);
+    m_weaponMaxReserveAmmo.push_back(12);
+    m_weaponMaxReserveAmmo.push_back(180);
+    m_weaponMaxReserveAmmo.push_back(32);
+    m_weaponMaxReserveAmmo.push_back(20);
+
     // Pistol
     m_weaponBarrelOffsets.emplace_back(131.f, 356.f);
     std::vector<sf::IntRect> pistolFrames;
@@ -70,7 +77,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
     m_weaponReloadTime.emplace_back(0.5f);
     weaponMagSize.push_back(7);
     weaponCurrentAmmo.push_back(7);
-    weaponReserveAmmo.push_back(35);
+    weaponReserveAmmo.push_back(70);
 
     // TommyGun
     m_weaponBarrelOffsets.emplace_back(115.f, 470.f);
@@ -89,7 +96,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
     m_weaponReloadTime.emplace_back(1.f);
     weaponMagSize.push_back(75);
     weaponCurrentAmmo.push_back(75);
-    weaponReserveAmmo.push_back(150);
+    weaponReserveAmmo.push_back(300);
 
     // RPG
     m_weaponBarrelOffsets.emplace_back(80.f, 520.f);
@@ -109,7 +116,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
     m_weaponReloadTime.emplace_back(3.f);
     weaponMagSize.push_back(3);
     weaponCurrentAmmo.push_back(3);
-    weaponReserveAmmo.push_back(9);
+    weaponReserveAmmo.push_back(12);
 
     // SMG
     m_weaponBarrelOffsets.emplace_back(100.f, 356.f);
@@ -121,14 +128,14 @@ Player::Player(float startX, float startY) : m_health(100.f),
     m_movementSpeeds.emplace_back(350.f);
     m_weaponDamage.push_back(15.f);
     m_weaponBulletScales.emplace_back(3.f, 1.f);
-    m_reloadAnimPosition.emplace_back(157.f, 640.f);
+    m_reloadAnimPosition.emplace_back(172.f, 640.f);
     m_weaponBulletAnimRects.push_back(smgFrames);
     m_weaponBulletAnimSpeeds.push_back(0.1f);
     m_weaponShootCooldowns.push_back(0.05f);
     m_weaponReloadTime.emplace_back(0.8f);
     weaponMagSize.push_back(35);
     weaponCurrentAmmo.push_back(35);
-    weaponReserveAmmo.push_back(90);
+    weaponReserveAmmo.push_back(180);
 
     // Shotgun
     m_weaponBarrelOffsets.emplace_back(100.f, 460.f);
@@ -147,7 +154,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
     m_weaponReloadTime.emplace_back(1.5f);
     weaponMagSize.push_back(8);
     weaponCurrentAmmo.push_back(8);
-    weaponReserveAmmo.push_back(16);
+    weaponReserveAmmo.push_back(32);
 
     // Sniper
     m_weaponBarrelOffsets.emplace_back(107.f, 620.f);
@@ -167,7 +174,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
     m_weaponReloadTime.emplace_back(2.f);
     weaponMagSize.push_back(5);
     weaponCurrentAmmo.push_back(5);
-    weaponReserveAmmo.push_back(10);
+    weaponReserveAmmo.push_back(20);
 
     sf::IntRect skinRect = m_gunSwitch.getCurrentWeaponRect();
     this->playerSprite.setTextureRect(skinRect);
@@ -195,8 +202,8 @@ Player::Player(float startX, float startY) : m_health(100.f),
     });
     this->playerSprite.setPosition({startX, startY});
 
-    const float BAR_WIDTH = 60.f;
-    const float BAR_HEIGHT = 8.f;
+    const float BAR_WIDTH = 200.f;
+    const float BAR_HEIGHT = 10.f;
 
     m_progressBarBackground.setSize({BAR_WIDTH, BAR_HEIGHT});
     m_progressBarBackground.setFillColor(sf::Color(100, 100, 100, 150)); // Gri
@@ -222,8 +229,7 @@ void Player::drawUI(sf::RenderWindow &window) {
 
     if (m_isInteracting) {
         sf::Vector2f viewCenter = window.getView().getCenter();
-
-        sf::Vector2f barPos = {viewCenter.x, viewCenter.y + 100.f};
+        sf::Vector2f barPos = {viewCenter.x, viewCenter.y + 300.f};
 
         m_progressBarBackground.setPosition(barPos);
         m_progressBarFront.setPosition(barPos);
@@ -248,6 +254,13 @@ sf::FloatRect Player::getCollisionBounds() const {
 void Player::takeDamage(float damage,sf::Vector2f knockbackDirection) {
     if (m_isKnockedBack)return;
 
+    if (m_isInteracting) {
+        m_isInteracting= false;
+    }
+    if (m_isReloading) {
+        m_isReloading = false;
+    }
+
     this->m_health.takeDamage(damage);
     updateHealthBar();
 
@@ -269,7 +282,8 @@ void Player::addAmmo(int amount)
     int currentIndex = m_gunSwitch.getCurrentWeaponIndex();
     if (currentIndex >= 0 && static_cast<size_t>(currentIndex) < weaponReserveAmmo.size())
     {
-        weaponReserveAmmo[currentIndex] += amount;
+        int maxReserve = m_weaponMaxReserveAmmo[currentIndex];
+        weaponReserveAmmo[currentIndex] = std::min(weaponReserveAmmo[currentIndex] + amount, maxReserve);
     }
 }
 
@@ -310,7 +324,6 @@ void Player::update(float dt, sf::Vector2f mousePosition, const GameMap &gameMap
             m_isInteracting = false;
             return;
         }
-
         float elapsed = m_interactionTimer.getElapsedTime().asSeconds();
         float progress = elapsed / m_interactionDuration;
 
@@ -321,26 +334,36 @@ void Player::update(float dt, sf::Vector2f mousePosition, const GameMap &gameMap
         {
             m_isInteracting = false;
             if (m_interactionTileID == 71) {
-                addHealth(50.f);
+                addHealth(50);
             } else if (m_interactionTileID == 72) {
                 addAmmo(20);
             }
         }
-
         return;
     }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::X) && !m_isReloading && !m_isKnockedBack)
-    {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::X) && !m_isReloading && !m_isKnockedBack) {
         sf::Vector2f playerCenter = getPosition();
         int tileID = gameMap.getTileIDAt(playerCenter);
 
-        if (tileID == 71 || tileID == 72)
-        {
+        bool canInteract = false;
+        if (tileID == 71) {
+            if (!m_health.isFull()) {
+                canInteract = true;
+            }
+        }else if (tileID == 72) {
+            int currentIndex = m_gunSwitch.getCurrentWeaponIndex();
+            if (currentIndex >= 0 && static_cast<size_t>(currentIndex) < weaponReserveAmmo.size()) {
+                if (weaponReserveAmmo[currentIndex] < m_weaponMaxReserveAmmo[currentIndex]) {
+                    canInteract = true;
+                }
+            }
+        }
+
+        if (canInteract) {
             m_isInteracting = true;
             m_interactionTimer.restart();
             m_interactionTileID = tileID;
-
             sf::Vector2f tileCenter = gameMap.getTileCenter(playerCenter);
             this->playerSprite.setPosition(tileCenter);
             return;

@@ -34,6 +34,10 @@ public:
         m_currentHealth = std::min(m_maxHealth, m_currentHealth);
     }
 
+    [[nodiscard]] bool isFull() const {
+        return m_currentHealth >= m_maxHealth;
+    }
+
     friend std::ostream &operator<<(std::ostream &os, const Health &health);
 
 private:
