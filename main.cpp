@@ -2,13 +2,14 @@
 #include <iostream>
 #include <ostream>
 #include <vector>
+#include <memory>
 #include <SFML/Graphics.hpp>
 #include "Bullet.h"
 #include "ChaserEnemy.h"
 #include "GameMap.h"
 #include "Player.h"
 #include "RandomGenerator.h"
-
+#include "Effect.h"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode({1280, 720}), "Top-Down Shooter");
@@ -40,7 +41,6 @@ int main() {
     const float RESPAWN_DELAY = 5.0f;
     sf::Clock respawnTimer;
 
-    //Pentru spawnul iniitaial
     for (int i = 0; i < MAX_ENEMIES; ++i)
     {
         sf::Vector2f randomPos;
@@ -59,11 +59,10 @@ int main() {
     camera.setSize({1280, 720});
     camera.setCenter(player.getPosition());
 
-    //Bullets
     std::vector<Bullet> bullets;
+    std::vector<std::unique_ptr<Effect>> effects;
     sf::Clock shootTimer;
 
-    //UI Ammo
     sf::Font ammoFont;
     if (!ammoFont.openFromFile("fonts/m6x11.ttf")) {
         std::cerr << "EROARE: Nu am putut incarca fontul fonts/m6x11.ttf" << std::endl;
@@ -74,13 +73,27 @@ int main() {
     ammoText.setCharacterSize(48);
     ammoText.setFillColor(sf::Color::Black);
 
-    //Timer pentru damage
     sf::Clock playerDamageTimer;
-    const float PLAYER_IFRAME_DURATION = 0.3f;//am o secunda invincibilitate
+    const float PLAYER_IFRAME_DURATION = 0.3f;
     sf::RectangleShape debugHitbox;
 
-    //debugHitbox.setFillColor(sf::Color::Transparent);
-    //debugHitbox.setOutlineThickness(2.f);
+    sf::Texture bloodEffectTexture;
+    if (!bloodEffectTexture.loadFromFile("assets/enemies/impact_animation.png")) {
+        std::cerr <<"EROARE la incarcarea imapct_aniamtion!!!";
+        return -1;
+    }
+    std::vector<sf::IntRect> bloodEffectFrames;
+    const int BLOOD_FRAME_WIDTH = 256;
+    const int BLOOD_FRAME_HEIGHT = 256;
+    const int BLOOD_COLS = 5;
+    const int BLOOD_ROWS = 4;
+
+    for (int y = 0;y < BLOOD_ROWS; ++y) {
+        for (int x = 0;x < BLOOD_COLS; ++x) {
+            bloodEffectFrames.push_back(sf::IntRect({x*BLOOD_FRAME_WIDTH,y*BLOOD_FRAME_HEIGHT},
+                {BLOOD_FRAME_WIDTH,BLOOD_FRAME_HEIGHT}));
+        }
+    }
 
     while (window.isOpen()) {
         sf::Time dt = clock.restart();
@@ -127,6 +140,12 @@ int main() {
                     {
                         enemy->takeDamage(bullet.getDamage());
                         bullet.hit();
+                        effects.push_back(std::make_unique<Effect>(
+                            bloodEffectTexture,
+                            bloodEffectFrames,
+                            bullet.getPosition(),
+                            0.01f,
+                            sf::Vector2f(0.25f, 0.25f)));
                         break;
                     }
                 }
@@ -154,13 +173,18 @@ int main() {
             }
             respawnTimer.restart();
         }
+
         for (auto& enemy : enemies)
-    {
-        if (!enemy->isDead())
         {
-            enemy->update(dt, player.getPosition(), gameMap);
+            if (!enemy->isDead())
+            {
+                enemy->update(dt, player.getPosition(), gameMap);
+            }
         }
-    }
+
+        for (auto &effect : effects) {
+            effect->update();
+        }
 
         for (auto& enemy : enemies)
         {
@@ -187,7 +211,6 @@ int main() {
             }
         }
 
-        //Obtin pozitiile si dimensiunile
         sf::Vector2f playerPos = player.getPosition();
         sf::Vector2f viewSizeBlockedCamera = camera.getSize();
 
@@ -221,33 +244,15 @@ int main() {
         window.setView(camera);
         window.draw(gameMap);
         player.drawWorld(window);
+
         for (auto& enemy : enemies)
         {
             enemy->draw(window);
         }
 
-
-        //DEBUG PENTRU HITBOX
-        /*
-        sf::FloatRect playerBounds = player.getCollisionBounds();
-        debugHitbox.setPosition(playerBounds.position);
-        debugHitbox.setSize(playerBounds.size);
-        debugHitbox.setOutlineColor(sf::Color::Blue);
-        window.draw(debugHitbox);
-
-        sf::FloatRect attackBox = chaser1.getAttackHitbox();
-        debugHitbox.setPosition(attackBox.position);
-        debugHitbox.setSize(attackBox.size);
-
-        if (chaser1.isAttacking()) {
-            if (chaser1.didAttackLand()) {
-                debugHitbox.setOutlineColor(sf::Color::Red);
-            } else {
-                debugHitbox.setOutlineColor(sf::Color::Green);
-            }
-            window.draw(debugHitbox);
+        for (auto& effect : effects) {
+            effect->draw(window);
         }
-        */
 
         for (auto &bullet: bullets) {
             bullet.draw(window);
@@ -278,12 +283,16 @@ int main() {
             ),
             bullets.end()
         );
+        std::erase_if(effects, [](const auto& effect) {
+            return effect->isDead();
+        });
         std::erase_if(enemies, [](const auto& enemy) {
-        return enemy->isDead();
+            return enemy->isDead();
     });
 
         window.setView(window.getDefaultView());
-        crosshairSprite.setPosition(sf::Vector2f(sf::Mouse::getPosition(window)));
+
+        crosshairSprite.setPosition(static_cast<sf::Vector2f>(mousePositionWindow));
         ammoText.setOrigin({0.f, 0.f});
 
         sf::Vector2f viewSize = static_cast<sf::Vector2f>(window.getSize());
@@ -303,4 +312,3 @@ int main() {
 
     return 0;
 }
-
