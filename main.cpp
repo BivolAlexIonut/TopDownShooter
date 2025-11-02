@@ -143,7 +143,7 @@ int main() {
                         enemy->takeDamage(damage);
                         bullet.hit();
                         float effectScale = 0.25f + (damage / 200.f);
-                        effectScale = std::clamp(effectScale, 0.2f, 2.0f);
+                        effectScale = std::clamp(effectScale, 0.2f, 5.0f);
                         effects.push_back(std::make_unique<Effect>(
                             bloodEffectTexture,
                             bloodEffectFrames,
@@ -256,7 +256,7 @@ int main() {
             enemy->draw(window);
         }
 
-        for (auto& effect : effects) {
+        for (const auto& effect : effects) {
             effect->draw(window);
         }
 
