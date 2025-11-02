@@ -318,44 +318,39 @@ void ChaserEnemy::updateAnimation()
         m_previousState = m_currentState;
         m_animationTimer.restart();
     }
-    if (m_animations[m_currentState].empty()) {
-        return;
-    }
-    float currentFrameTime = m_frameTime;
 
-    if (m_currentState == State::DYING)
-    {
-        currentFrameTime = 0.025f;
+    float currentFrameTime = m_frameTime;
+    if (m_currentState == State::DYING) {
+        currentFrameTime = 0.03f;
     }
+
     if (m_animationTimer.getElapsedTime().asSeconds() > currentFrameTime)
     {
         m_currentFrame++;
-
-        if (m_currentState == State::ATTACKING && m_currentFrame == m_damageFrame)
-        {
+        m_animationTimer.restart();
+        if (m_currentState == State::ATTACKING && m_currentFrame == m_damageFrame) {
             m_didAttackLand = true;
         }
 
         size_t frameCount = m_animations[m_currentState].size();
-
         if (static_cast<size_t>(m_currentFrame) >= frameCount)
         {
-            if (m_currentState == State::ATTACKING)
-            {
+            if (m_currentState == State::ATTACKING) {
                 m_currentState = State::MOVING;
                 m_currentFrame = 0;
-            }
-            else if (m_currentState == State::DYING)
-            {
+            } else if (m_currentState == State::DYING) {
                 m_currentFrame = static_cast<int>(frameCount - 1);
                 m_isReadyForRemoval = true;
-            }
-            else
-            {
-                m_currentFrame = 0;
+            } else {
+                m_currentFrame = 0; // Loop
             }
         }
-        m_sprite.setTextureRect(m_animations[m_currentState][m_currentFrame]);
-        m_animationTimer.restart();
+    }
+    if (!m_animations[m_currentState].empty())
+    {
+        if (static_cast<size_t>(m_currentFrame) < m_animations[m_currentState].size())
+        {
+            m_sprite.setTextureRect(m_animations[m_currentState][m_currentFrame]);
+        }
     }
 }

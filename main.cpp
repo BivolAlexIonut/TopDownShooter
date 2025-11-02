@@ -114,6 +114,25 @@ int main() {
         }
 
         player.update(dt.asSeconds(), mousePositionWorld, gameMap);
+
+        for (auto &bullet: bullets) {
+            bullet.update(dt.asSeconds());
+            if (!bullet.isImpacting())
+            {
+                for (auto& enemy : enemies)
+                {
+                    if (enemy->isDead()) continue;
+
+                    if (enemy->getBounds().findIntersection(bullet.getBounds()))
+                    {
+                        enemy->takeDamage(bullet.getDamage());
+                        bullet.hit();
+                        break;
+                    }
+                }
+            }
+        }
+
         if (respawnTimer.getElapsedTime().asSeconds() > RESPAWN_DELAY)
         {
             if (enemies.size() < MAX_ENEMIES)
@@ -190,25 +209,6 @@ int main() {
         }
 
         camera.setCenter(viewCenter);
-
-        for (auto &bullet: bullets) {
-            bullet.update(dt.asSeconds());
-            if (!bullet.isImpacting())
-            {
-                // Verifică dacă glonțul lovește VREUN inamic
-                for (auto& enemy : enemies)
-                {
-                    if (enemy->isDead()) continue;
-
-                    if (enemy->getBounds().findIntersection(bullet.getBounds()))
-                    {
-                        enemy->takeDamage(bullet.getDamage());
-                        bullet.hit();
-                        break; // Glonțul lovește un singur inamic și se oprește
-                    }
-                }
-            }
-        }
 
         std::string ammoString = std::to_string(player.getCurrentAmmo()) + " / " + std::to_string(
                                      player.getReserveAmmo());
