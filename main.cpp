@@ -11,6 +11,7 @@
 #include "Player.h"
 #include "RandomGenerator.h"
 #include "Effect.h"
+#include "GhostEnemy.h"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode({1280, 720}), "Top-Down Shooter");
@@ -36,10 +37,11 @@ int main() {
     sf::FloatRect mapBounds = gameMap.getPixelBounds();
     Player player(1640 * mapScale, 1360 * mapScale);
     ChaserEnemy::initAssets();
+    GhostEnemy::initAssets();
 
     std::vector<std::unique_ptr<EnemyBase>> enemies;
-    const int MAX_ENEMIES = 10;
-    const float RESPAWN_DELAY = 5.0f;
+    const int MAX_ENEMIES = 15;
+    const float RESPAWN_DELAY = 10.0f;
     sf::Clock respawnTimer;
 
     for (int i = 0; i < MAX_ENEMIES; ++i)
@@ -51,7 +53,14 @@ int main() {
             randomPos = {x, y};
         } while (gameMap.isSolid(randomPos));
 
-        enemies.push_back(std::make_unique<ChaserEnemy>());
+        if (RandomGenerator::getFloat(0.f, 1.f) > 0.5f)
+        {
+            enemies.push_back(std::make_unique<ChaserEnemy>());
+        }
+        else
+        {
+            enemies.push_back(std::make_unique<GhostEnemy>());
+        }
         enemies.back()->setPosition(randomPos);
     }
 
