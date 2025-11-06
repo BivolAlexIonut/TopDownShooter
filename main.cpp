@@ -40,8 +40,8 @@ int main() {
     GhostEnemy::initAssets();
 
     std::vector<std::unique_ptr<EnemyBase>> enemies;
-    const int MAX_ENEMIES = 15;
-    const float RESPAWN_DELAY = 10.0f;
+    const int MAX_ENEMIES = 5;
+    const float RESPAWN_DELAY = 100.0f;
     sf::Clock respawnTimer;
 
     for (int i = 0; i < MAX_ENEMIES; ++i)
@@ -258,6 +258,7 @@ int main() {
         window.clear(sf::Color(30, 30, 30));
         window.setView(camera);
         window.draw(gameMap);
+        gameMap.updateAndDrawCooldowns(window);
         player.drawWorld(window);
 
         for (auto& enemy : enemies)

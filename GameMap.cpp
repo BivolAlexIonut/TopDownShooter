@@ -159,6 +159,19 @@ bool GameMap::load(const std::string &mapPath, const std::string &tilesetPath, f
             vertexIndex++;
         }
     }
+
+    //bara de progres la cooldown
+    const float BAR_WIDTH = m_scaledTileSize.x * 0.8f;
+    const float BAR_HEIGHT =  8.f;
+
+    m_cooldownBarBg.setSize({BAR_WIDTH, BAR_HEIGHT});
+    m_cooldownBarBg.setFillColor(sf::Color(50, 50, 50, 150));
+    m_cooldownBarBg.setOrigin({BAR_WIDTH / 2.f, BAR_HEIGHT / 2.f});
+
+    m_cooldownBarFg.setSize({BAR_WIDTH, BAR_HEIGHT});
+    m_cooldownBarFg.setFillColor(sf::Color(255, 255, 0, 200));
+    m_cooldownBarFg.setOrigin({0, BAR_HEIGHT / 2.f});
+
     m_tileIDs = std::move(tileIDs);
 
     std::cout << "Harta incarcata: " << m_mapSize.x << "x" << m_mapSize.y << " piese." << std::endl;
@@ -236,6 +249,67 @@ bool GameMap::isSolid(sf::Vector2f mousePosition) const {
     return tileID > 1;
 }
 
+sf::Vector2u GameMap::getTileCoordsAt(sf::Vector2f worldPosition) const {
+    if (m_scaledTileSize.x == 0.0f || m_scaledTileSize.y == 0.0f) {
+        return {0,0};
+    }
+    auto tileX = static_cast<unsigned int>(worldPosition.x / m_scaledTileSize.x);
+    auto tileY = static_cast<unsigned int>(worldPosition.y / m_scaledTileSize.y);
+
+    return {tileX, tileY};
+}
+
+bool GameMap::isPickupOnCooldown(sf::Vector2u tileCoords) const {
+    auto it = m_pickupCooldowns.find(tileCoords);
+    if (it == m_pickupCooldowns.end()) {
+        return false;
+    }
+
+    if (it->second.timer.getElapsedTime().asSeconds() < m_pickupCooldownDuration) {
+        return true;
+    }
+    return false;
+}
+
+void GameMap::startPickupCooldown(sf::Vector2u tileCoords) {
+    auto it = m_pickupCooldowns.find(tileCoords);
+
+    if (it != m_pickupCooldowns.end())
+    {
+        it->second.timer.restart();
+    }
+    else
+    {
+        m_pickupCooldowns[tileCoords] = PickupCooldown();
+    }
+
+    std::cout<<"DEBUG Cooldown pornit pentru tile : "<<tileCoords.x<<","<<tileCoords.y<<std::endl;
+}
+
+void GameMap::updateAndDrawCooldowns(sf::RenderWindow &window) {
+    for (auto it = m_pickupCooldowns.begin();it!=m_pickupCooldowns.end();) {
+        float elapsed = it->second.timer.getElapsedTime().asSeconds();
+        if (elapsed >= m_pickupCooldownDuration) {
+            it = m_pickupCooldowns.erase(it);
+        }else {
+            float percent = elapsed / m_pickupCooldownDuration;
+            sf::Vector2f worldPos = {
+                static_cast<float>(it->first.x) * m_scaledTileSize.x,
+                static_cast<float>(it->first.y) * m_scaledTileSize.y
+            };
+            sf::Vector2f tileCenter = getTileCenter(worldPos);
+            sf::Vector2f barPos = {tileCenter.x, tileCenter.y - m_scaledTileSize.y / 2.f - 10.f};
+            m_cooldownBarBg.setPosition(barPos);
+            float barWidth = m_cooldownBarBg.getSize().x;
+            sf::Vector2f fgPos = {barPos.x - barWidth / 2.f, barPos.y};
+            m_cooldownBarFg.setPosition(fgPos);
+            m_cooldownBarFg.setSize({barWidth * percent, m_cooldownBarFg.getSize().y});
+            window.draw(m_cooldownBarBg);
+            window.draw(m_cooldownBarFg);
+            ++it;
+        }
+    }
+}
 
 /*
  * PENTRU METODA CU VERTEX ARRAY AM FOLOSIT https://www.sfml-dev.org/tutorials/3.0/graphics/vertex-array/#creating-an-sfml-like-entity,

@@ -13,7 +13,7 @@ public:
     ~Player();
 
     //Functiile triviale ale playerului
-    void update(float dt, sf::Vector2f mousePosition,const GameMap& gameMap);
+    void update(float dt, sf::Vector2f mousePosition,GameMap& gameMap);
     sf::FloatRect getCollisionBounds() const;
 
     void drawWorld(sf::RenderWindow& window) const;

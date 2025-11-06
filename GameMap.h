@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #endif
 #include <string>
+#include <map>
 
 class GameMap : public sf::Drawable, public sf::Transformable {
 public:
@@ -20,13 +21,18 @@ public:
 
     [[nodiscard]] int getTileIDAt(sf::Vector2f worldPosition) const;
 
+    sf::Vector2u getTileCoordsAt(sf::Vector2f worldPosition) const;
+    bool isPickupOnCooldown(sf::Vector2u tileCoords) const;
+    void startPickupCooldown(sf::Vector2u tileCoords);
+    void updateAndDrawCooldowns(sf::RenderWindow& window);
+
     friend std::ostream &operator<<(std::ostream &os, const GameMap &map);
 
 private:
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
-    sf::Texture m_tilesetTexture; //textura cu toate tileurile
-    sf::VertexArray m_vertices; //stocheaza geometria hartii
+    sf::Texture m_tilesetTexture;
+    sf::VertexArray m_vertices;
 
     int getTileID(sf::Vector2u tileCoords) const;
 
@@ -36,4 +42,20 @@ private:
     sf::Vector2u m_tileSize;
     sf::Vector2u m_mapSize;
     sf::Vector2f m_mapPixelSize;
+
+    struct PickupCooldown {
+        sf::Clock timer;
+    };
+    const float m_pickupCooldownDuration = 20.f;
+
+    struct Vector2uComparator {
+        bool operator()(const sf::Vector2u &a, const sf::Vector2u &b) const {
+            if (a.x != b.x)
+                return a.x<b.x;
+            return a.y<b.y;
+        }
+    };
+    std::map<sf::Vector2u,PickupCooldown,Vector2uComparator> m_pickupCooldowns;
+    sf::RectangleShape m_cooldownBarBg;
+    sf::RectangleShape m_cooldownBarFg;
 };

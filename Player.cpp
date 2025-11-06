@@ -312,7 +312,7 @@ float Player::getCurrentWeaponCooldown() const {
 }
 
 //Update pentru player,include movementul,rotatia,reloadul si animatii
-void Player::update(float dt, sf::Vector2f mousePosition, const GameMap &gameMap) {
+void Player::update(float dt, sf::Vector2f mousePosition, GameMap &gameMap) {
     if (m_isInteracting)
     {
         if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::X))
@@ -329,10 +329,13 @@ void Player::update(float dt, sf::Vector2f mousePosition, const GameMap &gameMap
         if (elapsed >= m_interactionDuration)
         {
             m_isInteracting = false;
+            sf::Vector2u tileCoords = gameMap.getTileCoordsAt(getPosition());
             if (m_interactionTileID == 71) {
                 addHealth(50);
+                gameMap.startPickupCooldown(tileCoords);
             } else if (m_interactionTileID == 72) {
                 addAmmo(20);
+                gameMap.startPickupCooldown(tileCoords);
             }
         }
         return;
@@ -340,29 +343,35 @@ void Player::update(float dt, sf::Vector2f mousePosition, const GameMap &gameMap
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::X) && !m_isReloading && !m_isKnockedBack) {
         sf::Vector2f playerCenter = getPosition();
+
+        sf::Vector2u tileCoords = gameMap.getTileCoordsAt(playerCenter);
         int tileID = gameMap.getTileIDAt(playerCenter);
 
-        bool canInteract = false;
-        if (tileID == 71) {
-            if (!m_health.isFull()) {
-                canInteract = true;
-            }
-        }else if (tileID == 72) {
-            int currentIndex = m_gunSwitch.getCurrentWeaponIndex();
-            if (currentIndex >= 0 && static_cast<size_t>(currentIndex) < weaponReserveAmmo.size()) {
-                if (weaponReserveAmmo[currentIndex] < m_weaponMaxReserveAmmo[currentIndex]) {
+        if (gameMap.isPickupOnCooldown(tileCoords)) {
+            m_isInteracting = false;
+        }else {
+            bool canInteract = false;
+            if (tileID == 71) {
+                if (!m_health.isFull()) {
                     canInteract = true;
                 }
+            }else if (tileID == 72) {
+                int currentIndex = m_gunSwitch.getCurrentWeaponIndex();
+                if (currentIndex >= 0 && static_cast<size_t>(currentIndex) < weaponReserveAmmo.size()) {
+                    if (weaponReserveAmmo[currentIndex] < m_weaponMaxReserveAmmo[currentIndex]) {
+                        canInteract = true;
+                    }
+                }
             }
-        }
 
-        if (canInteract) {
-            m_isInteracting = true;
-            m_interactionTimer.restart();
-            m_interactionTileID = tileID;
-            sf::Vector2f tileCenter = gameMap.getTileCenter(playerCenter);
-            this->playerSprite.setPosition(tileCenter);
-            return;
+            if (canInteract) {
+                m_isInteracting = true;
+                m_interactionTimer.restart();
+                m_interactionTileID = tileID;
+                sf::Vector2f tileCenter = gameMap.getTileCenter(playerCenter);
+                this->playerSprite.setPosition(tileCenter);
+                return;
+            }
         }
     }
 
