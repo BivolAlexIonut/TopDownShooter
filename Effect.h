@@ -8,7 +8,7 @@ public:
            const std::vector<sf::IntRect>& animRects,
            sf::Vector2f position,
            float animSpeed,
-           sf::Vector2f scale);
+           sf::Vector2f scale,sf::Color = sf::Color::White);
 
     void update();
     void draw(sf::RenderWindow& window) const;

@@ -1,6 +1,7 @@
 #include "Effect.h"
 
-Effect::Effect(sf::Texture& texture, const std::vector<sf::IntRect>& animRects, sf::Vector2f position, float animSpeed, sf::Vector2f scale)
+Effect::Effect(sf::Texture& texture, const std::vector<sf::IntRect>& animRects, sf::Vector2f position, float animSpeed,
+    sf::Vector2f scale,sf::Color color)
     : m_sprite(texture),
       m_animRects(animRects),
       m_currentFrame(0),
@@ -14,6 +15,7 @@ Effect::Effect(sf::Texture& texture, const std::vector<sf::IntRect>& animRects, 
 
     m_sprite.setPosition(position);
     m_sprite.setScale(scale);
+    m_sprite.setColor(color);
 }
 
 void Effect::update() {

@@ -1,7 +1,6 @@
 #include "GhostEnemy.h"
 #include <stdexcept>
 #include <cmath>
-#include <iostream>
 
 std::map<GhostEnemy::State, sf::Texture> GhostEnemy::s_stateTextures;
 std::map<GhostEnemy::AttackDirection, std::vector<sf::IntRect>> GhostEnemy::s_attackAnimations;
@@ -272,6 +271,7 @@ void GhostEnemy::updateAnimation()
             const int FRAME_W = 128;
             const int FRAME_H = 128;
             m_sprite.setOrigin({FRAME_W / 2.f, FRAME_H / 2.f});
+            m_sprite.setColor(sf::Color::Black);
             m_sprite.setScale({3.f, 3.f});
         }
         if (!m_animations[m_currentState].empty()) {

@@ -345,7 +345,7 @@ void Player::update(float dt, sf::Vector2f mousePosition, GameMap &gameMap) {
         sf::Vector2f playerCenter = getPosition();
 
         sf::Vector2u tileCoords = gameMap.getTileCoordsAt(playerCenter);
-        int tileID = gameMap.getTileIDAt(playerCenter);
+        const int tileID = gameMap.getTileIDAt(playerCenter);
 
         if (gameMap.isPickupOnCooldown(tileCoords)) {
             m_isInteracting = false;

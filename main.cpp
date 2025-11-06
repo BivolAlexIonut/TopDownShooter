@@ -153,13 +153,27 @@ int main() {
                         bullet.hit();
                         float effectScale = 0.25f + (damage / 200.f);
                         effectScale = std::clamp(effectScale, 0.2f, 5.0f);
-                        effects.push_back(std::make_unique<Effect>(
-                            bloodEffectTexture,
-                            bloodEffectFrames,
-                            bullet.getPosition(),
-                            0.01f,
-                            sf::Vector2f(effectScale, effectScale)
-                        ));
+                        if (dynamic_cast<GhostEnemy*>(enemy.get()))
+                        {
+                            // Este o fantoma (GhostEnemy), folosim efectul tintat NEGRU
+                            effects.push_back(std::make_unique<Effect>(
+                                bloodEffectTexture,   // Textura de sange
+                                bloodEffectFrames,    // Frame-urile de sange
+                                bullet.getPosition(),
+                                0.01f,
+                                sf::Vector2f(effectScale, effectScale),
+                                sf::Color::Black // <-- AICI ESTE CULOAREA NEAGRĂ
+                            ));
+                        }
+                        else {
+                            effects.push_back(std::make_unique<Effect>(
+                                bloodEffectTexture,
+                                bloodEffectFrames,
+                                bullet.getPosition(),
+                                0.01f,
+                                sf::Vector2f(effectScale, effectScale)
+                            ));
+                        }
 
                         break;
                     }
