@@ -21,8 +21,8 @@ bool GhostEnemy::initAssets()
          throw std::runtime_error("EROARE: Nu am putut incarca Spectre_15_Ability.png!");
     }
 
-    if (!s_deathTexture.loadFromFile("assets/enemies/death_animation.png")) {
-         throw std::runtime_error("EROARE: Nu am putut incarca death_animation.png!");
+    if (!s_deathTexture.loadFromFile("assets/enemies/death_animation-ghost.png")) {
+         throw std::runtime_error("EROARE: Nu am putut incarca death_animation-ghost.png!");
     }
 
     const int FRAME_W = 128;
@@ -271,7 +271,6 @@ void GhostEnemy::updateAnimation()
             const int FRAME_W = 128;
             const int FRAME_H = 128;
             m_sprite.setOrigin({FRAME_W / 2.f, FRAME_H / 2.f});
-            m_sprite.setColor(sf::Color::Black);
             m_sprite.setScale({3.f, 3.f});
         }
         if (!m_animations[m_currentState].empty()) {

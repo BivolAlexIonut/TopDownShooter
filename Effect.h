@@ -4,11 +4,11 @@
 
 class Effect {
 public:
-    Effect(sf::Texture& texture,
+    Effect(const sf::Texture& texture,
            const std::vector<sf::IntRect>& animRects,
            sf::Vector2f position,
            float animSpeed,
-           sf::Vector2f scale,sf::Color = sf::Color::White);
+           sf::Vector2f scale);
 
     void update();
     void draw(sf::RenderWindow& window) const;

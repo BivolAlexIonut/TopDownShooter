@@ -87,9 +87,30 @@ int main() {
     constexpr float PLAYER_IFRAME_DURATION = 0.3f;
     sf::RectangleShape debugHitbox;
 
+    sf::Texture ghostImpactTexture;
+    if (!ghostImpactTexture.loadFromFile("assets/enemies/death_animation-ghost.png")) {
+        std::cerr <<"EROARE la incarcarea ghost_impact_animation.png pentru impact";
+        return -1;
+    }
+    std::vector<sf::IntRect> ghostImpactFrames;
+    const int GHOST_IMPACT_W = 256;
+    const int GHOST_IMPACT_H = 256;
+
+    const int GHOST_IMPACT_COLS = 5;
+    const int GHOST_IMPACT_TOTAL_FRAMES = 20;
+
+    for (int i = 0; i < GHOST_IMPACT_TOTAL_FRAMES; ++i) {
+        int row = i / GHOST_IMPACT_COLS;
+        int col = i % GHOST_IMPACT_COLS;
+        ghostImpactFrames.push_back(sf::IntRect(
+            {col * GHOST_IMPACT_W, row * GHOST_IMPACT_H},
+            {GHOST_IMPACT_W, GHOST_IMPACT_H}
+        ));
+    }
+
     sf::Texture bloodEffectTexture;
-    if (!bloodEffectTexture.loadFromFile("assets/enemies/impact_animation.png")) {
-        std::cerr <<"EROARE la incarcarea imapct_aniamtion!!!";
+    if (!bloodEffectTexture.loadFromFile("assets/enemies/death_animation.png")) {
+        std::cerr <<"EROARE la incarcarea death_a iamtion";
         return -1;
     }
     std::vector<sf::IntRect> bloodEffectFrames;
@@ -151,21 +172,21 @@ int main() {
                         float damage = bullet.getDamage();
                         enemy->takeDamage(damage);
                         bullet.hit();
-                        float effectScale = 0.25f + (damage / 200.f);
-                        effectScale = std::clamp(effectScale, 0.2f, 5.0f);
+
                         if (dynamic_cast<GhostEnemy*>(enemy.get()))
                         {
-                            // Este o fantoma (GhostEnemy), folosim efectul tintat NEGRU
                             effects.push_back(std::make_unique<Effect>(
-                                bloodEffectTexture,   // Textura de sange
-                                bloodEffectFrames,    // Frame-urile de sange
+                                ghostImpactTexture,
+                                ghostImpactFrames,
                                 bullet.getPosition(),
-                                0.01f,
-                                sf::Vector2f(effectScale, effectScale),
-                                sf::Color::Black // <-- AICI ESTE CULOAREA NEAGRĂ
+                                0.03f,
+                                sf::Vector2f(0.6f, 0.6f)
                             ));
                         }
-                        else {
+                        else
+                        {
+                            float effectScale = 0.25f + (damage / 200.f);
+                            effectScale = std::clamp(effectScale, 0.2f, 5.0f);
                             effects.push_back(std::make_unique<Effect>(
                                 bloodEffectTexture,
                                 bloodEffectFrames,
