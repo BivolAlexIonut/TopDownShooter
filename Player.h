@@ -3,6 +3,7 @@
 #include "Health.h"
 #include "GunSwitch.h"
 #include "Bullet.h"
+#include "GameMap.h"
 
 class Player {
 public:
@@ -10,7 +11,9 @@ public:
     ~Player();
 
     //Functiile triviale ale playerului
-    void update(float dt, sf::Vector2f mousePosition);
+    void update(float dt, sf::Vector2f mousePosition,const GameMap& gameMap);
+    sf::FloatRect getCollisionBounds() const;
+
     void drawWorld(sf::RenderWindow& window) const;
     void drawUI(sf::RenderWindow& window);
     void takeDamage(float damage);
@@ -40,6 +43,7 @@ private:
     sf::Texture playerTexture;
     sf::Sprite playerSprite;
     std::vector<float> m_movementSpeeds;
+    //std::vector<sf::Vector2f> m_weaponOrigins;
 
     //Sectiune pentru arme,gloante,vectori pentru a modifica usor valori ale armelor din Player.cpp
     //----------------------------------------

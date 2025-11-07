@@ -68,6 +68,9 @@ int main() {
                 if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::R) {
                     player.reload();
                 }
+                if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Backspace) {
+                    window.close();
+                }
             }
         }
 
@@ -80,7 +83,7 @@ int main() {
             shootTimer.restart();
         }
 
-        player.update(dt.asSeconds(), mousePositionWorld);
+        player.update(dt.asSeconds(), mousePositionWorld,gameMap);
         //Obtin pozitiile si dimensiunile
         sf::Vector2f playerPos = player.getPosition();
         sf::Vector2f viewSizeBlockedCamera = camera.getSize();

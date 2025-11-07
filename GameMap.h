@@ -10,6 +10,7 @@ public:
     bool load(const std::string& mapPath, const std::string& tilesetPath,float mapScale);
 
     sf::FloatRect getPixelBounds() const;
+    bool isSolid(sf::Vector2f mousePosition) const;
 
     friend std::ostream& operator<<(std::ostream& os, const GameMap& map);
 
@@ -18,6 +19,10 @@ private:
 
     sf::Texture m_tilesetTexture; //textura cu toate tileurile
     sf::VertexArray m_vertices; //stocheaza geometria hartii
+
+    int getTileID(sf::Vector2u tileCoords) const;
+    std::vector<int> m_tileIDs;
+    sf::Vector2f m_scaledTileSize;
 
     sf::Vector2u m_tileSize;
     sf::Vector2u m_mapSize;

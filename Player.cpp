@@ -184,6 +184,16 @@ void Player::drawUI(sf::RenderWindow& window) {
     window.draw(this->HealthBarForeground);
 }
 
+sf::FloatRect Player::getCollisionBounds() const {
+    float boxWidth = 15.f;
+    float boxHeight = 25.f;
+    sf::Vector2f pos = getPosition();
+    return {
+                {pos.x - boxWidth / 2.f, pos.y - boxHeight / 2.f},
+                {boxWidth, boxHeight}
+    };
+}
+
 //Functie pentru damage(va fi folosita mai mult cand voi adauga inamici)
 //Momentan o folosesc pentru test la healthbar
 void Player::takeDamage(float damage) {
@@ -217,7 +227,7 @@ float Player::getCurrentWeaponCooldown() const {
 }
 
 //Update pentru player,include movementul,rotatia,reloadul si animatii
-void Player::update(float dt, sf::Vector2f mousePosition) {
+void Player::update(float dt, sf::Vector2f mousePosition,const GameMap& gameMap) {
     sf::Vector2f direction(0.f, 0.f);
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) direction.y = -1.f;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) direction.y = 1.f;
@@ -234,7 +244,56 @@ void Player::update(float dt, sf::Vector2f mousePosition) {
     if (currentSpeedIndex >=0 && static_cast<size_t>(currentSpeedIndex)<m_movementSpeeds.size()) {
         currentSpeed = m_movementSpeeds[currentSpeedIndex];
     }
-    this->playerSprite.move(direction*currentSpeed*dt);
+    sf::Vector2f currentPos = getPosition();
+    sf::Vector2f velocity(direction.x * currentSpeed * dt, direction.y * currentSpeed * dt);
+
+    // --- Verifică axa X ---
+    sf::FloatRect bounds = getCollisionBounds();
+    bounds.position.x += velocity.x; // Proiectează noua poziție X
+
+    // Punctele de coliziune pentru mișcarea X
+    float topY = bounds.position.y;
+    float bottomY = bounds.position.y + bounds.size.y;
+
+    if (velocity.x > 0) { // Mergi la dreapta
+        float rightX = bounds.position.x + bounds.size.x;
+        if (gameMap.isSolid({rightX, topY}) || gameMap.isSolid({rightX, bottomY})) {
+            velocity.x = 0; // Oprește mișcarea pe X
+        }
+    } else if (velocity.x < 0) { // Mergi la stânga
+        float leftX = bounds.position.x;
+        if (gameMap.isSolid({leftX, topY}) || gameMap.isSolid({leftX, bottomY})) {
+            velocity.x = 0; // Oprește mișcarea pe X
+        }
+    }
+
+    // Aplică mișcarea pe X (fie 0, fie valoarea completă)
+    currentPos.x += velocity.x;
+    this->playerSprite.setPosition(currentPos); // Setează noua poziție X
+
+    // --- Verifică axa Y ---
+    bounds = getCollisionBounds(); // Ia noile coordonate (cu X-ul actualizat)
+    bounds.position.y += velocity.y; // Proiectează noua poziție Y
+
+    // Punctele de coliziune pentru mișcarea Y
+    float leftX = bounds.position.x;
+    float rightX = bounds.position.x + bounds.size.x;
+
+    if (velocity.y > 0) { // Mergi în jos
+        float bottomY1 = bounds.position.y + bounds.size.y;
+        if (gameMap.isSolid({leftX, bottomY1}) || gameMap.isSolid({rightX, bottomY1})) {
+            velocity.y = 0; // Oprește mișcarea pe Y
+        }
+    } else if (velocity.y < 0) { // Mergi în sus
+        float topY1 = bounds.position.y;
+        if (gameMap.isSolid({leftX, topY1}) || gameMap.isSolid({rightX, topY1})) {
+            velocity.y = 0; // Oprește mișcarea pe Y
+        }
+    }
+
+    // Aplică mișcarea pe Y
+    currentPos.y += velocity.y;
+    this->playerSprite.setPosition(currentPos);
 
     //Pozitia armei playerului si implicit a playerului dupa mouse
     sf::Vector2f playerPosition = this->playerSprite.getPosition();
@@ -299,8 +358,7 @@ void Player::switchWeaponNext() {
     m_gunSwitch.nextWeapon();
     sf::IntRect newRect = m_gunSwitch.getCurrentWeaponRect();
     this->playerSprite.setTextureRect(newRect);
-    this->playerSprite.setOrigin({static_cast<float>(newRect.size.x) / 2.f, static_cast<float>(newRect.size.y) / 2.f});
-}
+this->playerSprite.setOrigin({static_cast<float>(newRect.size.x) / 2.f, static_cast<float>(newRect.size.y) / 2.f});}
 
 void Player::switchWeaponPrev() {
     if (m_isReloading)return;
@@ -308,8 +366,7 @@ void Player::switchWeaponPrev() {
     m_gunSwitch.previousWeapon();
     sf::IntRect newRect = m_gunSwitch.getCurrentWeaponRect();
     this->playerSprite.setTextureRect(newRect);
-    this->playerSprite.setOrigin({static_cast<float>(newRect.size.x) / 2.f, static_cast<float>(newRect.size.y) / 2.f});
-}
+this->playerSprite.setOrigin({static_cast<float>(newRect.size.x) / 2.f, static_cast<float>(newRect.size.y) / 2.f});}
 
 //Functia pentru tras(shooting)
 Bullet Player::shoot(sf::Vector2f mousePosition) {
