@@ -27,7 +27,7 @@ Coin::Coin(sf::Vector2f startPos) : m_sprite(Coin::s_texture),m_currentFrame(0),
     m_sprite.setScale({1.5f,1.5f});
 }
 
-void Coin::update(float dt) {
+void Coin::update() {
     if (m_animTimer.getElapsedTime().asSeconds() > m_animSpeed) {
         m_currentFrame++;
         m_animTimer.restart();

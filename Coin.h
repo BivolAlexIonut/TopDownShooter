@@ -8,7 +8,7 @@ public:
 
     static bool initAssets();
 
-    void update(float dt);
+    void update();
     void draw(sf::RenderWindow &window) const;
     sf::FloatRect getBounds() const;
     sf::Vector2f getPosition() const;

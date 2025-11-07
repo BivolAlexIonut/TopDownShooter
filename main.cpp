@@ -265,7 +265,7 @@ int main() {
         }
 
         for (auto& coin : coins) {
-            coin->update(dt.asSeconds());
+            coin->update();
         }
         std::erase_if(coins, [&](const auto& coin) {
             if (player.getCollisionBounds().findIntersection(coin->getBounds())) {
