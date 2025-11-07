@@ -12,6 +12,8 @@
 #include "RandomGenerator.h"
 #include "Effect.h"
 #include "GhostEnemy.h"
+#include "GameExceptions.h"
+#include "Coin.h"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode({1280, 720}), "Top-Down Shooter");
@@ -27,17 +29,34 @@ int main() {
     crosshairSprite.setScale(sf::Vector2f(2.f,2.f));
 
     GameMap gameMap;
-
     constexpr float mapScale = 0.4f;
-    if (!gameMap.load("assets/Levels/level1.txt",
-                      "assets/Premium Content/Tileset with cell size 256x256.png", mapScale)) {
-        std::cerr << "EROARE FATALA: Harta nu a putut fi incarcata." << std::endl;
+    sf::FloatRect mapBounds;
+    Player player(1640 * mapScale, 1360 * mapScale);
+    sf::Font ammoFont;
+
+    try {
+        if (!gameMap.load("assets/Levels/level1.txt",
+                          "assets/Premium Content/Tileset with cell size 256x256.png", mapScale)) {
+            throw MapLoadException("level1.txt", "Functia load a returnat false.");
+        }
+
+        mapBounds = gameMap.getPixelBounds();
+        ChaserEnemy::initAssets();
+        GhostEnemy::initAssets();
+        Coin::initAssets();
+
+        if (!ammoFont.openFromFile("fonts/m6x11.ttf")) {
+            throw FontLoadException("fonts/m6x11.ttf");
+        }
+    }
+    catch (const GameException& e) {
+        std::cerr << "EROARE FATALA: " << e.what() << std::endl;
         return -1;
     }
-    sf::FloatRect mapBounds = gameMap.getPixelBounds();
-    Player player(1640 * mapScale, 1360 * mapScale);
-    ChaserEnemy::initAssets();
-    GhostEnemy::initAssets();
+    catch (const std::exception& e) {
+        std::cerr << "EROARE NECUNOSCUTA: " << e.what() << std::endl;
+        return -1;
+    }
 
     std::vector<std::unique_ptr<EnemyBase>> enemies;
     const int MAX_ENEMIES = 5;
@@ -71,13 +90,9 @@ int main() {
 
     std::vector<Bullet> bullets;
     std::vector<std::unique_ptr<Effect>> effects;
+    std::vector<std::unique_ptr<Coin>> coins;
     sf::Clock shootTimer;
 
-    sf::Font ammoFont;
-    if (!ammoFont.openFromFile("fonts/m6x11.ttf")) {
-        std::cerr << "EROARE: Nu am putut incarca fontul fonts/m6x11.ttf" << std::endl;
-        return -1;
-    }
     sf::Text ammoText(ammoFont);
     ammoText.setFont(ammoFont);
     ammoText.setCharacterSize(48);
@@ -86,6 +101,19 @@ int main() {
     sf::Clock playerDamageTimer;
     constexpr float PLAYER_IFRAME_DURATION = 0.3f;
     sf::RectangleShape debugHitbox;
+
+    sf::Texture coinIconTexture;
+    if (!coinIconTexture.loadFromFile("assets/coin.png")) {
+        throw AssetLoadException("coin.png");
+    }
+    sf::Sprite coinIconSprite(coinIconTexture);
+    coinIconSprite.setTextureRect(sf::IntRect({0, 0}, {20, 20}));
+    coinIconSprite.setScale({1.5f, 1.5f});
+
+    sf::Text coinText(ammoFont);
+    coinText.setFont(ammoFont);
+    coinText.setCharacterSize(48);
+    coinText.setFillColor(sf::Color(240, 180, 0));
 
     sf::Texture ghostImpactTexture;
     if (!ghostImpactTexture.loadFromFile("assets/enemies/death_animation-ghost.png")) {
@@ -110,7 +138,7 @@ int main() {
 
     sf::Texture bloodEffectTexture;
     if (!bloodEffectTexture.loadFromFile("assets/enemies/death_animation.png")) {
-        std::cerr <<"EROARE la incarcarea death_a iamtion";
+        std::cerr <<"EROARE la incarcarea death_animation.png";
         return -1;
     }
     std::vector<sf::IntRect> bloodEffectFrames;
@@ -155,7 +183,7 @@ int main() {
             && player.canShoot(mousePositionWorld)) {
             bullets.push_back((player.shoot(mousePositionWorld)));
             shootTimer.restart();
-        }
+            }
 
         player.update(dt.asSeconds(), mousePositionWorld, gameMap);
 
@@ -236,6 +264,17 @@ int main() {
             effect->update();
         }
 
+        for (auto& coin : coins) {
+            coin->update(dt.asSeconds());
+        }
+        std::erase_if(coins, [&](const auto& coin) {
+            if (player.getCollisionBounds().findIntersection(coin->getBounds())) {
+                player.addCoins(1);
+                return true;
+            }
+            return false;
+        });
+
         for (auto& enemy : enemies)
         {
             if (enemy->isDead()) continue;
@@ -294,6 +333,11 @@ int main() {
         window.setView(camera);
         window.draw(gameMap);
         gameMap.updateAndDrawCooldowns(window);
+
+        for (const auto& coin : coins) {
+            coin->draw(window);
+        }
+
         player.drawWorld(window);
 
         for (auto& enemy : enemies)
@@ -337,9 +381,13 @@ int main() {
         std::erase_if(effects, [](const auto& effect) {
             return effect->isDead();
         });
-        std::erase_if(enemies, [](const auto& enemy) {
-            return enemy->isDead();
-    });
+        std::erase_if(enemies, [&](const auto& enemy) {
+            if (enemy->isDead()) {
+                coins.push_back(std::make_unique<Coin>(enemy->getPosition()));
+                return true;
+            }
+            return false;
+        });
 
         window.setView(window.getDefaultView());
 
@@ -354,8 +402,18 @@ int main() {
         float positionY = viewSize.y - totalTextHeight - 10.f;
         ammoText.setPosition({10.f, positionY});
 
+        coinText.setString(std::to_string(player.getCoinCount()));
+
+        float coinTextWidth = coinText.getGlobalBounds().size.x;
+        float coinIconWidth = coinIconSprite.getGlobalBounds().size.x;
+
+        coinIconSprite.setPosition({viewSize.x - coinIconWidth - 80.f, 15.f});
+        coinText.setPosition({viewSize.x - coinTextWidth - 20.f, 10.f});
+
         player.drawUI(window);
         window.draw(ammoText);
+        window.draw(coinText);
+        window.draw(coinIconSprite);
         window.draw(crosshairSprite);
 
         window.display();

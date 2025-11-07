@@ -10,7 +10,7 @@ Player::Player(float startX, float startY) : m_health(100.f),
                                              playerTexture(),
                                              playerSprite(this->playerTexture),
                                              m_gunSwitch(),
-                                             m_isReloading(false), //Incep prin a nu reincarca
+                                             m_isReloading(false),
                                              m_reloadAnimSprite(this->m_reloadAnimTexture),
                                              m_healthBarSprite(this->m_reloadAnimTexture),
                                              m_reloadingWeaponIndex(-1),
@@ -19,7 +19,8 @@ Player::Player(float startX, float startY) : m_health(100.f),
                                              m_knockbackVelocity(0.f,0.f),
                                              m_isInteracting(false),
                                              m_interactionTileID(0),
-                                             m_interactionDuration(2.0f)
+                                             m_interactionDuration(2.0f),
+                                             m_coinCount(0)
 {
     if (!this->playerTexture.loadFromFile("assets/Premium Content/Examples/Basic Usage.png")) {
         std::cerr << "EROARE: Nu am putut incarca ../assets/Premium Content/Examples/Basic Usage.png" << std::endl;
@@ -216,7 +217,6 @@ Player::Player(float startX, float startY) : m_health(100.f),
 
 Player::~Player() = default;
 
-//Functie afisare player
 void Player::drawWorld(sf::RenderWindow &window) const {
     window.draw(this->playerSprite);
 }
@@ -249,8 +249,6 @@ sf::FloatRect Player::getCollisionBounds() const {
     };
 }
 
-//Functie pentru damage(va fi folosita mai mult cand voi adauga inamici)
-//Momentan o folosesc pentru test la healthbar
 void Player::takeDamage(float damage,sf::Vector2f knockbackDirection) {
     if (m_isKnockedBack)return;
 
@@ -635,4 +633,15 @@ std::string Player::getCurrentWeaponName() const {
     if (index < 0 || static_cast<size_t>(index) >= weaponNames.size())
         return "Unknown";
     return weaponNames[index];
+}
+
+void Player::addCoins(int amount) {
+    if (amount>0) {
+        m_coinCount+=amount;
+        std::cout << "Coins added: " << amount << std::endl;
+    }
+}
+
+int Player::getCoinCount() const {
+    return m_coinCount;
 }

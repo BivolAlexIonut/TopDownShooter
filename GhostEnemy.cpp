@@ -2,6 +2,8 @@
 #include <stdexcept>
 #include <cmath>
 
+#include "GameExceptions.h"
+
 std::map<GhostEnemy::State, sf::Texture> GhostEnemy::s_stateTextures;
 std::map<GhostEnemy::AttackDirection, std::vector<sf::IntRect>> GhostEnemy::s_attackAnimations;
 sf::Texture GhostEnemy::s_deathTexture;
@@ -9,20 +11,20 @@ sf::Texture GhostEnemy::s_deathTexture;
 bool GhostEnemy::initAssets()
 {
     if (!s_stateTextures[State::IDLE].loadFromFile("assets/enemies/Spectre_15_Idle.png")) {
-         throw std::runtime_error("EROARE: Nu am putut incarca Spectre_15_Idle.png!");
+         throw AssetLoadException("Spectre_15_Idle.png");
     }
     if (!s_stateTextures[State::MOVING].loadFromFile("assets/enemies/Spectre_15_Move.png")) {
-         throw std::runtime_error("EROARE: Nu am putut incarca Spectre_15_Move.png!");
+         throw AssetLoadException("Spectre_15_Move.png");
     }
     if (!s_stateTextures[State::ATTACKING].loadFromFile("assets/enemies/Spectre_15_Attack.png")) {
-         throw std::runtime_error("EROARE: Nu am putut incarca Spectre_15_Attack.png!");
+         throw AssetLoadException("Spectre_15_Attack.png!");
     }
     if (!s_stateTextures[State::ABILITY].loadFromFile("assets/enemies/Spectre_15_Ability.png")) {
-         throw std::runtime_error("EROARE: Nu am putut incarca Spectre_15_Ability.png!");
+         throw AssetLoadException("Spectre_15_Ability.png!");
     }
 
     if (!s_deathTexture.loadFromFile("assets/enemies/death_animation-ghost.png")) {
-         throw std::runtime_error("EROARE: Nu am putut incarca death_animation-ghost.png!");
+         throw AssetLoadException("death_animation-ghost.png!");
     }
 
     const int FRAME_W = 128;

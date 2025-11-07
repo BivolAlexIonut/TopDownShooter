@@ -72,6 +72,9 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         Effect.h
         GhostEnemy.h
         GhostEnemy.cpp
+        GameExceptions.h
+        Coin.h
+        Coin.cpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

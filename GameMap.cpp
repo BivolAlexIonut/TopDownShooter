@@ -1,4 +1,5 @@
 #include "GameMap.h"
+#include "GameExceptions.h"
 #include <fstream>
 #include <iostream>
 #include <ostream>
@@ -8,26 +9,20 @@ GameMap::GameMap() : m_tileSize(0, 0), m_mapSize(0, 0) {
 
 bool GameMap::load(const std::string &mapPath, const std::string &tilesetPath, float mapScale) {
     if (!m_tilesetTexture.loadFromFile(tilesetPath)) {
-        std::cerr << "EROARE: Nu am putut incarca tileset-ul: " << tilesetPath << std::endl;
-        return false;
+        throw AssetLoadException(tilesetPath);
     }
 
     std::ifstream f(mapPath);
     if (!f.is_open()) {
-        std::cerr << "EROARE: Nu am putut deschide fisierul text al harții: " << mapPath << std::endl;
-        return false;
+        throw MapLoadException(mapPath, "Fisierul text nu a putut fi deschis.");
     }
 
     if (!(f >> m_mapSize.x >> m_mapSize.y)) {
-        std::cerr << "EROARE: Nu am putut citi map dimensions din " << mapPath << std::endl;
-        f.close();
-        return false;
+        throw MapLoadException(mapPath, "Nu am putut citi dimensiunile harti.");
     }
 
     if (!(f >> m_tileSize.x >> m_tileSize.y)) {
-        std::cerr << "EROARE: Nu am putut citi tile dimensions din " << mapPath << std::endl;
-        f.close();
-        return false;
+        throw MapLoadException(mapPath, "Nu am putut citi tile dimensions.");
     }
 
     //citesc id-s dintr un vector temporar

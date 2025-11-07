@@ -1,4 +1,5 @@
 #include "ChaserEnemy.h"
+#include "GameExceptions.h"
 #include <cmath>
 #include <stdexcept>
 
@@ -10,17 +11,16 @@ bool ChaserEnemy::initAssets()
 {
     if (!s_texture.loadFromFile("assets/enemies/chaser_spritesheet_bun_final.png"))
     {
-        throw std::runtime_error("EROARE: Nu am putut incarca chaser_spritesheet.png!");
+        throw AssetLoadException("chaser_spritesheet_bun_final.png");
     }
     if (!s_alertTexture.loadFromFile("assets/ui/alert_icon.png"))
     {
-        throw std::runtime_error("EROARE: Nu am putut incarca alert_icon.png!");
+        throw AssetLoadException("alert_icon.png");
     }
     if (!s_deathTexture.loadFromFile("assets/enemies/death_animation.png"))
     {
-        throw std::runtime_error("EROARE: Nu am putut incarca death_animation.png!");
+        throw AssetLoadException("death_animation.png");
     }
-
     return true;
 }
 

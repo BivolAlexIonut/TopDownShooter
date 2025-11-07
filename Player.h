@@ -26,7 +26,6 @@ public:
     void addAmmo(int amount);
     //-------------------
 
-    //Functii triviale pentru uzul armelor
     void switchWeaponNext();
     void switchWeaponPrev();
     Bullet shoot(sf::Vector2f mousePosition);
@@ -37,10 +36,12 @@ public:
     void reload();
     bool canShoot(sf::Vector2f mousePosition) const;
 
+    void addCoins(int amount);
+    [[nodiscard]] int getCoinCount() const;
+
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
 
 private:
-    //Healthbar
     void updateHealthBar();
     void updateHealthBarPosition();
     std::vector<sf::IntRect> m_healthBarFrames;
@@ -50,9 +51,7 @@ private:
     sf::Texture playerTexture;
     sf::Sprite playerSprite;
     std::vector<float> m_movementSpeeds;
-    //std::vector<sf::Vector2f> m_weaponOrigins;
 
-    //Sectiune pentru arme,gloante,vectori pentru a modifica usor valori ale armelor din Player.cpp
     //----------------------------------------
     GunSwitch m_gunSwitch;
     sf::Texture bulletTexture;
@@ -93,5 +92,7 @@ private:
 
     sf::RectangleShape m_progressBarBackground;
     sf::RectangleShape m_progressBarFront;
+
+    int m_coinCount;
     //--------------------------------------------------
 };
