@@ -4,7 +4,7 @@
 
 class Coin {
 public:
-    Coin(sf::Vector2f startPos);
+    explicit Coin(sf::Vector2f startPos);
 
     static bool initAssets();
 
