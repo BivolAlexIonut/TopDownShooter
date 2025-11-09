@@ -231,6 +231,10 @@ void DevilEnemy::acknowledgeDeath() { m_justDied = false; }
 bool DevilEnemy::isAttacking() const { return m_currentState == State::ATTACKING; }
 
 sf::FloatRect DevilEnemy::getBounds() const {
+
+    if (m_currentState == State::DYING)
+        return {};
+
     const float boxWidth = 50.f;
     const float boxHeight = 60.f;
     sf::Vector2f pos = m_sprite.getPosition();

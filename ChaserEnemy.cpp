@@ -221,6 +221,10 @@ void ChaserEnemy::updateHealthBar()
 }
 
 sf::FloatRect ChaserEnemy::getBounds() const {
+
+    if (m_currentState == State::DYING)
+        return {};
+
     const float boxWidth = 30.f;
     const float boxHeight = 30.f;
 

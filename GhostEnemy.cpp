@@ -348,6 +348,10 @@ sf::Vector2f GhostEnemy::getPosition() const {
 }
 
 sf::FloatRect GhostEnemy::getBounds() const {
+
+    if (m_currentState == State::DYING)
+        return {};
+
     const float boxWidth = 30.f;
     const float boxHeight = 50.f;
     sf::Vector2f pos = m_sprite.getPosition();
