@@ -14,6 +14,8 @@
 #include "GhostEnemy.h"
 #include "GameExceptions.h"
 #include "Coin.h"
+#include "DevilEnemy.h"
+#include "DevilProjectile.h"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode({1280, 720}), "Top-Down Shooter");
@@ -34,6 +36,9 @@ int main() {
     Player player(1640 * mapScale, 1360 * mapScale);
     sf::Font ammoFont;
 
+    const std::string devilBasePath = "assets/enemies/Flying Demon 2D Pixel Art/Sprites/with_outline/";
+    const std::string devilProjectilePath = "assets/enemies/Flying Demon 2D Pixel Art/Sprites/projectile.png";
+
     try {
         if (!gameMap.load("assets/Levels/level1.txt",
                           "assets/Premium Content/Tileset with cell size 256x256.png", mapScale)) {
@@ -42,6 +47,8 @@ int main() {
 
         mapBounds = gameMap.getPixelBounds();
         ChaserEnemy::initAssets();
+        DevilEnemy::initAssets(devilBasePath);
+        DevilProjectile::initAssets(devilProjectilePath);
         GhostEnemy::initAssets();
         Coin::initAssets();
 
@@ -59,8 +66,8 @@ int main() {
     }
 
     std::vector<std::unique_ptr<EnemyBase>> enemies;
-    const int MAX_ENEMIES = 5;
-    const float RESPAWN_DELAY = 100.0f;
+    const int MAX_ENEMIES = 10;
+    const float RESPAWN_DELAY = 6.0f;
     sf::Clock respawnTimer;
 
     for (int i = 0; i < MAX_ENEMIES; ++i)
@@ -72,13 +79,13 @@ int main() {
             randomPos = {x, y};
         } while (gameMap.isSolid(randomPos));
 
-        if (RandomGenerator::getFloat(0.f, 1.f) > 0.5f)
-        {
+        float randType = RandomGenerator::getFloat(0.f, 1.f);
+        if (randType < 0.4f) {
             enemies.push_back(std::make_unique<ChaserEnemy>());
-        }
-        else
-        {
+        } else if (randType < 0.8f) {
             enemies.push_back(std::make_unique<GhostEnemy>());
+        } else {
+            enemies.push_back(std::make_unique<DevilEnemy>());
         }
         enemies.back()->setPosition(randomPos);
     }
@@ -91,6 +98,7 @@ int main() {
     std::vector<Bullet> bullets;
     std::vector<std::unique_ptr<Effect>> effects;
     std::vector<std::unique_ptr<Coin>> coins;
+    std::vector<std::unique_ptr<DevilProjectile>> enemyProjectiles;
     sf::Clock shootTimer;
 
     sf::Text ammoText(ammoFont);
@@ -248,13 +256,13 @@ int main() {
                         randomPos = {x, y};
                     } while (gameMap.isSolid(randomPos));
 
-                    if (RandomGenerator::getFloat(0.f, 1.f) > 0.5f)
-                    {
+                    float randType = RandomGenerator::getFloat(0.f, 1.f);
+                    if (randType < 0.0f) {
                         enemies.push_back(std::make_unique<ChaserEnemy>());
-                    }
-                    else
-                    {
+                    } else if (randType < 0.0f) {
                         enemies.push_back(std::make_unique<GhostEnemy>());
+                    } else {
+                        enemies.push_back(std::make_unique<DevilEnemy>());
                     }
                     enemies.back()->setPosition(randomPos);
                 }
@@ -274,8 +282,27 @@ int main() {
             effect->update();
         }
 
+
+        const float magnetRadius = 150.f;
+        const float magnetRadiusSq = magnetRadius * magnetRadius;
+        const float magnetSpeed = 500.f;
+        sf::Vector2f playerPos = player.getPosition();
+        float dt_sec = dt.asSeconds();
+
         for (auto& coin : coins) {
             coin->update();
+
+            sf::Vector2f coinPos = coin->getPosition();
+            sf::Vector2f dir = playerPos - coinPos;
+            float distSq = dir.x * dir.x + dir.y * dir.y;
+
+            if (distSq < magnetRadiusSq && distSq > 0.01f) {
+                float dist = std::sqrt(distSq);
+                sf::Vector2f normDir = dir / dist;
+                sf::Vector2f velocity = normDir * magnetSpeed * dt_sec;
+
+                coin->setPosition(coinPos + velocity);
+            }
         }
         std::erase_if(coins, [&](const auto& coin) {
             if (player.getCollisionBounds().findIntersection(coin->getBounds())) {
@@ -289,10 +316,35 @@ int main() {
         {
             if (enemy->hasJustDied())
             {
-                coins.push_back(std::make_unique<Coin>(enemy->getPosition()));
+                int coinCount = enemy->getCoinValue();
+                for (int c = 0; c < coinCount; ++c) {
+                    sf::Vector2f pos = enemy->getPosition();
+                    pos.x += RandomGenerator::getFloat(-40.f, 40.f);
+                    pos.y += RandomGenerator::getFloat(-40.f, 40.f);
+                    coins.push_back(std::make_unique<Coin>(pos));
+                }
                 enemy->acknowledgeDeath();
             }
         }
+
+        for (auto& proj : enemyProjectiles)
+        {
+            proj->update(dt.asSeconds(), gameMap);
+
+            if (proj->getBounds().findIntersection(player.getCollisionBounds()) &&
+                playerDamageTimer.getElapsedTime().asSeconds() > PLAYER_IFRAME_DURATION)
+            {
+                sf::Vector2f knockbackDir = player.getPosition() - proj->getBounds().position;
+                float length = std::sqrt(knockbackDir.x * knockbackDir.x + knockbackDir.y * knockbackDir.y);
+                if (length != 0.f) knockbackDir /= length;
+                else knockbackDir = {1.f, 0.f};
+
+                player.takeDamage(15.f, knockbackDir);
+                playerDamageTimer.restart();
+                proj->hit();
+            }
+        }
+        std::erase_if(enemyProjectiles, [](const auto& proj){ return proj->isDead(); });
 
         for (auto& enemy : enemies)
         {
@@ -301,7 +353,14 @@ int main() {
             if (enemy->didAttackLand())
             {
                 sf::FloatRect attackBox = enemy->getAttackHitbox();
-                if (attackBox.findIntersection(player.getCollisionBounds()) &&
+
+                if (attackBox.size.x < 0)
+                {
+                    sf::Vector2f spawnPos = enemy->getPosition();
+                    sf::Vector2f dir = player.getPosition() - spawnPos;
+                    enemyProjectiles.push_back(std::make_unique<DevilProjectile>(spawnPos, dir));
+                }
+                else if (attackBox.findIntersection(player.getCollisionBounds()) &&
                     playerDamageTimer.getElapsedTime().asSeconds() > PLAYER_IFRAME_DURATION)
                 {
                     sf::Vector2f knockbackDir = player.getPosition() - enemy->getPosition();
@@ -319,7 +378,6 @@ int main() {
             }
         }
 
-        sf::Vector2f playerPos = player.getPosition();
         sf::Vector2f viewSizeBlockedCamera = camera.getSize();
 
 
@@ -366,6 +424,10 @@ int main() {
 
         for (const auto& effect : effects) {
             effect->draw(window);
+        }
+
+        for (const auto& proj : enemyProjectiles) {
+            proj->draw(window);
         }
 
         for (auto &bullet: bullets) {

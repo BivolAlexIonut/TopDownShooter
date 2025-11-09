@@ -363,3 +363,8 @@ void ChaserEnemy::updateAnimation()
         }
     }
 }
+
+int ChaserEnemy::getCoinValue() const
+{
+    return 5;
+}

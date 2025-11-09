@@ -12,6 +12,7 @@ public:
     void draw(sf::RenderWindow &window) const;
     sf::FloatRect getBounds() const;
     sf::Vector2f getPosition() const;
+    void setPosition(sf::Vector2f pos);
 
 private:
     sf::Sprite m_sprite;

@@ -75,6 +75,10 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         GameExceptions.h
         Coin.h
         Coin.cpp
+        DevilProjectile.h
+        DevilProjectile.cpp
+        DevilEnemy.h
+        DevilEnemy.cpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

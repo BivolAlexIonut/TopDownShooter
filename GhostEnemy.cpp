@@ -462,3 +462,8 @@ void GhostEnemy::updateHealthBar() {
     m_healthBarBackground.setPosition(barPos);
     m_healthBarForeground.setPosition(barPos);
 }
+
+int GhostEnemy::getCoinValue() const
+{
+    return 7;
+}

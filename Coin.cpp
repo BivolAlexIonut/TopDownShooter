@@ -53,3 +53,7 @@ sf::FloatRect Coin::getBounds() const
 {
     return m_sprite.getGlobalBounds();
 }
+
+void Coin::setPosition(sf::Vector2f pos) {
+    m_sprite.setPosition(pos);
+}

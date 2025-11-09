@@ -32,6 +32,7 @@ public:
 
     [[nodiscard]] bool hasJustDied() const override;
     void acknowledgeDeath() override;
+    [[nodiscard]] int getCoinValue() const override;
 
     bool isAttacking() const override;
     bool didAttackLand() override;
