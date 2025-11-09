@@ -249,9 +249,10 @@ sf::FloatRect DevilEnemy::getAttackHitbox() const {
     return {{-1.f, -1.f}, {-1.f, -1.f}};
 }
 
+/*
 std::unique_ptr<EnemyBase> DevilEnemy::clone() const {
     return std::make_unique<DevilEnemy>(*this);
-}
+}*/
 
 int DevilEnemy::getCoinValue() const {
     return 10;
