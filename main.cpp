@@ -257,9 +257,9 @@ int main() {
                     } while (gameMap.isSolid(randomPos));
 
                     float randType = RandomGenerator::getFloat(0.f, 1.f);
-                    if (randType < 0.0f) {
+                    if (randType < 0.2f) {
                         enemies.push_back(std::make_unique<ChaserEnemy>());
-                    } else if (randType < 0.0f) {
+                    } else if (randType < 0.4f) {
                         enemies.push_back(std::make_unique<GhostEnemy>());
                     } else {
                         enemies.push_back(std::make_unique<DevilEnemy>());
