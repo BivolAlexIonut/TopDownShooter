@@ -4,6 +4,9 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <map>
+#include <list>
+#include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include "Bullet.h"
 #include "ChaserEnemy.h"
@@ -16,6 +19,9 @@
 #include "Coin.h"
 #include "DevilEnemy.h"
 #include "DevilProjectile.h"
+
+std::map<std::string, sf::SoundBuffer> soundBuffers;
+std::list<sf::Sound> activeSounds;
 
 int main() {
     sf::RenderWindow window(sf::VideoMode({1280, 720}), "Top-Down Shooter");
@@ -33,7 +39,7 @@ int main() {
     GameMap gameMap;
     constexpr float mapScale = 0.4f;
     sf::FloatRect mapBounds;
-    Player player(1640 * mapScale, 1360 * mapScale);
+
     sf::Font ammoFont;
 
     const std::string devilBasePath = "assets/enemies/Flying Demon 2D Pixel Art/Sprites/with_outline/";
@@ -55,6 +61,17 @@ int main() {
         if (!ammoFont.openFromFile("fonts/m6x11.ttf")) {
             throw FontLoadException("fonts/m6x11.ttf");
         }
+
+        std::cout << "Loading sounds..." << std::endl;
+        if (!soundBuffers["player_step"].loadFromFile("assets/sounds/steps/Steps_floor-001.ogg")) {
+            throw AssetLoadException("Steps_floor-001.ogg");
+        }
+        if (!soundBuffers["pistol_shoot"].loadFromFile("assets/sounds/shoot/pistol.wav")) {
+            throw AssetLoadException("pistol.ogg");
+        }
+        if (!soundBuffers["enemy_hurt"].loadFromFile("/home/alex/TopDownShooter/assets/sounds/enemies/chaser/Orc_Damage.wav")) {
+            throw AssetLoadException("pistol.ogg");
+        }
     }
     catch (const GameException& e) {
         std::cerr << "EROARE FATALA: " << e.what() << std::endl;
@@ -64,6 +81,8 @@ int main() {
         std::cerr << "EROARE NECUNOSCUTA: " << e.what() << std::endl;
         return -1;
     }
+
+    Player player(1640 * mapScale, 1360 * mapScale,soundBuffers);
 
     std::vector<std::unique_ptr<EnemyBase>> enemies;
     const int MAX_ENEMIES = 10;
@@ -193,6 +212,9 @@ int main() {
             getCurrentWeaponCooldown()
             && player.canShoot(mousePositionWorld)) {
             bullets.push_back((player.shoot(mousePositionWorld)));
+            activeSounds.emplace_back(soundBuffers["pistol_shoot"]);
+            activeSounds.back().setPitch(RandomGenerator::getFloat(0.95f, 1.05f));
+            activeSounds.back().play();
             shootTimer.restart();
             }
 
@@ -210,6 +232,10 @@ int main() {
                     {
                         float damage = bullet.getDamage();
                         enemy->takeDamage(damage);
+                        activeSounds.emplace_back(soundBuffers["enemy_hurt"]);
+                        activeSounds.back().setPitch(RandomGenerator::getFloat(1.f, 3.f));
+                        activeSounds.back().setVolume(20.f);
+                        activeSounds.back().play();
                         bullet.hit();
 
                         if (dynamic_cast<GhostEnemy*>(enemy.get()))
@@ -487,7 +513,7 @@ int main() {
         float coinTextWidth = coinText.getGlobalBounds().size.x;
         float coinIconWidth = coinIconSprite.getGlobalBounds().size.x;
 
-        coinIconSprite.setPosition({viewSize.x - coinIconWidth - 80.f, 15.f});
+        coinIconSprite.setPosition({viewSize.x - coinIconWidth - 100.f, 15.f});
         coinText.setPosition({viewSize.x - coinTextWidth - 20.f, 10.f});
 
         player.drawUI(window);
@@ -495,6 +521,9 @@ int main() {
         window.draw(coinText);
         window.draw(coinIconSprite);
         window.draw(crosshairSprite);
+        std::erase_if(activeSounds, [](const sf::Sound& s) {
+        return s.getStatus() == sf::Sound::Status::Stopped;
+    });
 
         window.display();
     }

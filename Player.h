@@ -2,6 +2,7 @@
 #ifndef __clangd__
 #include <SFML/Graphics.hpp>
 #endif
+#include <SFML/Audio.hpp>
 #include "Health.h"
 #include "GunSwitch.h"
 #include "Bullet.h"
@@ -9,7 +10,7 @@
 
 class Player {
 public:
-    Player(float startX, float startY);
+    Player(float startX, float startY,const std::map<std::string, sf::SoundBuffer>& soundBuffers);
     ~Player();
 
     //Functiile triviale ale playerului
@@ -93,6 +94,11 @@ private:
     sf::RectangleShape m_progressBarBackground;
     sf::RectangleShape m_progressBarFront;
 
+    bool m_wasMoving;
+
     int m_coinCount;
+    sf::Sound m_stepSound;
+    sf::Clock m_stepTimer;
+    float m_stepCooldown = 0.35f;
     //--------------------------------------------------
 };

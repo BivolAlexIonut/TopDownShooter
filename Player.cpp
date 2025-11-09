@@ -1,27 +1,28 @@
 #include "Player.h"
+#include "RandomGenerator.h"
 #include <cmath>
 #include <iostream>
 #include <ostream>
 #include <algorithm>
 
 constexpr float PI = 3.14159265358979323846f;
+static sf::SoundBuffer s_emptySoundBuffer;
 
-Player::Player(float startX, float startY) : m_health(100.f),
-                                             playerTexture(),
-                                             playerSprite(this->playerTexture),
-                                             m_gunSwitch(),
-                                             m_isReloading(false),
-                                             m_reloadAnimSprite(this->m_reloadAnimTexture),
-                                             m_healthBarSprite(this->m_reloadAnimTexture),
-                                             m_reloadingWeaponIndex(-1),
-                                             m_isKnockedBack(false),
-                                             m_knockbackDuration(0.15f),
-                                             m_knockbackVelocity(0.f,0.f),
-                                             m_isInteracting(false),
-                                             m_interactionTileID(0),
-                                             m_interactionDuration(2.0f),
-                                             m_coinCount(0)
-{
+Player::Player(float startX, float startY, const std::map<std::string, sf::SoundBuffer>& soundBuffers) : m_health(100.f),
+    playerTexture(),
+    playerSprite(this->playerTexture),
+    m_gunSwitch(),
+    m_isReloading(false),
+    m_reloadAnimSprite(this->m_reloadAnimTexture),
+    m_healthBarSprite(this->m_reloadAnimTexture),
+    m_reloadingWeaponIndex(-1),
+    m_isKnockedBack(false),
+    m_knockbackDuration(0.15f),
+    m_knockbackVelocity(0.f, 0.f),
+    m_isInteracting(false),
+    m_interactionTileID(0),
+    m_interactionDuration(2.0f),
+    m_wasMoving(false), m_coinCount(0),m_stepSound(s_emptySoundBuffer),m_stepCooldown(0.35f) {
     if (!this->playerTexture.loadFromFile("assets/Premium Content/Examples/Basic Usage.png")) {
         std::cerr << "EROARE: Nu am putut incarca ../assets/Premium Content/Examples/Basic Usage.png" << std::endl;
     }
@@ -31,6 +32,15 @@ Player::Player(float startX, float startY) : m_health(100.f),
     if (!this->m_reloadAnimTexture.loadFromFile("assets/effects/All.png")) {
         std::cerr << "EROARE: Nu am putut incarca ../assets/effects/All.png" << std::endl;
     }
+
+    if (soundBuffers.count("player_step")) {
+        m_stepSound.setBuffer(soundBuffers.at("player_step"));
+        m_stepSound.setVolume(100.f);
+        std::cout << "DEBUG: Sunetul player_step a fost INCARCAT si atasat." << std::endl;
+    } else {
+        std::cerr << "EROARE FATALA: Nu am gasit 'player_step' in soundBuffers!" << std::endl;
+    }
+
     m_healthBarSprite.setTexture(m_reloadAnimTexture);
     //---------------------------------------------------------------------------------------------------
     m_reloadAnimFrames.push_back(sf::IntRect({290, 162}, {44, 44}));
@@ -300,7 +310,6 @@ void Player::updateHealthBarPosition() {
     m_healthBarSprite.setPosition({x, y});
 }
 
-//Cooldown pentru fiecare arma in aprte
 float Player::getCurrentWeaponCooldown() const {
     int index = m_gunSwitch.getCurrentWeaponIndex();
     if (index < 0 || static_cast<size_t>(index) >= m_weaponShootCooldowns.size()) {
@@ -309,7 +318,6 @@ float Player::getCurrentWeaponCooldown() const {
     return m_weaponShootCooldowns[index];
 }
 
-//Update pentru player,include movementul,rotatia,reloadul si animatii
 void Player::update(float dt, sf::Vector2f mousePosition, GameMap &gameMap) {
     if (m_isInteracting)
     {
@@ -397,10 +405,37 @@ void Player::update(float dt, sf::Vector2f mousePosition, GameMap &gameMap) {
             direction /= length;
         }
 
+        bool isMoving = (direction.x != 0.f || direction.y != 0.f);
+
+        if (isMoving) {
+            if (!m_wasMoving) {
+                std::cout << "DEBUG: Primul pas!" << std::endl;
+                m_stepSound.setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
+                m_stepSound.play();
+                m_stepTimer.restart();
+            } else {
+                if (m_stepTimer.getElapsedTime().asSeconds() > m_stepCooldown) {
+                    std::cout << "DEBUG: Pas urmator (dupa cooldown)!" << std::endl;
+                    m_stepSound.setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
+                    m_stepSound.play();
+                    m_stepTimer.restart();
+                }
+            }
+        }
+        m_wasMoving = isMoving;
+
         int currentSpeedIndex = m_gunSwitch.getCurrentWeaponIndex();
         float currentSpeed = 270.f;
         if (currentSpeedIndex >= 0 && static_cast<size_t>(currentSpeedIndex) < m_movementSpeeds.size()) {
             currentSpeed = m_movementSpeeds[currentSpeedIndex];
+        }
+        const float baseSpeedForSteps = 300.f;
+        const float baseStepCooldown = 0.4f;
+
+        if (currentSpeed > 0.f) {
+            m_stepCooldown = baseStepCooldown * (baseSpeedForSteps / currentSpeed);
+        } else {
+            m_stepCooldown = baseStepCooldown;
         }
         velocity = direction * currentSpeed;
     }
