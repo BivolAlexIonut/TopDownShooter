@@ -61,7 +61,7 @@ GhostEnemy::GhostEnemy()
       m_currentAngleRad(0.f),
       m_didAttackLand(false),
       m_health{75.f, 75.f},
-      m_isReadyForRemoval(false),m_abilityChargeTime(1.0f),m_justDied(false) {
+      m_isReadyForRemoval(false),m_justDied(false),m_abilityChargeTime(1.0f) {
     m_sprite.setTexture(s_stateTextures[State::IDLE]);
 
     const int FRAME_W = 128;
