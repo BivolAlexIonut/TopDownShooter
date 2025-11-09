@@ -36,6 +36,8 @@ public:
     sf::FloatRect getAttackHitbox() const override;
     void takeDamage(float damage) override;
     bool isDead() const override;
+    [[nodiscard]] bool hasJustDied() const override;
+    void acknowledgeDeath() override;
 
 private:
     void updateAnimation();
@@ -62,6 +64,7 @@ private:
     sf::RectangleShape m_healthBarBackground;
     sf::RectangleShape m_healthBarForeground;
     bool m_isReadyForRemoval;
+    bool m_justDied;
 
     sf::Clock m_abilityTimer;
     float m_abilityChargeTime;

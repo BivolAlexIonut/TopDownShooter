@@ -30,7 +30,7 @@ ChaserEnemy::ChaserEnemy()
       m_currentState(State::IDLE),
       m_currentFrame(0), m_frameTime(0.05f), m_didAttackLand(false), m_damageFrame(8), m_currentAngleRad(0.f),
       m_health(100.f, 100.f), m_previousState(m_currentState), m_alertSprite(ChaserEnemy::s_alertTexture),
-      m_alertDuration(0.8f),m_isReadyForRemoval(false)
+      m_alertDuration(0.8f),m_isReadyForRemoval(false),m_justDied(false)
     {
 
     m_sprite.setTexture(s_texture);
@@ -260,6 +260,7 @@ void ChaserEnemy::takeDamage(float damage) {
     if (m_health.isDead())
     {
         m_currentState = State::DYING;
+        m_justDied = true;
         m_currentFrame = 0;
         m_animationTimer.restart();
 
@@ -282,6 +283,14 @@ void ChaserEnemy::setPosition(sf::Vector2f position) {
 
 sf::Vector2f ChaserEnemy::getPosition() const {
     return m_sprite.getPosition();
+}
+
+bool ChaserEnemy::hasJustDied() const {
+    return m_justDied;
+}
+
+void ChaserEnemy::acknowledgeDeath() {
+    m_justDied = false;
 }
 
 bool ChaserEnemy::isAttacking() const {

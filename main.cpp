@@ -172,6 +172,9 @@ int main() {
                 if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::R) {
                     player.reload();
                 }
+                if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Backspace) {
+                    window.close();
+                }
             }
         }
 
@@ -214,7 +217,7 @@ int main() {
                         else
                         {
                             float effectScale = 0.25f + (damage / 200.f);
-                            effectScale = std::clamp(effectScale, 0.2f, 5.0f);
+                            effectScale = std::clamp(effectScale, 0.2f, 2.0f);
                             effects.push_back(std::make_unique<Effect>(
                                 bloodEffectTexture,
                                 bloodEffectFrames,
@@ -245,7 +248,14 @@ int main() {
                         randomPos = {x, y};
                     } while (gameMap.isSolid(randomPos));
 
-                    enemies.push_back(std::make_unique<ChaserEnemy>());
+                    if (RandomGenerator::getFloat(0.f, 1.f) > 0.5f)
+                    {
+                        enemies.push_back(std::make_unique<ChaserEnemy>());
+                    }
+                    else
+                    {
+                        enemies.push_back(std::make_unique<GhostEnemy>());
+                    }
                     enemies.back()->setPosition(randomPos);
                 }
             }
@@ -274,6 +284,15 @@ int main() {
             }
             return false;
         });
+
+        for (auto& enemy : enemies)
+        {
+            if (enemy->hasJustDied())
+            {
+                coins.push_back(std::make_unique<Coin>(enemy->getPosition()));
+                enemy->acknowledgeDeath();
+            }
+        }
 
         for (auto& enemy : enemies)
         {
@@ -383,7 +402,6 @@ int main() {
         });
         std::erase_if(enemies, [&](const auto& enemy) {
             if (enemy->isDead()) {
-                coins.push_back(std::make_unique<Coin>(enemy->getPosition()));
                 return true;
             }
             return false;

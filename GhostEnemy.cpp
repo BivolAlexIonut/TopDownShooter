@@ -61,7 +61,7 @@ GhostEnemy::GhostEnemy()
       m_currentAngleRad(0.f),
       m_didAttackLand(false),
       m_health{75.f, 75.f},
-      m_isReadyForRemoval(false),m_abilityChargeTime(1.0f) {
+      m_isReadyForRemoval(false),m_abilityChargeTime(1.0f),m_justDied(false) {
     m_sprite.setTexture(s_stateTextures[State::IDLE]);
 
     const int FRAME_W = 128;
@@ -421,6 +421,7 @@ void GhostEnemy::takeDamage(float damage) {
     if (m_health.isDead())
     {
         m_currentState = State::DYING;
+        m_justDied = true;
         m_currentFrame = 0;
         m_animationTimer.restart();
 
@@ -438,6 +439,14 @@ void GhostEnemy::takeDamage(float damage) {
 
 bool GhostEnemy::isDead() const {
     return m_isReadyForRemoval;
+}
+
+bool GhostEnemy::hasJustDied() const {
+    return m_justDied;
+}
+
+void GhostEnemy::acknowledgeDeath() {
+    m_justDied = false;
 }
 
 void GhostEnemy::updateHealthBar() {

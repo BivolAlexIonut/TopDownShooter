@@ -23,4 +23,7 @@ public:
 
     virtual void takeDamage(float damage) = 0;
     [[nodiscard]] virtual bool isDead() const = 0;
+
+    [[nodiscard]] virtual bool hasJustDied() const = 0;
+    virtual void acknowledgeDeath() = 0;
 };

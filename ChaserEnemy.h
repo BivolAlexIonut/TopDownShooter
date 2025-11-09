@@ -30,6 +30,9 @@ public:
     void takeDamage(float damage) override;
     bool isDead() const override;
 
+    [[nodiscard]] bool hasJustDied() const override;
+    void acknowledgeDeath() override;
+
     bool isAttacking() const override;
     bool didAttackLand() override;
     sf::FloatRect getAttackHitbox() const override;
@@ -64,6 +67,7 @@ private:
     float m_alertDuration;
 
     bool m_isReadyForRemoval;
+    bool m_justDied;
 
     static sf::Texture s_texture;
     static sf::Texture s_alertTexture;
