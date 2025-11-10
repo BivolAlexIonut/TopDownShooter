@@ -59,6 +59,21 @@ Player::Player(float startX, float startY, const std::map<std::string, sf::Sound
     weaponNames.emplace_back("SNIPER");
     //------------------------------
 
+    //Sunete arme
+    m_weaponShootSounds.emplace_back("pistol_shoot");
+    m_weaponShootSounds.emplace_back("tommygun_shoot");
+    m_weaponShootSounds.emplace_back("rpg_shoot");
+    m_weaponShootSounds.emplace_back("smg_shoot");
+    m_weaponShootSounds.emplace_back("shotgun_shoot");
+    m_weaponShootSounds.emplace_back("sniper_shoot");
+
+    m_weaponReloadSounds.emplace_back("pistol_reload");
+    m_weaponReloadSounds.emplace_back("tommygun_reload");
+    m_weaponReloadSounds.emplace_back("rpg_reload");
+    m_weaponReloadSounds.emplace_back("smg_reload");
+    m_weaponReloadSounds.emplace_back("shotgun_reload");
+    m_weaponReloadSounds.emplace_back("sniper_reload");
+
     //Scalez animatia si incarc textura
     m_reloadAnimSprite.setScale(sf::Vector2f(1.4f, 1.4f));
     m_reloadAnimSprite.setTextureRect(m_reloadAnimFrames[0]);
@@ -579,8 +594,6 @@ Bullet Player::shoot(sf::Vector2f mousePosition) {
     sf::Vector2f bulletScale = m_weaponBulletScales[currentIndex];
 
     float currentDamage = m_weaponDamage[currentIndex];
-    //cosntante pentru a aseza corect punctul de plecare a gloantelor
-    //armele nu sunt centrate cu originea playerului el le tine pe partea dreapta+
     const float localBarrelOffsetX = barrelOffset.x;
     const float localBarrelOffsetY = barrelOffset.y;
 
@@ -612,9 +625,17 @@ bool Player::canShoot(sf::Vector2f mousePosition) const {
     return weaponCurrentAmmo[index] > 0;
 }
 
-void Player::reload() {
+std::string Player::getShootSoundKey() const {
+    int index = m_gunSwitch.getCurrentWeaponIndex();
+    if (index < 0 || static_cast<size_t>(index) >= m_weaponShootSounds.size()) {
+        return "";
+    }
+    return m_weaponShootSounds[index];
+}
+
+std::pair<std::string,float> Player::reload() {
     if (m_isReloading) {
-        return;
+        return {"", 0.f};
     }
 
     int index = m_gunSwitch.getCurrentWeaponIndex();
@@ -625,7 +646,7 @@ void Player::reload() {
         static_cast<size_t>(index) >= weaponCurrentAmmo.size() ||
         static_cast<size_t>(index) >= weaponReserveAmmo.size()) {
         std::cerr << "Eroare: Date de reincarcare invalide pentru indexul " << index << std::endl;
-        return;
+        return {"", 0.f};
     }
 
     int magSize = weaponMagSize[index];
@@ -634,12 +655,12 @@ void Player::reload() {
 
     int amountNeeded = magSize - currentAmmo;
     if (amountNeeded <= 0 || reserveAmmo <= 0) {
-        return;
+        return {"", 0.f};
     }
 
     if (static_cast<size_t>(index) >= m_reloadAnimPosition.size()) {
         std::cerr << "Eroare: Pozitie de reincarcare invalida pentru indexul " << index << std::endl;
-        return;
+        return {"", 0.f};
     }
     m_reloadAnimSprite.setPosition(m_reloadAnimPosition[index]);
 
@@ -648,7 +669,10 @@ void Player::reload() {
     m_reloadingWeaponIndex = index;
     m_currentReloadTotalTime = m_weaponReloadTime[index];
 
+    std::string soundKeyToPlay = m_weaponReloadSounds[index];
     std::cout << "Reloading... (va dura " << m_currentReloadTotalTime << "s)" << std::endl;
+
+    return {soundKeyToPlay, m_currentReloadTotalTime};
 }
 
 int Player::getCurrentAmmo() const {

@@ -22,6 +22,7 @@
 
 std::map<std::string, sf::SoundBuffer> soundBuffers;
 std::list<sf::Sound> activeSounds;
+sf::Music backgroundMusic;
 
 int main() {
     sf::RenderWindow window(sf::VideoMode({1280, 720}), "Top-Down Shooter");
@@ -63,14 +64,89 @@ int main() {
         }
 
         std::cout << "Loading sounds..." << std::endl;
-        if (!soundBuffers["player_step"].loadFromFile("assets/sounds/steps/Steps_floor-001.ogg")) {
-            throw AssetLoadException("Steps_floor-001.ogg");
+        if (!soundBuffers["player_step"].loadFromFile("assets/sounds/steps/Steps_floor-001.wav")) {
+            throw AssetLoadException("Steps_floor-001.wav");
         }
         if (!soundBuffers["pistol_shoot"].loadFromFile("assets/sounds/shoot/pistol.wav")) {
             throw AssetLoadException("pistol.ogg");
         }
-        if (!soundBuffers["enemy_hurt"].loadFromFile("/home/alex/TopDownShooter/assets/sounds/enemies/chaser/Orc_Damage.wav")) {
-            throw AssetLoadException("pistol.ogg");
+        if (!soundBuffers["chaser_hurt"].loadFromFile("/home/alex/TopDownShooter/assets/sounds/enemies/chaser/Orc_Damage.wav")) {
+            throw AssetLoadException("Orc_Damage.wav");
+        }
+        if (!soundBuffers["ghost_hurt"].loadFromFile("assets/sounds/enemies/ghost/Ghost_Death.wav")) {
+            throw AssetLoadException("Ghost_Death.wav");
+        }
+        if (!soundBuffers["devil_hurt"].loadFromFile("assets/sounds/enemies/devil/Behemoth_Death.wav")) {
+            throw AssetLoadException("Behemoth_Death.wav");
+        }
+        if (!soundBuffers["chaser_attack"].loadFromFile("assets/sounds/enemies/chaser/Attack.wav")) {
+            throw AssetLoadException("Chaser_Attack.wav");
+        }
+        if (!soundBuffers["ghost_attack"].loadFromFile("assets/sounds/enemies/ghost/Attack.wav")) {
+            throw AssetLoadException("Ghost_Attack.wav");
+        }
+        if (!soundBuffers["devil_attack"].loadFromFile("assets/sounds/enemies/devil/Attack.wav")) {
+            throw AssetLoadException("Devil_Attack.wav");
+        }
+        if (!soundBuffers["chaser_move"].loadFromFile("assets/sounds/enemies/chaser/Move.wav")) {
+            throw AssetLoadException("Chaser_Move.ogg");
+        }
+        if (!soundBuffers["ghost_move"].loadFromFile("assets/sounds/enemies/chaser/Move.wav")) {
+            throw AssetLoadException("Chaser_Move.ogg");
+        }
+        if (!soundBuffers["devil_move"].loadFromFile("assets/sounds/enemies/chaser/Move.wav")) {
+            throw AssetLoadException("Chaser_Move.ogg");
+        }
+        // --- Pistol ---
+        if (!soundBuffers["pistol_shoot"].loadFromFile("assets/sounds/shoot/pistol.wav")) {
+            throw AssetLoadException("pistol.wav");
+        }
+        if (!soundBuffers["pistol_reload"].loadFromFile("assets/sounds/reload/pistol_reload.wav")) {
+            throw AssetLoadException("pistol_reload.wav");
+        }
+        // --- Tommy Gun ---
+        if (!soundBuffers["tommygun_shoot"].loadFromFile("assets/sounds/shoot/tommygun.wav")) {
+            throw AssetLoadException("tommygun.wav");
+        }
+        if (!soundBuffers["tommygun_reload"].loadFromFile("assets/sounds/reload/tommygun_reload.wav")) {
+            throw AssetLoadException("tommygun_reload.wav");
+        }
+        // --- RPG ---
+        if (!soundBuffers["rpg_shoot"].loadFromFile("assets/sounds/shoot/rpg.wav")) {
+            throw AssetLoadException("rpg.wav");
+        }
+        if (!soundBuffers["rpg_reload"].loadFromFile("assets/sounds/reload/rpg_reload.wav")) {
+            throw AssetLoadException("rpg_reload.wav");
+        }
+        // --- SMG ---
+        if (!soundBuffers["smg_shoot"].loadFromFile("assets/sounds/shoot/smg.wav")) {
+            throw AssetLoadException("smg.wav");
+        }
+        if (!soundBuffers["smg_reload"].loadFromFile("assets/sounds/reload/smg_reload.wav")) {
+            throw AssetLoadException("smg_reload.wav");
+        }
+        // --- Shotgun ---
+        if (!soundBuffers["shotgun_shoot"].loadFromFile("assets/sounds/shoot/shotgun.wav")) {
+            throw AssetLoadException("shotgun.wav");
+        }
+        if (!soundBuffers["shotgun_reload"].loadFromFile("assets/sounds/reload/shotgun_reload.wav")) {
+            throw AssetLoadException("shotgun_reload.wav");
+        }
+        // --- Sniper ---
+        if (!soundBuffers["sniper_shoot"].loadFromFile("assets/sounds/shoot/sniper.wav")) {
+            throw AssetLoadException("sniper.wav");
+        }
+        if (!soundBuffers["sniper_reload"].loadFromFile("assets/sounds/reload/sniper_reload.wav")) {
+            throw AssetLoadException("sniper_reload.wav");
+        }
+        if (!soundBuffers["coin_drop"].loadFromFile("assets/sounds/coin_drop.wav")) {
+            throw AssetLoadException("coin_drop.wav");
+        }
+        if (!soundBuffers["coin_pickup"].loadFromFile("assets/sounds/coin_pickup.wav")) {
+            throw AssetLoadException("coin_pickup.wav");
+        }
+        if (!backgroundMusic.openFromFile("assets/sounds/background/retro_metal.ogg")) {
+            throw AssetLoadException("retro_metal.ogg");
         }
     }
     catch (const GameException& e) {
@@ -81,6 +157,11 @@ int main() {
         std::cerr << "EROARE NECUNOSCUTA: " << e.what() << std::endl;
         return -1;
     }
+
+    backgroundMusic.setVolume(30.f);
+    backgroundMusic.setLooping(true);
+
+    backgroundMusic.play();
 
     Player player(1640 * mapScale, 1360 * mapScale,soundBuffers);
 
@@ -99,12 +180,12 @@ int main() {
         } while (gameMap.isSolid(randomPos));
 
         float randType = RandomGenerator::getFloat(0.f, 1.f);
-        if (randType < 0.4f) {
-            enemies.push_back(std::make_unique<ChaserEnemy>());
-        } else if (randType < 0.8f) {
-            enemies.push_back(std::make_unique<GhostEnemy>());
+        if (randType < 0.2f) {
+            enemies.push_back(std::make_unique<ChaserEnemy>(soundBuffers));
+        } else if (randType < 0.4f) {
+            enemies.push_back(std::make_unique<GhostEnemy>(soundBuffers));
         } else {
-            enemies.push_back(std::make_unique<DevilEnemy>());
+            enemies.push_back(std::make_unique<DevilEnemy>(soundBuffers));
         }
         enemies.back()->setPosition(randomPos);
     }
@@ -197,7 +278,21 @@ int main() {
                     player.switchWeaponPrev();
                 }
                 if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::R) {
-                    player.reload();
+                    std::pair<std::string, float> reloadData = player.reload();
+                    std::string reloadSoundKey = reloadData.first;
+                    float reloadAnimDuration = reloadData.second;
+
+                    if (!reloadSoundKey.empty()) {
+                        activeSounds.emplace_back(soundBuffers[reloadSoundKey]);
+                        sf::Sound& newSound = activeSounds.back();
+                        float soundOriginalDuration = soundBuffers[reloadSoundKey].getDuration().asSeconds();
+                        float newPitch = 1.0f;
+                        if (reloadAnimDuration > 0.01f && soundOriginalDuration > 0.01f) {
+                            newPitch = soundOriginalDuration / reloadAnimDuration;
+                        }
+                        newSound.setPitch(newPitch);
+                        newSound.play();
+                    }
                 }
                 if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Backspace) {
                     window.close();
@@ -212,7 +307,14 @@ int main() {
             getCurrentWeaponCooldown()
             && player.canShoot(mousePositionWorld)) {
             bullets.push_back((player.shoot(mousePositionWorld)));
-            activeSounds.emplace_back(soundBuffers["pistol_shoot"]);
+            std::string shootSoundKey = player.getShootSoundKey();
+
+            if (!shootSoundKey.empty()) {
+                activeSounds.emplace_back(soundBuffers[shootSoundKey]);
+                activeSounds.back().setPitch(RandomGenerator::getFloat(0.95f, 1.05f));
+                activeSounds.back().play();
+            }
+
             activeSounds.back().setPitch(RandomGenerator::getFloat(0.95f, 1.05f));
             activeSounds.back().play();
             shootTimer.restart();
@@ -232,10 +334,25 @@ int main() {
                     {
                         float damage = bullet.getDamage();
                         enemy->takeDamage(damage);
-                        activeSounds.emplace_back(soundBuffers["enemy_hurt"]);
-                        activeSounds.back().setPitch(RandomGenerator::getFloat(1.f, 3.f));
-                        activeSounds.back().setVolume(20.f);
-                        activeSounds.back().play();
+
+                        if (dynamic_cast<ChaserEnemy*>(enemy.get())) {
+                            activeSounds.emplace_back(soundBuffers["chaser_hurt"]);
+                            activeSounds.back().setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
+                            activeSounds.back().setVolume(20.f);
+                            activeSounds.back().play();
+
+                        } else if (dynamic_cast<GhostEnemy*>(enemy.get())) {
+                            activeSounds.emplace_back(soundBuffers["ghost_hurt"]);
+                            activeSounds.back().setPitch(RandomGenerator::getFloat(1.1f, 1.3f));
+                            activeSounds.back().setVolume(20.f);
+                            activeSounds.back().play();
+
+                        } else if (dynamic_cast<DevilEnemy*>(enemy.get())) {
+                            activeSounds.emplace_back(soundBuffers["devil_hurt"]);
+                            activeSounds.back().setPitch(RandomGenerator::getFloat(3.0f, 4.0f));
+                            activeSounds.back().setVolume(20.f);
+                            activeSounds.back().play();
+                        }
                         bullet.hit();
 
                         if (dynamic_cast<GhostEnemy*>(enemy.get()))
@@ -284,11 +401,11 @@ int main() {
 
                     float randType = RandomGenerator::getFloat(0.f, 1.f);
                     if (randType < 0.2f) {
-                        enemies.push_back(std::make_unique<ChaserEnemy>());
+                        enemies.push_back(std::make_unique<ChaserEnemy>(soundBuffers));
                     } else if (randType < 0.4f) {
-                        enemies.push_back(std::make_unique<GhostEnemy>());
+                        enemies.push_back(std::make_unique<GhostEnemy>(soundBuffers));
                     } else {
-                        enemies.push_back(std::make_unique<DevilEnemy>());
+                        enemies.push_back(std::make_unique<DevilEnemy>(soundBuffers));
                     }
                     enemies.back()->setPosition(randomPos);
                 }
@@ -332,6 +449,11 @@ int main() {
         }
         std::erase_if(coins, [&](const auto& coin) {
             if (player.getCollisionBounds().findIntersection(coin->getBounds())) {
+                activeSounds.emplace_back(soundBuffers["coin_pickup"]);
+                activeSounds.back().setPitch(RandomGenerator::getFloat(1.1f, 1.3f));
+                activeSounds.back().setVolume(80.f);
+                activeSounds.back().play();
+
                 player.addCoins(1);
                 return true;
             }
@@ -342,6 +464,11 @@ int main() {
         {
             if (enemy->hasJustDied())
             {
+                activeSounds.emplace_back(soundBuffers["coin_drop"]);
+                activeSounds.back().setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
+                activeSounds.back().setVolume(40.f);
+                activeSounds.back().play();
+
                 int coinCount = enemy->getCoinValue();
                 for (int c = 0; c < coinCount; ++c) {
                     sf::Vector2f pos = enemy->getPosition();
@@ -385,6 +512,10 @@ int main() {
                     sf::Vector2f spawnPos = enemy->getPosition();
                     sf::Vector2f dir = player.getPosition() - spawnPos;
                     enemyProjectiles.push_back(std::make_unique<DevilProjectile>(spawnPos, dir));
+
+                    activeSounds.emplace_back(soundBuffers["devil_attack"]);
+                    activeSounds.back().setPitch(2.f);
+                    activeSounds.back().play();
                 }
                 else if (attackBox.findIntersection(player.getCollisionBounds()) &&
                     playerDamageTimer.getElapsedTime().asSeconds() > PLAYER_IFRAME_DURATION)
@@ -398,6 +529,15 @@ int main() {
                     }
                     player.takeDamage(10.f, knockbackDir);
                     playerDamageTimer.restart();
+                    if (dynamic_cast<ChaserEnemy*>(enemy.get())) {
+                        activeSounds.emplace_back(soundBuffers["chaser_attack"]);
+                        activeSounds.back().setVolume(20.f);
+                        activeSounds.back().play();
+                    } else if (dynamic_cast<GhostEnemy*>(enemy.get())) {
+                        activeSounds.emplace_back(soundBuffers["ghost_attack"]);
+                        activeSounds.back().setVolume(20.f);
+                        activeSounds.back().play();
+                    }
 
                     break;
                 }

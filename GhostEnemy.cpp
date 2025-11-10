@@ -1,8 +1,10 @@
 #include "GhostEnemy.h"
 #include <stdexcept>
 #include <cmath>
+#include <iostream>
 
 #include "GameExceptions.h"
+#include "RandomGenerator.h"
 
 std::map<GhostEnemy::State, sf::Texture> GhostEnemy::s_stateTextures;
 std::map<GhostEnemy::AttackDirection, std::vector<sf::IntRect>> GhostEnemy::s_attackAnimations;
@@ -50,7 +52,7 @@ bool GhostEnemy::initAssets()
     return true;
 }
 
-GhostEnemy::GhostEnemy()
+GhostEnemy::GhostEnemy(const std::map<std::string, sf::SoundBuffer> &soundBuffers)
     : m_sprite(GhostEnemy::s_stateTextures[State::IDLE]),
       m_currentState(State::IDLE),
       m_previousState(m_currentState), m_lockedAttackDirection(),
@@ -61,8 +63,15 @@ GhostEnemy::GhostEnemy()
       m_currentAngleRad(0.f),
       m_didAttackLand(false),
       m_health{75.f, 75.f},
-      m_isReadyForRemoval(false),m_justDied(false),m_abilityChargeTime(1.0f) {
+      m_isReadyForRemoval(false),m_justDied(false),m_abilityChargeTime(1.0f),m_moveCooldown(0.45f), m_wasMoving(false) {
     m_sprite.setTexture(s_stateTextures[State::IDLE]);
+
+    if (soundBuffers.count("ghost_move")) {
+        m_moveSound.setBuffer(soundBuffers.at("ghost_move"));
+        m_moveSound.setVolume(40.f);
+    } else {
+        std::cerr << "EROARE: Nu am gasit 'ghost_move' in soundBuffers!" << std::endl;
+    }
 
     const int FRAME_W = 128;
     const int FRAME_H = 128;
@@ -245,6 +254,25 @@ void GhostEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap&
         m_sprite.move({0.f, frameVelocity.y});
     }
     m_currentAngleRad = std::atan2(direction.y, direction.x);
+
+    bool isMoving = (m_currentState == State::MOVING);
+
+    if (isMoving) {
+        if (!m_wasMoving) {
+            m_moveSound.setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
+            m_moveSound.setVolume(10.f);
+            m_moveSound.play();
+            m_moveTimer.restart();
+        } else {
+            if (m_moveTimer.getElapsedTime().asSeconds() > m_moveCooldown) {
+                m_moveSound.setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
+                m_moveSound.setVolume(10.f);
+                m_moveSound.play();
+                m_moveTimer.restart();
+            }
+        }
+    }
+    m_wasMoving = isMoving;
 
     updateAnimation();
     updateHealthBar();

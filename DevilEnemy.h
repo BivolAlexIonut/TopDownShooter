@@ -3,6 +3,7 @@
 #include "Health.h"
 #include <map>
 #include <vector>
+#include <SFML/Audio.hpp>
 
 class DevilEnemy : public EnemyBase {
 public:
@@ -14,7 +15,7 @@ public:
         DYING
     };
 
-    DevilEnemy();
+    DevilEnemy(const std::map<std::string, sf::SoundBuffer>& soundBuffers);
     static bool initAssets(const std::string& basePath);
 
     void update(sf::Time dt, sf::Vector2f playerPosition, const GameMap& gameMap) override;
@@ -62,4 +63,10 @@ private:
 
     bool m_isReadyForRemoval;
     bool m_justDied;
+
+    sf::SoundBuffer soundBuffer;
+    sf::Sound m_moveSound{soundBuffer};
+    sf::Clock m_moveTimer;
+    float m_moveCooldown;
+    bool m_wasMoving;
 };

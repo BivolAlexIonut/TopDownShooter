@@ -2,6 +2,9 @@
 #include "GameExceptions.h"
 #include <cmath>
 #include <stdexcept>
+#include <iostream>
+
+#include "RandomGenerator.h"
 
 sf::Texture ChaserEnemy::s_texture;
 sf::Texture ChaserEnemy::s_alertTexture;
@@ -24,13 +27,13 @@ bool ChaserEnemy::initAssets()
     return true;
 }
 
-ChaserEnemy::ChaserEnemy()
+ChaserEnemy::ChaserEnemy(const std::map<std::string, sf::SoundBuffer>& soundBuffers)
     : m_speed(270.f),
       m_sprite(ChaserEnemy::s_texture),
       m_currentState(State::IDLE),
       m_currentFrame(0), m_frameTime(0.05f), m_didAttackLand(false), m_damageFrame(8), m_currentAngleRad(0.f),
       m_health(100.f, 100.f), m_previousState(m_currentState), m_alertSprite(ChaserEnemy::s_alertTexture),
-      m_alertDuration(0.8f),m_isReadyForRemoval(false),m_justDied(false)
+        m_alertDuration(0.8f),m_isReadyForRemoval(false),m_justDied(false),m_moveCooldown(0.45f), m_wasMoving(false)
     {
 
     m_sprite.setTexture(s_texture);
@@ -39,6 +42,13 @@ ChaserEnemy::ChaserEnemy()
     m_alertSprite.setOrigin({iconBounds.size.x / 2.f, iconBounds.size.y});
     m_alertSprite.setScale({0.15f, 0.15f});
     m_alertSprite.setColor(sf::Color::Yellow);
+
+    if (soundBuffers.count("chaser_move")) {
+        m_moveSound.setBuffer(soundBuffers.at("chaser_move"));
+        m_moveSound.setVolume(20.f);
+    } else {
+        std::cerr << "EROARE: Nu am gasit 'chaser_move' in soundBuffers!" << std::endl;
+    }
 
     constexpr int FRAME_WIDTH = 288;
     constexpr int FRAME_HEIGHT = 311;
@@ -195,6 +205,25 @@ void ChaserEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap
     m_currentAngleRad = std::atan2(dir.y, dir.x);
     float angleInDegrees = m_currentAngleRad * (180.f / 3.14159265f);
     m_sprite.setRotation(sf::degrees(angleInDegrees));
+
+    bool isMoving = (m_currentState == State::MOVING);
+
+    if (isMoving) {
+        if (!m_wasMoving) {
+            m_moveSound.setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
+            m_moveSound.setVolume(10.f);
+            m_moveSound.play();
+            m_moveTimer.restart();
+        } else {
+            if (m_moveTimer.getElapsedTime().asSeconds() > m_moveCooldown) {
+                m_moveSound.setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
+                m_moveSound.setVolume(10.f);
+                m_moveSound.play();
+                m_moveTimer.restart();
+            }
+        }
+    }
+    m_wasMoving = isMoving;
 
     updateAnimation();
     updateHealthBar();

@@ -16,7 +16,7 @@ public:
         DYING
     };
 
-    ChaserEnemy();
+    ChaserEnemy(const std::map<std::string, sf::SoundBuffer>& soundBuffers);
 
     static bool initAssets();
 
@@ -73,4 +73,10 @@ private:
     static sf::Texture s_texture;
     static sf::Texture s_alertTexture;
     static sf::Texture s_deathTexture;
+
+    sf::SoundBuffer soundBuffer;
+    sf::Sound m_moveSound{soundBuffer};
+    sf::Clock m_moveTimer;
+    float m_moveCooldown;
+    bool m_wasMoving;
 };

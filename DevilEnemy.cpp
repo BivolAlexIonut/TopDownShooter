@@ -1,6 +1,9 @@
 #include "DevilEnemy.h"
 #include "GameExceptions.h"
 #include <cmath>
+#include <iostream>
+
+#include "RandomGenerator.h"
 
 std::map<DevilEnemy::State, sf::Texture> DevilEnemy::s_textures;
 
@@ -36,15 +39,22 @@ bool DevilEnemy::initAssets(const std::string& basePath)
     return true;
 }
 
-DevilEnemy::DevilEnemy()
+DevilEnemy::DevilEnemy(const std::map<std::string, sf::SoundBuffer> &soundBuffers)
     : m_sprite(s_textures[State::IDLE]),
       m_currentState(State::IDLE),
       m_previousState(m_currentState),
       m_currentFrame(0), m_frameTime(0.1f), m_speed(150.f), m_damageFrame(6),
       m_didAttackLand(false),
       m_health(120.f, 120.f),
-      m_isReadyForRemoval(false),m_justDied(false)
+      m_isReadyForRemoval(false),m_justDied(false),m_moveCooldown(0.45f), m_wasMoving(false)
 {
+    if (soundBuffers.count("devil_move")) {
+        m_moveSound.setBuffer(soundBuffers.at("devil_move"));
+        m_moveSound.setVolume(20.f);
+    } else {
+        std::cerr << "EROARE: Nu am gasit 'devil_move' in soundBuffers!" << std::endl;
+    }
+
     const int FRAME_W = 81;
     const int FRAME_H = 71;
 
@@ -99,7 +109,7 @@ void DevilEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap&
     const float attackRange = 450.f;
     const float idealRangeMin = 400.f;
     const float moveRange = 700.f;
-    const float attackCooldown = 2.5f;
+    const float attackCooldown = 6.f;
 
     if (m_currentState != State::ATTACKING) {
         if (length <= attackRange && length >= idealRangeMin && m_shootTimer.getElapsedTime().asSeconds() > attackCooldown) {
@@ -130,6 +140,25 @@ void DevilEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap&
     } else if (directionToPlayer.x < -1.0f) {
         m_sprite.setScale(sf::Vector2f(1.2f, 1.2f));
     }
+
+    bool isMoving = (m_currentState == State::FLYING);
+
+    if (isMoving) {
+        if (!m_wasMoving) {
+            m_moveSound.setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
+            m_moveSound.setVolume(10.f);
+            m_moveSound.play();
+            m_moveTimer.restart();
+        } else {
+            if (m_moveTimer.getElapsedTime().asSeconds() > m_moveCooldown) {
+                m_moveSound.setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
+                m_moveSound.setVolume(10.f);
+                m_moveSound.play();
+                m_moveTimer.restart();
+            }
+        }
+    }
+    m_wasMoving = isMoving;
 
     updateAnimation();
     updateHealthBar();

@@ -3,6 +3,7 @@
 #include "Health.h"
 #include <map>
 #include <vector>
+#include <SFML/Audio.hpp>
 
 class GhostEnemy : public EnemyBase
 {
@@ -22,7 +23,7 @@ public:
         DYING
     };
 
-    GhostEnemy();
+    GhostEnemy(const std::map<std::string, sf::SoundBuffer>& soundBuffers);
 
     static bool initAssets();
 
@@ -72,4 +73,10 @@ private:
 
     static std::map<State, sf::Texture> s_stateTextures;
     static sf::Texture s_deathTexture;
+
+    sf::SoundBuffer soundBuffer;
+    sf::Sound m_moveSound{soundBuffer};
+    sf::Clock m_moveTimer;
+    float m_moveCooldown;
+    bool m_wasMoving;
 };

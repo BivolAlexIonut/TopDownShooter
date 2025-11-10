@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #endif
 #include <SFML/Audio.hpp>
+#include <utility>
 #include "Health.h"
 #include "GunSwitch.h"
 #include "Bullet.h"
@@ -34,11 +35,14 @@ public:
     int getCurrentAmmo() const;
     int getReserveAmmo() const;
     std::string getCurrentWeaponName() const;
-    void reload();
+    //void reload();
     bool canShoot(sf::Vector2f mousePosition) const;
 
     void addCoins(int amount);
     [[nodiscard]] int getCoinCount() const;
+
+    std::string getShootSoundKey() const;
+    std::pair<std::string, float> reload();
 
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
 
@@ -99,6 +103,9 @@ private:
     int m_coinCount;
     sf::Sound m_stepSound;
     sf::Clock m_stepTimer;
-    float m_stepCooldown = 0.35f;
+    float m_stepCooldown = 0.20f;
+
+    std::vector<std::string> m_weaponShootSounds;
+    std::vector<std::string> m_weaponReloadSounds;
     //--------------------------------------------------
 };
