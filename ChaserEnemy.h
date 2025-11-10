@@ -16,7 +16,7 @@ public:
         DYING
     };
 
-    ChaserEnemy(const std::map<std::string, sf::SoundBuffer>& soundBuffers);
+    explicit ChaserEnemy(const std::map<std::string, sf::SoundBuffer>& soundBuffers);
 
     static bool initAssets();
 

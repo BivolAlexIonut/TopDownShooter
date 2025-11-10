@@ -23,7 +23,7 @@ public:
         DYING
     };
 
-    GhostEnemy(const std::map<std::string, sf::SoundBuffer>& soundBuffers);
+    explicit GhostEnemy(const std::map<std::string, sf::SoundBuffer>& soundBuffers);
 
     static bool initAssets();
 

@@ -15,7 +15,7 @@ public:
         DYING
     };
 
-    DevilEnemy(const std::map<std::string, sf::SoundBuffer>& soundBuffers);
+    explicit DevilEnemy(const std::map<std::string, sf::SoundBuffer>& soundBuffers);
     static bool initAssets(const std::string& basePath);
 
     void update(sf::Time dt, sf::Vector2f playerPosition, const GameMap& gameMap) override;
