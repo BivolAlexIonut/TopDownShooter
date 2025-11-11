@@ -22,7 +22,7 @@ Player::Player(float startX, float startY, const std::map<std::string, sf::Sound
     m_isInteracting(false),
     m_interactionTileID(0),
     m_interactionDuration(2.0f),
-    m_wasMoving(false), m_coinCount(0),m_stepSound(s_emptySoundBuffer),m_stepCooldown(0.35f) {
+    m_wasMoving(false), m_coinCount(0),m_stepSound(s_emptySoundBuffer),m_stepCooldown(0.35f),m_upgradeCostHealth(100.f) {
     if (!this->playerTexture.loadFromFile("assets/Premium Content/Examples/Basic Usage.png")) {
         std::cerr << "EROARE: Nu am putut incarca ../assets/Premium Content/Examples/Basic Usage.png" << std::endl;
     }
@@ -32,6 +32,10 @@ Player::Player(float startX, float startY, const std::map<std::string, sf::Sound
     if (!this->m_reloadAnimTexture.loadFromFile("assets/effects/All.png")) {
         std::cerr << "EROARE: Nu am putut incarca ../assets/effects/All.png" << std::endl;
     }
+
+    playerSprite.setTexture(playerTexture);
+    m_reloadAnimSprite.setTexture(m_reloadAnimTexture);
+    m_healthBarSprite.setTexture(m_reloadAnimTexture);
 
     if (soundBuffers.count("player_step")) {
         m_stepSound.setBuffer(soundBuffers.at("player_step"));
@@ -104,6 +108,9 @@ Player::Player(float startX, float startY, const std::map<std::string, sf::Sound
     weaponMagSize.push_back(7);
     weaponCurrentAmmo.push_back(7);
     weaponReserveAmmo.push_back(70);
+    m_upgradeCostDamage.push_back(150);
+    m_upgradeCostFireRate.push_back(100);
+    m_upgradeCostMoveSpeed.push_back(300);
 
     // TommyGun
     m_weaponBarrelOffsets.emplace_back(115.f, 470.f);
@@ -123,6 +130,9 @@ Player::Player(float startX, float startY, const std::map<std::string, sf::Sound
     weaponMagSize.push_back(75);
     weaponCurrentAmmo.push_back(75);
     weaponReserveAmmo.push_back(300);
+    m_upgradeCostDamage.push_back(500);
+    m_upgradeCostFireRate.push_back(600);
+    m_upgradeCostMoveSpeed.push_back(400);
 
     // RPG
     m_weaponBarrelOffsets.emplace_back(80.f, 520.f);
@@ -143,6 +153,9 @@ Player::Player(float startX, float startY, const std::map<std::string, sf::Sound
     weaponMagSize.push_back(3);
     weaponCurrentAmmo.push_back(3);
     weaponReserveAmmo.push_back(12);
+    m_upgradeCostDamage.push_back(700);
+    m_upgradeCostFireRate.push_back(300);
+    m_upgradeCostMoveSpeed.push_back(400);
 
     // SMG
     m_weaponBarrelOffsets.emplace_back(100.f, 356.f);
@@ -162,6 +175,9 @@ Player::Player(float startX, float startY, const std::map<std::string, sf::Sound
     weaponMagSize.push_back(35);
     weaponCurrentAmmo.push_back(35);
     weaponReserveAmmo.push_back(180);
+    m_upgradeCostDamage.push_back(750);
+    m_upgradeCostFireRate.push_back(900);
+    m_upgradeCostMoveSpeed.push_back(1000);
 
     // Shotgun
     m_weaponBarrelOffsets.emplace_back(100.f, 460.f);
@@ -181,6 +197,9 @@ Player::Player(float startX, float startY, const std::map<std::string, sf::Sound
     weaponMagSize.push_back(8);
     weaponCurrentAmmo.push_back(8);
     weaponReserveAmmo.push_back(32);
+    m_upgradeCostDamage.push_back(500);
+    m_upgradeCostFireRate.push_back(800);
+    m_upgradeCostMoveSpeed.push_back(400);
 
     // Sniper
     m_weaponBarrelOffsets.emplace_back(107.f, 620.f);
@@ -201,6 +220,9 @@ Player::Player(float startX, float startY, const std::map<std::string, sf::Sound
     weaponMagSize.push_back(5);
     weaponCurrentAmmo.push_back(5);
     weaponReserveAmmo.push_back(20);
+    m_upgradeCostDamage.push_back(950);
+    m_upgradeCostFireRate.push_back(500);
+    m_upgradeCostMoveSpeed.push_back(1000);
 
     sf::IntRect skinRect = m_gunSwitch.getCurrentWeaponRect();
     this->playerSprite.setTextureRect(skinRect);
@@ -705,6 +727,88 @@ void Player::addCoins(int amount) {
     }
 }
 
+bool Player::spendCoins(int amount) {
+    if (m_coinCount >= amount) {
+        m_coinCount -= amount;
+        return true;
+    }
+    return false;
+}
+
 int Player::getCoinCount() const {
     return m_coinCount;
+}
+
+std::map<std::string, std::string> Player::getUpgradeInfo() const {
+
+    std::map<std::string, std::string> info;
+    int index = m_gunSwitch.getCurrentWeaponIndex();
+
+    info["weapon_name"] = getCurrentWeaponName();
+    info["damage"] = std::to_string(static_cast<int>(m_weaponDamage[index]));
+    info["fire_rate"] = std::to_string(m_weaponShootCooldowns[index]);
+    info["move_speed"] = std::to_string(static_cast<int>(m_movementSpeeds[index]));
+
+    info["max_health"] = std::to_string(static_cast<int>(m_health.getMaxHealth()));
+
+    info["cost_damage"] = std::to_string(m_upgradeCostDamage[index]);
+    info["cost_fire_rate"] = std::to_string(m_upgradeCostFireRate[index]);
+    info["cost_move_speed"] = std::to_string(m_upgradeCostMoveSpeed[index]);
+    info["cost_health"] = std::to_string(m_upgradeCostHealth);
+
+    info["coin_count"] = std::to_string(m_coinCount);
+
+    return info;
+}
+
+std::string Player::upgradeCurrentWeaponDamage() {
+    int index = m_gunSwitch.getCurrentWeaponIndex();
+    int& cost = m_upgradeCostDamage[index];
+
+    if (spendCoins(cost)) {
+        m_weaponDamage[index] *= 1.2f;
+        cost = static_cast<int>(static_cast<float>(cost) * 1.3f);
+
+        return "Damage crescut!";
+    }
+    return "Bani insuficienti!";
+}
+
+std::string Player::upgradeCurrentWeaponFireRate() {
+    int index = m_gunSwitch.getCurrentWeaponIndex();
+    int& cost = m_upgradeCostFireRate[index];
+
+    if (spendCoins(cost)) {
+        m_weaponShootCooldowns[index] *= 0.9f;
+        cost = static_cast<int>(static_cast<float>(cost) * 1.3f);
+
+        return "Viteza de tragere crescuta!";
+    }
+    return "Bani insuficienti!";
+}
+
+std::string Player::upgradeCurrentWeaponMoveSpeed() {
+    int index = m_gunSwitch.getCurrentWeaponIndex();
+    int& cost = m_upgradeCostMoveSpeed[index];
+
+    if (spendCoins(cost)) {
+        m_movementSpeeds[index] *= 1.15f;
+        cost = static_cast<int>(static_cast<float>(cost) * 1.3f);
+
+        return "Viteza de miscare crescuta!";
+    }
+    return "Bani insuficienti!";
+}
+
+std::string Player::upgradeMaxHealth() {
+    int& cost = m_upgradeCostHealth;
+
+    if (spendCoins(cost)) {
+        m_health.addMaxHealth(25.f);
+        m_health.addHealth(25.f);
+        updateHealthBar();
+        cost = static_cast<int>(static_cast<float>(cost) * 1.3f);
+        return "Viata maxima crescuta!";
+    }
+    return "Bani insuficienti!";
 }

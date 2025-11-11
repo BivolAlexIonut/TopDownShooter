@@ -4,6 +4,8 @@
 #endif
 #include <SFML/Audio.hpp>
 #include <utility>
+#include <string>
+#include<map>
 #include "Health.h"
 #include "GunSwitch.h"
 #include "Bullet.h"
@@ -35,7 +37,6 @@ public:
     int getCurrentAmmo() const;
     int getReserveAmmo() const;
     std::string getCurrentWeaponName() const;
-    //void reload();
     bool canShoot(sf::Vector2f mousePosition) const;
 
     void addCoins(int amount);
@@ -43,6 +44,13 @@ public:
 
     std::string getShootSoundKey() const;
     std::pair<std::string, float> reload();
+
+    std::string upgradeCurrentWeaponDamage();
+    std::string upgradeCurrentWeaponFireRate();
+    std::string upgradeMaxHealth();
+    std::string upgradeCurrentWeaponMoveSpeed();
+    std::map<std::string, std::string> getUpgradeInfo() const;
+    bool spendCoins(int amount);
 
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
 
@@ -107,5 +115,10 @@ private:
 
     std::vector<std::string> m_weaponShootSounds;
     std::vector<std::string> m_weaponReloadSounds;
+
+    std::vector<int> m_upgradeCostDamage;
+    std::vector<int> m_upgradeCostFireRate;
+    std::vector<int> m_upgradeCostMoveSpeed;
+    int m_upgradeCostHealth;
     //--------------------------------------------------
 };

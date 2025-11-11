@@ -38,6 +38,14 @@ public:
         return m_currentHealth >= m_maxHealth;
     }
 
+    void addMaxHealth(float amount) {
+        m_maxHealth += amount;
+    }
+
+    [[nodiscard]] float getMaxHealth() const {
+        return m_maxHealth;
+    }
+
     friend std::ostream &operator<<(std::ostream &os, const Health &health);
 
 private:
