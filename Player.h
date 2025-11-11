@@ -16,7 +16,6 @@ public:
     Player(float startX, float startY,const std::map<std::string, sf::SoundBuffer>& soundBuffers);
     ~Player();
 
-    //Functiile triviale ale playerului
     void update(float dt, sf::Vector2f mousePosition,GameMap& gameMap);
     sf::FloatRect getCollisionBounds() const;
 

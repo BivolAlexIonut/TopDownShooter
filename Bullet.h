@@ -12,7 +12,7 @@ public:
 
     ~Bullet();
 
-    void draw(sf::RenderWindow &window);
+    void draw(sf::RenderWindow &window) const;
 
     void update(float dt);
 

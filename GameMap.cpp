@@ -155,7 +155,6 @@ bool GameMap::load(const std::string &mapPath, const std::string &tilesetPath, f
         }
     }
 
-    //bara de progres la cooldown
     const float BAR_WIDTH = m_scaledTileSize.x * 0.8f;
     const float BAR_HEIGHT =  8.f;
 

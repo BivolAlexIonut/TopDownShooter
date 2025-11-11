@@ -78,7 +78,6 @@ Player::Player(float startX, float startY, const std::map<std::string, sf::Sound
     m_weaponReloadSounds.emplace_back("shotgun_reload");
     m_weaponReloadSounds.emplace_back("sniper_reload");
 
-    //Scalez animatia si incarc textura
     m_reloadAnimSprite.setScale(sf::Vector2f(1.4f, 1.4f));
     m_reloadAnimSprite.setTextureRect(m_reloadAnimFrames[0]);
     //---------------------------------------------------------------------------------------------------------
@@ -328,7 +327,6 @@ void Player::addAmmo(int amount)
     }
 }
 
-//Updateaza healthbarul
 void Player::updateHealthBar() {
     float healthPercent = m_health.getPercentage();
     int frameCount = static_cast<int>(m_healthBarFrames.size());
@@ -339,7 +337,6 @@ void Player::updateHealthBar() {
     m_healthBarSprite.setTextureRect(m_healthBarFrames[frameIndex]);
 }
 
-//Update la pozitia healthbarului
 void Player::updateHealthBarPosition() {
     float barWidth = m_healthBarSprite.getGlobalBounds().size.x;
     float x = (1280.f / 2.f) - (barWidth / 2.f);
@@ -560,7 +557,6 @@ void Player::update(float dt, sf::Vector2f mousePosition, GameMap &gameMap) {
             weaponCurrentAmmo[index] += ammoToMove;
             reserveAmmo -= ammoToMove;
 
-            //debug
             std::cout << "Reloaded complete! Ammo: " << weaponCurrentAmmo[index] << "/" << reserveAmmo << std::endl;
 
             m_reloadingWeaponIndex = -1;
@@ -597,7 +593,6 @@ void Player::switchWeaponPrev() {
     this->playerSprite.setOrigin({static_cast<float>(newRect.size.x) / 2.f, static_cast<float>(newRect.size.y) / 2.f});
 }
 
-//Functia pentru tras(shooting)
 Bullet Player::shoot(sf::Vector2f mousePosition) {
     int currentIndex = m_gunSwitch.getCurrentWeaponIndex();
     if (currentIndex >= 0 && static_cast<size_t>(currentIndex) < weaponCurrentAmmo.size()) {

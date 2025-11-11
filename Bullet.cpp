@@ -39,7 +39,6 @@ Bullet::Bullet(sf::Texture &texture, const std::vector<sf::IntRect> &animRects, 
 Bullet::~Bullet() = default;
 
 void Bullet::update(float dt) {
-    //miscarea glontului
     if (!m_isImpacting) {
         bulletSprite.move(bulletVelocity * dt);
     } else {
@@ -57,7 +56,7 @@ void Bullet::update(float dt) {
     bulletSprite.setTextureRect(m_animRects[bulletCurrentFrame]);
 }
 
-void Bullet::draw(sf::RenderWindow &window) {
+void Bullet::draw(sf::RenderWindow &window) const {
     window.draw(bulletSprite);
 }
 

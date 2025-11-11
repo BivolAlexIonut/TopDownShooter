@@ -1,14 +1,14 @@
 #pragma once
 
-#include <stdexcept>
 #include <string>
+#include <utility>
 
 class GameException : public std::exception {
 protected:
     std::string msg;
 public:
-    explicit GameException(const std::string& msg) : msg(msg) {}
-    const char* what() const noexcept override { return msg.c_str(); }
+    explicit GameException(std::string  msg) : msg(std::move(msg)) {}
+    [[nodiscard]] const char* what() const noexcept override { return msg.c_str(); }
 };
 
 class AssetLoadException : public GameException {

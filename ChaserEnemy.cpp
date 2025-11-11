@@ -384,7 +384,7 @@ void ChaserEnemy::updateAnimation()
                 m_currentFrame = static_cast<int>(frameCount - 1);
                 m_isReadyForRemoval = true;
             } else {
-                m_currentFrame = 0; // Loop
+                m_currentFrame = 0;
             }
         }
     }

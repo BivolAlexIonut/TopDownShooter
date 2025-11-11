@@ -16,12 +16,11 @@ bool Coin::initAssets() {
 
 Coin::Coin(sf::Vector2f startPos) : m_sprite(Coin::s_texture),m_currentFrame(0),m_animSpeed(0.1f),m_currentState(),
             m_isDead(false),m_isVisible(true) {
-
-    const int FRAME_WIDTH = 20;
-    const int FRAME_HEIGHT = 20;
-    const int FRAME_COUNT = 9;
+    constexpr int FRAME_COUNT = 9;
 
     for (int i=0;i<FRAME_COUNT;++i) {
+        constexpr int FRAME_HEIGHT = 20;
+        constexpr int FRAME_WIDTH = 20;
         m_animRects.push_back(sf::IntRect({i*FRAME_WIDTH,0},{FRAME_WIDTH,FRAME_HEIGHT}));
     }
 

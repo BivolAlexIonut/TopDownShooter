@@ -12,8 +12,8 @@ public:
 
     ~Health() = default;
 
-    Health(const Health &other); //Constructor de copiere
-    Health &operator=(const Health &other); //Operator= de copiere
+    Health(const Health &other);
+    Health &operator=(const Health &other);
 
     [[maybe_unused]] void takeDamage(float amount) {
         m_currentHealth -= amount;
