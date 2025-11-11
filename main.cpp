@@ -148,6 +148,9 @@ int main() {
         if (!backgroundMusic.openFromFile("assets/sounds/background/retro_metal.ogg")) {
             throw AssetLoadException("retro_metal.ogg");
         }
+        if (!soundBuffers["player_hurt"].loadFromFile("assets/sounds/player/damage.wav")) {
+            throw AssetLoadException("damage.wav");
+        }
     }
     catch (const GameException& e) {
         std::cerr << "EROARE FATALA: " << e.what() << std::endl;
@@ -158,7 +161,7 @@ int main() {
         return -1;
     }
 
-    backgroundMusic.setVolume(30.f);
+    backgroundMusic.setVolume(60.f);
     backgroundMusic.setLooping(true);
 
     backgroundMusic.play();
@@ -451,7 +454,7 @@ int main() {
             if (player.getCollisionBounds().findIntersection(coin->getBounds())) {
                 activeSounds.emplace_back(soundBuffers["coin_pickup"]);
                 activeSounds.back().setPitch(RandomGenerator::getFloat(1.1f, 1.3f));
-                activeSounds.back().setVolume(80.f);
+                activeSounds.back().setVolume(100.f);
                 activeSounds.back().play();
 
                 player.addCoins(1);
@@ -466,7 +469,7 @@ int main() {
             {
                 activeSounds.emplace_back(soundBuffers["coin_drop"]);
                 activeSounds.back().setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
-                activeSounds.back().setVolume(40.f);
+                activeSounds.back().setVolume(100.f);
                 activeSounds.back().play();
 
                 int coinCount = enemy->getCoinValue();
@@ -493,6 +496,10 @@ int main() {
                 else knockbackDir = {1.f, 0.f};
 
                 player.takeDamage(15.f, knockbackDir);
+                activeSounds.emplace_back(soundBuffers["player_hurt"]);
+                activeSounds.back().setPitch(RandomGenerator::getFloat(0.5f, 1.2f));
+                activeSounds.back().setVolume(80.f);
+                activeSounds.back().play();
                 playerDamageTimer.restart();
                 proj->hit();
             }
@@ -528,6 +535,10 @@ int main() {
                         knockbackDir = {1.f, 0.f};
                     }
                     player.takeDamage(10.f, knockbackDir);
+                    activeSounds.emplace_back(soundBuffers["player_hurt"]);
+                    activeSounds.back().setPitch(RandomGenerator::getFloat(0.5f, 1.2f));
+                    activeSounds.back().setVolume(80.f);
+                    activeSounds.back().play();
                     playerDamageTimer.restart();
                     if (dynamic_cast<ChaserEnemy*>(enemy.get())) {
                         activeSounds.emplace_back(soundBuffers["chaser_attack"]);

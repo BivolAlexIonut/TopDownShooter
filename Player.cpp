@@ -611,6 +611,10 @@ Bullet Player::shoot(sf::Vector2f mousePosition) {
 }
 
 bool Player::canShoot(sf::Vector2f mousePosition) const {
+    if (m_isInteracting) {
+        return false;
+    }
+
     if (m_isReloading) {
         return false;
     }
