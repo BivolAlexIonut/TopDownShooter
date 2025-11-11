@@ -81,7 +81,7 @@ void UpgradeMenu::draw(sf::RenderWindow& window, const sf::View &uiView) {
 }
 
 void UpgradeMenu::handleInput(sf::Keyboard::Key key, Player& player) {
-    std::string feedback = "";
+    std::string feedback;
     if (key == sf::Keyboard::Key::Up || key == sf::Keyboard::Key::W) {
         m_selectedItemIndex = (m_selectedItemIndex - 1 + 4) % 4;
     } else if (key == sf::Keyboard::Key::Down || key == sf::Keyboard::Key::S) {
