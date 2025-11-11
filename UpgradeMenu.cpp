@@ -63,11 +63,11 @@ void UpgradeMenu::updateText(const Player& player) {
     m_feedbackText.setPosition({viewWidth / 2.f - m_feedbackText.getGlobalBounds().size.x / 2.f, viewHeight - 100.f});
 }
 
-void UpgradeMenu::update(Player& player) {
+void UpgradeMenu::update(const Player& player) {
     updateText(player);
 }
 
-void UpgradeMenu::draw(sf::RenderWindow& window, sf::View uiView) {
+void UpgradeMenu::draw(sf::RenderWindow& window, const sf::View &uiView) {
     m_background.setPosition({uiView.getCenter().x - uiView.getSize().x / 2.f, uiView.getCenter().y - uiView.getSize().y / 2.f});
 
     window.draw(m_background);

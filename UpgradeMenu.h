@@ -9,8 +9,8 @@ public:
     UpgradeMenu();
 
     bool loadFont(const std::string& fontPath);
-    void update(Player& player);
-    void draw(sf::RenderWindow& window, sf::View uiView);
+    void update(const Player& player);
+    void draw(sf::RenderWindow& window, const sf::View &uiView);
 
     void handleInput(sf::Keyboard::Key key, Player& player);
     std::string getFeedbackMessage();
