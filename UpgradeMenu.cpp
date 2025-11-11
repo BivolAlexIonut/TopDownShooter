@@ -17,7 +17,7 @@ bool UpgradeMenu::loadFont(const std::string& fontPath) {
     return true;
 }
 
-void UpgradeMenu::updateText(Player& player) {
+void UpgradeMenu::updateText(const Player& player) {
     auto info = player.getUpgradeInfo();
     float viewWidth = 1280.f;
     float viewHeight = 720.f;
@@ -80,12 +80,12 @@ void UpgradeMenu::draw(sf::RenderWindow& window, sf::View uiView) {
 }
 
 void UpgradeMenu::handleInput(sf::Keyboard::Key key, Player& player) {
-    std::string feedback;
     if (key == sf::Keyboard::Key::Up || key == sf::Keyboard::Key::W) {
         m_selectedItemIndex = (m_selectedItemIndex - 1 + 4) % 4;
     } else if (key == sf::Keyboard::Key::Down || key == sf::Keyboard::Key::S) {
         m_selectedItemIndex = (m_selectedItemIndex + 1) % 4;
     } else if (key == sf::Keyboard::Key::Enter) {
+        std::string feedback;
         switch (m_selectedItemIndex) {
             case 0: feedback = player.upgradeCurrentWeaponDamage(); break;
             case 1: feedback = player.upgradeCurrentWeaponFireRate(); break;

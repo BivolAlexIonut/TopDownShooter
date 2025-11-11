@@ -16,7 +16,7 @@ public:
     std::string getFeedbackMessage();
 
 private:
-    void updateText(Player& player);
+    void updateText(const Player& player);
 
     sf::Font m_font;
     static sf::Font s_emptyMenuFont;
