@@ -739,62 +739,70 @@ int Player::getCoinCount() const {
     return m_coinCount;
 }
 
-std::map<std::string, std::string> Player::getUpgradeInfo() const {
+int Player::getCurrentWeaponIndex() const {
+    return m_gunSwitch.getCurrentWeaponIndex();
+}
+
+int Player::getWeaponCount() const {
+    return static_cast<int>(weaponNames.size());
+}
+
+std::string Player::getWeaponName(int weaponIndex) const {
+    if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= weaponNames.size())
+        return "Unknown";
+    return weaponNames[weaponIndex];
+}
+
+std::map<std::string, std::string> Player::getUpgradeInfo(int weaponIndex) const {
 
     std::map<std::string, std::string> info;
-    int index = m_gunSwitch.getCurrentWeaponIndex();
+    int index = weaponIndex;
 
-    info["weapon_name"] = getCurrentWeaponName();
+    info["weapon_name"] = getWeaponName(index);
     info["damage"] = std::to_string(static_cast<int>(m_weaponDamage[index]));
     info["fire_rate"] = std::to_string(m_weaponShootCooldowns[index]);
     info["move_speed"] = std::to_string(static_cast<int>(m_movementSpeeds[index]));
-
     info["max_health"] = std::to_string(static_cast<int>(m_health.getMaxHealth()));
-
     info["cost_damage"] = std::to_string(m_upgradeCostDamage[index]);
     info["cost_fire_rate"] = std::to_string(m_upgradeCostFireRate[index]);
     info["cost_move_speed"] = std::to_string(m_upgradeCostMoveSpeed[index]);
     info["cost_health"] = std::to_string(m_upgradeCostHealth);
-
     info["coin_count"] = std::to_string(m_coinCount);
 
     return info;
 }
 
-std::string Player::upgradeCurrentWeaponDamage() {
-    int index = m_gunSwitch.getCurrentWeaponIndex();
+std::string Player::upgradeWeaponDamage(int weaponIndex) {
+    int index = weaponIndex;
     int& cost = m_upgradeCostDamage[index];
 
     if (spendCoins(cost)) {
         m_weaponDamage[index] *= 1.2f;
         cost = static_cast<int>(static_cast<float>(cost) * 1.3f);
-
         return "Damage crescut!";
     }
     return "Bani insuficienti!";
 }
 
-std::string Player::upgradeCurrentWeaponFireRate() {
-    int index = m_gunSwitch.getCurrentWeaponIndex();
+std::string Player::upgradeWeaponFireRate(int weaponIndex) {
+    int index = weaponIndex;
     int& cost = m_upgradeCostFireRate[index];
 
     if (spendCoins(cost)) {
         m_weaponShootCooldowns[index] *= 0.9f;
         cost = static_cast<int>(static_cast<float>(cost) * 1.3f);
-
         return "Viteza de tragere crescuta!";
     }
     return "Bani insuficienti!";
 }
 
-std::string Player::upgradeCurrentWeaponMoveSpeed() {
-    int index = m_gunSwitch.getCurrentWeaponIndex();
+std::string Player::upgradeWeaponMoveSpeed(int weaponIndex) {
+    int index = weaponIndex;
     int& cost = m_upgradeCostMoveSpeed[index];
 
     if (spendCoins(cost)) {
         m_movementSpeeds[index] *= 1.15f;
         cost = static_cast<int>(static_cast<float>(cost) * 1.3f);
-
         return "Viteza de miscare crescuta!";
     }
     return "Bani insuficienti!";

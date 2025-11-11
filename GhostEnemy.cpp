@@ -185,6 +185,10 @@ void GhostEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap&
                     m_lockedAttackDirection = AttackDirection::DOWN;
                 }
             }
+            const sf::FloatRect mapBounds = gameMap.getPixelBounds();
+            teleportDest.x = std::clamp(teleportDest.x, mapBounds.position.x + 1.f, (mapBounds.position.x + mapBounds.size.x) - 1.f);
+            teleportDest.y = std::clamp(teleportDest.y, mapBounds.position.y + 1.f, (mapBounds.position.y + mapBounds.size.y) - 1.f);
+
             setPosition(teleportDest);
         }
         else if (length < attackRange)

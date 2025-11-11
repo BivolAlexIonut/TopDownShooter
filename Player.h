@@ -45,12 +45,16 @@ public:
     std::string getShootSoundKey() const;
     std::pair<std::string, float> reload();
 
-    std::string upgradeCurrentWeaponDamage();
-    std::string upgradeCurrentWeaponFireRate();
+    std::string upgradeWeaponDamage(int weaponIndex);
+    std::string upgradeWeaponFireRate(int weaponIndex);
+    std::string upgradeWeaponMoveSpeed(int weaponIndex);
     std::string upgradeMaxHealth();
-    std::string upgradeCurrentWeaponMoveSpeed();
-    std::map<std::string, std::string> getUpgradeInfo() const;
+    std::map<std::string, std::string> getUpgradeInfo(int weaponIndex) const;
     bool spendCoins(int amount);
+
+    [[nodiscard]] int getCurrentWeaponIndex() const;
+    [[nodiscard]] int getWeaponCount() const;
+    [[nodiscard]] std::string getWeaponName(int weaponIndex) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
 

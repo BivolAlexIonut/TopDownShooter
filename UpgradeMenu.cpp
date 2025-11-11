@@ -4,7 +4,8 @@
 sf::Font UpgradeMenu::s_emptyMenuFont;
 
 UpgradeMenu::UpgradeMenu() : m_titleText(s_emptyMenuFont,""), m_coinText(s_emptyMenuFont,""),
-m_menuItems(4, sf::Text(s_emptyMenuFont, "")), m_feedbackText(s_emptyMenuFont,""),m_selectedItemIndex(0) {
+m_menuItems(4, sf::Text(s_emptyMenuFont, "")), m_feedbackText(s_emptyMenuFont,""),m_displayedWeaponIndex(0),
+m_selectedItemIndex(0){
     m_background.setSize({1280.f, 720.f});
     m_background.setFillColor(sf::Color(0, 0, 0, 180));
 }
@@ -18,7 +19,7 @@ bool UpgradeMenu::loadFont(const std::string& fontPath) {
 }
 
 void UpgradeMenu::updateText(const Player& player) {
-    auto info = player.getUpgradeInfo();
+    auto info = player.getUpgradeInfo(m_displayedWeaponIndex);
     float viewWidth = 1280.f;
     float viewHeight = 720.f;
 
@@ -80,20 +81,35 @@ void UpgradeMenu::draw(sf::RenderWindow& window, const sf::View &uiView) {
 }
 
 void UpgradeMenu::handleInput(sf::Keyboard::Key key, Player& player) {
+    std::string feedback = "";
     if (key == sf::Keyboard::Key::Up || key == sf::Keyboard::Key::W) {
         m_selectedItemIndex = (m_selectedItemIndex - 1 + 4) % 4;
     } else if (key == sf::Keyboard::Key::Down || key == sf::Keyboard::Key::S) {
         m_selectedItemIndex = (m_selectedItemIndex + 1) % 4;
-    } else if (key == sf::Keyboard::Key::Enter) {
-        std::string feedback;
+    }
+    else if (key == sf::Keyboard::Key::Left || key == sf::Keyboard::Key::A) {
+        int weaponCount = player.getWeaponCount();
+        m_displayedWeaponIndex = (m_displayedWeaponIndex - 1 + weaponCount) % weaponCount;
+        m_selectedItemIndex = 0;
+    } else if (key == sf::Keyboard::Key::Right || key == sf::Keyboard::Key::D) {
+        int weaponCount = player.getWeaponCount();
+        m_displayedWeaponIndex = (m_displayedWeaponIndex + 1) % weaponCount;
+        m_selectedItemIndex = 0;
+    }
+    else if (key == sf::Keyboard::Key::Enter) {
         switch (m_selectedItemIndex) {
-            case 0: feedback = player.upgradeCurrentWeaponDamage(); break;
-            case 1: feedback = player.upgradeCurrentWeaponFireRate(); break;
-            case 2: feedback = player.upgradeCurrentWeaponMoveSpeed(); break;
+            case 0: feedback = player.upgradeWeaponDamage(m_displayedWeaponIndex); break;
+            case 1: feedback = player.upgradeWeaponFireRate(m_displayedWeaponIndex); break;
+            case 2: feedback = player.upgradeWeaponMoveSpeed(m_displayedWeaponIndex); break;
             case 3: feedback = player.upgradeMaxHealth(); break;
             default: ;
         }
         m_feedbackText.setString(feedback);
         m_feedbackClock.restart();
     }
+}
+
+void UpgradeMenu::setDisplayedWeapon(const int index) {
+    m_displayedWeaponIndex = index;
+    m_selectedItemIndex = 0;
 }

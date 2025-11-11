@@ -14,6 +14,7 @@ public:
 
     void handleInput(sf::Keyboard::Key key, Player& player);
     std::string getFeedbackMessage();
+    void setDisplayedWeapon(int index);
 
 private:
     void updateText(const Player& player);
@@ -26,6 +27,7 @@ private:
     std::vector<sf::Text> m_menuItems;
     sf::Text m_feedbackText;
     sf::Clock m_feedbackClock;
+    int m_displayedWeaponIndex;
 
     int m_selectedItemIndex;
 };

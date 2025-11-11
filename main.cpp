@@ -44,7 +44,6 @@ int main() {
     crosshairSprite.setScale(sf::Vector2f(2.f, 2.f));
 
     GameMap gameMap;
-    constexpr float mapScale = 0.4f;
     sf::FloatRect mapBounds;
 
     sf::Font ammoFont;
@@ -55,6 +54,7 @@ int main() {
     std::unique_ptr<Player> player;
 
     try {
+        constexpr float mapScale = 0.4f;
         if (!gameMap.load("assets/Levels/level1.txt",
                           "assets/Premium Content/Tileset with cell size 256x256.png", mapScale)) {
             throw MapLoadException("level1.txt", "Functia load a returnat false.");
@@ -172,7 +172,7 @@ int main() {
     backgroundMusic.play();
 
     std::vector<std::unique_ptr<EnemyBase> > enemies;
-    const int MAX_ENEMIES = 10;
+    constexpr int MAX_ENEMIES = 10;
     const float RESPAWN_DELAY = 6.0f;
     sf::Clock respawnTimer;
 
@@ -310,6 +310,7 @@ int main() {
                 if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Tab) {
                     if (currentState == GameState::Playing) {
                         currentState = GameState::Paused;
+                        upgradeMenu.setDisplayedWeapon(player->getCurrentWeaponIndex());
                     } else {
                         currentState = GameState::Playing;
                     }
@@ -501,7 +502,7 @@ int main() {
                     player->addCoins(1);
                     return true;
                 }
-                return false;
+                return coin->isDead();
             });
 
             for (auto &enemy: enemies) {
