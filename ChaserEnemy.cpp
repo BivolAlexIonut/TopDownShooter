@@ -397,6 +397,10 @@ void ChaserEnemy::updateAnimation()
     }
 }
 
+[[nodiscard]] std::unique_ptr<EnemyBase> ChaserEnemy::clone() const {
+    return std::make_unique<ChaserEnemy>(*this);
+}
+
 int ChaserEnemy::getCoinValue() const
 {
     return 5;

@@ -27,4 +27,6 @@ public:
     [[nodiscard]] virtual bool hasJustDied() const = 0;
     virtual void acknowledgeDeath() = 0;
     [[nodiscard]] virtual int getCoinValue() const = 0;
+
+    [[nodiscard]] virtual std::unique_ptr<EnemyBase> clone() const = 0;
 };

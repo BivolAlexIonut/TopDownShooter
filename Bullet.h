@@ -30,6 +30,7 @@ public:
 
     float getDamage() const;
 
+
     friend std::ostream &operator<<(std::ostream &os, const Bullet &b);
 
 private:

@@ -1,7 +1,5 @@
 #pragma once
-#ifndef __clangd__
 #include <SFML/Graphics.hpp>
-#endif
 #include <vector>
 
 class GunSwitch {

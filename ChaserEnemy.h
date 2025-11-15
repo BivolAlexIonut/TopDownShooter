@@ -26,7 +26,6 @@ public:
     sf::Vector2f getPosition() const override;
     sf::FloatRect getBounds() const override;
 
-    //Inamic
     void takeDamage(float damage) override;
     bool isDead() const override;
 
@@ -37,6 +36,8 @@ public:
     bool isAttacking() const override;
     bool didAttackLand() override;
     sf::FloatRect getAttackHitbox() const override;
+
+    [[nodiscard]] std::unique_ptr<EnemyBase> clone() const override;
 
 private:
     float m_speed;

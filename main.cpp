@@ -25,9 +25,9 @@ std::map<std::string, sf::SoundBuffer> soundBuffers;
 std::list<sf::Sound> activeSounds;
 sf::Music backgroundMusic;
 
-enum class GameState { Playing, Paused };
+enum class GameState { MainMenu, Playing, Paused, GameOver };
+GameState currentState = GameState::MainMenu;
 
-GameState currentState = GameState::Playing;
 UpgradeMenu upgradeMenu;
 
 int main() {
@@ -157,8 +157,6 @@ int main() {
             throw AssetLoadException("damage.wav");
         }
 
-        player = std::make_unique<Player>(1640 * mapScale, 1360 * mapScale, soundBuffers);
-
     } catch (const GameException &e) {
         std::cerr << "EROARE FATALA: " << e.what() << std::endl;
         return -1;
@@ -169,36 +167,15 @@ int main() {
 
     backgroundMusic.setVolume(60.f);
     backgroundMusic.setLooping(true);
-    backgroundMusic.play();
 
     std::vector<std::unique_ptr<EnemyBase> > enemies;
     constexpr int MAX_ENEMIES = 10;
     const float RESPAWN_DELAY = 6.0f;
     sf::Clock respawnTimer;
 
-    for (int i = 0; i < MAX_ENEMIES; ++i) {
-        sf::Vector2f randomPos;
-        do {
-            float x = RandomGenerator::getFloat(mapBounds.position.x, mapBounds.position.x + mapBounds.size.x);
-            float y = RandomGenerator::getFloat(mapBounds.position.y, mapBounds.position.y + mapBounds.size.y);
-            randomPos = {x, y};
-        } while (gameMap.isSolid(randomPos));
-
-        float randType = RandomGenerator::getFloat(0.f, 1.f);
-        if (randType < 0.2f) {
-            enemies.push_back(std::make_unique<ChaserEnemy>(soundBuffers));
-        } else if (randType < 0.4f) {
-            enemies.push_back(std::make_unique<GhostEnemy>(soundBuffers));
-        } else {
-            enemies.push_back(std::make_unique<DevilEnemy>(soundBuffers));
-        }
-        enemies.back()->setPosition(randomPos);
-    }
-
     sf::Clock clock;
     sf::View camera;
     camera.setSize({1280, 720});
-    camera.setCenter(player->getPosition());
 
     sf::View uiView;
     uiView.setSize(static_cast<sf::Vector2f>(window.getSize()));
@@ -231,6 +208,37 @@ int main() {
     coinText.setFont(ammoFont);
     coinText.setCharacterSize(48);
     coinText.setFillColor(sf::Color(240, 180, 0));
+
+    sf::Text menuTitle(ammoFont);
+    menuTitle.setString("TOP-DOWN SHOOTER");
+    menuTitle.setFont(ammoFont);
+    menuTitle.setCharacterSize(72);
+    menuTitle.setFillColor(sf::Color::White);
+
+    sf::Text menuStart(ammoFont);
+    menuStart.setString("Apasati ENTER pentru a incepe");
+    menuStart.setFont(ammoFont);
+    menuStart.setCharacterSize(48);
+    menuStart.setFillColor(sf::Color::Yellow);
+
+    sf::Text menuExit(ammoFont);
+    menuExit.setString("Apasati ESCAPE pentru a iesi");
+    menuExit.setFont(ammoFont);
+    menuExit.setCharacterSize(48);
+    menuExit.setFillColor(sf::Color::White);
+
+    sf::Text gameOverTitle(ammoFont);
+    gameOverTitle.setString("GAME OVER");
+    gameOverTitle.setFont(ammoFont);
+    gameOverTitle.setCharacterSize(72);
+    gameOverTitle.setFillColor(sf::Color::Red);
+
+    sf::Text gameOverRestart(ammoFont);
+    gameOverRestart.setString("Apasati R pentru a reveni la meniu");
+    gameOverRestart.setFont(ammoFont);
+    gameOverRestart.setCharacterSize(48);
+    gameOverRestart.setFillColor(sf::Color::Yellow);
+
 
     sf::Texture ghostImpactTexture;
     if (!ghostImpactTexture.loadFromFile("assets/enemies/death_animation-ghost.png")) {
@@ -307,50 +315,105 @@ int main() {
 
 
             if (event->is<sf::Event::KeyPressed>()) {
-                if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Tab) {
-                    if (currentState == GameState::Playing) {
-                        currentState = GameState::Paused;
-                        upgradeMenu.setDisplayedWeapon(player->getCurrentWeaponIndex());
-                    } else {
+                if (currentState == GameState::MainMenu) {
+                    if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Enter) {
+                        player.reset();
+                        constexpr float mapScale = 0.4f;
+                        player = std::make_unique<Player>(1640 * mapScale, 1360 * mapScale, soundBuffers);
+
+                        enemies.clear();
+                        bullets.clear();
+                        effects.clear();
+                        coins.clear();
+                        enemyProjectiles.clear();
+
+                        for (int i = 0; i < MAX_ENEMIES; ++i) {
+                            sf::Vector2f randomPos;
+                            do {
+                                float x = RandomGenerator::getFloat(mapBounds.position.x, mapBounds.position.x + mapBounds.size.x);
+                                float y = RandomGenerator::getFloat(mapBounds.position.y, mapBounds.position.y + mapBounds.size.y);
+                                randomPos = {x, y};
+                            } while (gameMap.isSolid(randomPos));
+
+                            float randType = RandomGenerator::getFloat(0.f, 1.f);
+                            if (randType < 0.2f) {
+                                enemies.push_back(std::make_unique<ChaserEnemy>(soundBuffers));
+                            } else if (randType < 0.4f) {
+                                enemies.push_back(std::make_unique<GhostEnemy>(soundBuffers));
+                            } else {
+                                enemies.push_back(std::make_unique<DevilEnemy>(soundBuffers));
+                            }
+                            enemies.back()->setPosition(randomPos);
+                        }
+
+                        camera.setCenter(player->getPosition());
+
+                        clock.restart();
+                        respawnTimer.restart();
+                        shootTimer.restart();
+                        playerDamageTimer.restart();
+
+                        backgroundMusic.play();
                         currentState = GameState::Playing;
                     }
+                    if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape) {
+                        window.close();
+                    }
                 }
-                if (currentState == GameState::Paused) {
-                    if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Backspace) {
-                       window.close();
-                    }
-                    upgradeMenu.handleInput(event->getIf<sf::Event::KeyPressed>()->code, *player);
-                }
-                else if (currentState == GameState::Playing) {
-                    if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::E) {
-                        player->switchWeaponNext();
-                    }
-                    if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Q) {
-                        player->switchWeaponPrev();
-                    }
+                else if (currentState == GameState::GameOver) {
                     if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::R) {
-                        std::pair<std::string, float> reloadData = player->reload();
-
-                        std::string reloadSoundKey = reloadData.first;
-                        float reloadAnimDuration = reloadData.second;
-
-                        if (!reloadSoundKey.empty()) {
-                            activeSounds.emplace_back(soundBuffers[reloadSoundKey]);
-                            sf::Sound &newSound = activeSounds.back();
-
-                            float soundOriginalDuration = soundBuffers[reloadSoundKey].getDuration().asSeconds();
-                            float newPitch = 1.0f;
-
-                            if (reloadAnimDuration > 0.01f && soundOriginalDuration > 0.01f) {
-                                newPitch = soundOriginalDuration / reloadAnimDuration;
-                            }
-
-                            newSound.setPitch(newPitch);
-                            newSound.play();
+                        currentState = GameState::MainMenu;
+                    }
+                    if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape) {
+                        window.close();
+                    }
+                }
+                else {
+                    if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Tab) {
+                        if (currentState == GameState::Playing) {
+                            currentState = GameState::Paused;
+                            upgradeMenu.setDisplayedWeapon(player->getCurrentWeaponIndex());
+                        } else {
+                            currentState = GameState::Playing;
                         }
                     }
-                    if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Backspace) {
-                        window.close();
+                    if (currentState == GameState::Paused) {
+                        if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Backspace) {
+                           window.close();
+                        }
+                        upgradeMenu.handleInput(event->getIf<sf::Event::KeyPressed>()->code, *player);
+                    }
+                    else if (currentState == GameState::Playing) {
+                        if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::E) {
+                            player->switchWeaponNext();
+                        }
+                        if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Q) {
+                            player->switchWeaponPrev();
+                        }
+                        if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::R) {
+                            std::pair<std::string, float> reloadData = player->reload();
+
+                            std::string reloadSoundKey = reloadData.first;
+                            float reloadAnimDuration = reloadData.second;
+
+                            if (!reloadSoundKey.empty()) {
+                                activeSounds.emplace_back(soundBuffers[reloadSoundKey]);
+                                sf::Sound &newSound = activeSounds.back();
+
+                                float soundOriginalDuration = soundBuffers[reloadSoundKey].getDuration().asSeconds();
+                                float newPitch = 1.0f;
+
+                                if (reloadAnimDuration > 0.01f && soundOriginalDuration > 0.01f) {
+                                    newPitch = soundOriginalDuration / reloadAnimDuration;
+                                }
+
+                                newSound.setPitch(newPitch);
+                                newSound.play();
+                            }
+                        }
+                        if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Backspace) {
+                            window.close();
+                        }
                     }
                 }
             }
@@ -606,113 +669,141 @@ int main() {
             }
 
             camera.setCenter(viewCenter);
+
+            if (player->isDead()) {
+                currentState = GameState::GameOver;
+                backgroundMusic.stop();
+            }
         }
-        else
+        else if (currentState == GameState::Paused)
         {
             upgradeMenu.update(*player);
         }
 
-        std::string ammoString = std::to_string(player->getCurrentAmmo()) + " / " + std::to_string(
-                                     player->getReserveAmmo());
-        std::string weaponNameString = player->getCurrentWeaponName();
-        std::string uiText = weaponNameString + '\n';
-        std::string ammoFinal = uiText + ammoString;
-        ammoText.setString(ammoFinal);
-
         window.clear(sf::Color(30, 30, 30));
-        window.setView(camera);
-        window.draw(gameMap);
-        gameMap.updateAndDrawCooldowns(window);
 
-        for (const auto &coin: coins) {
-            coin->draw(window);
-        }
+        if (currentState == GameState::Playing || currentState == GameState::Paused) {
+            std::string ammoString = std::to_string(player->getCurrentAmmo()) + " / " + std::to_string(
+                                         player->getReserveAmmo());
+            std::string weaponNameString = player->getCurrentWeaponName();
+            std::string uiText = weaponNameString + '\n';
+            std::string ammoFinal = uiText + ammoString;
+            ammoText.setString(ammoFinal);
 
-        player->drawWorld(window);
+            window.setView(camera);
+            window.draw(gameMap);
+            gameMap.updateAndDrawCooldowns(window);
 
-        for (auto &enemy: enemies) {
-            enemy->draw(window);
-        }
+            for (const auto &coin: coins) {
+                coin->draw(window);
+            }
 
-        for (const auto &effect: effects) {
-            effect->draw(window);
-        }
+            player->drawWorld(window);
 
-        for (const auto &proj: enemyProjectiles) {
-            proj->draw(window);
-        }
+            for (auto &enemy: enemies) {
+                enemy->draw(window);
+            }
 
-        for (auto &bullet: bullets) {
-            bullet.draw(window);
+            for (const auto &effect: effects) {
+                effect->draw(window);
+            }
 
-            if (!bullet.isImpacting()) {
-                sf::Vector2f pos = bullet.getPosition();
-                sf::Vector2f vel = bullet.getVelocity();
+            for (const auto &proj: enemyProjectiles) {
+                proj->draw(window);
+            }
 
-                float length = std::sqrt(vel.x * vel.x + vel.y * vel.y);
-                sf::Vector2f normVel(0.f, 0.f);
-                if (length != 0.f) {
-                    normVel = vel / length;
-                }
-                float checkOffset = 25.f;
+            for (auto &bullet: bullets) {
+                bullet.draw(window);
 
-                sf::Vector2f checkPosition = pos + normVel * checkOffset;
-                if (gameMap.isSolid(checkPosition)) {
-                    bullet.hit();
+                if (!bullet.isImpacting()) {
+                    sf::Vector2f pos = bullet.getPosition();
+                    sf::Vector2f vel = bullet.getVelocity();
+
+                    float length = std::sqrt(vel.x * vel.x + vel.y * vel.y);
+                    sf::Vector2f normVel(0.f, 0.f);
+                    if (length != 0.f) {
+                        normVel = vel / length;
+                    }
+                    float checkOffset = 25.f;
+
+                    sf::Vector2f checkPosition = pos + normVel * checkOffset;
+                    if (gameMap.isSolid(checkPosition)) {
+                        bullet.hit();
+                    }
                 }
             }
-        }
 
-        bullets.erase(
-            std::remove_if(bullets.begin(), bullets.end(),
-                           [](const Bullet &bullet) {
-                               return bullet.isDead();
-                           }
-            ),
-            bullets.end()
-        );
-        std::erase_if(effects, [](const auto &effect) {
-            return effect->isDead();
-        });
-        std::erase_if(enemies, [&](const auto &enemy) {
-            if (enemy->isDead()) {
-                return true;
+            bullets.erase(
+                std::remove_if(bullets.begin(), bullets.end(),
+                               [](const Bullet &bullet) {
+                                   return bullet.isDead();
+                               }
+                ),
+                bullets.end()
+            );
+            std::erase_if(effects, [](const auto &effect) {
+                return effect->isDead();
+            });
+            std::erase_if(enemies, [&](const auto &enemy) {
+                if (enemy->isDead()) {
+                    return true;
+                }
+                return false;
+            });
+
+            window.setView(uiView);
+
+            crosshairSprite.setPosition(static_cast<sf::Vector2f>(mousePositionWindow));
+            ammoText.setOrigin({0.f, 0.f});
+
+            sf::Vector2f viewSize = static_cast<sf::Vector2f>(window.getSize());
+
+            auto charSize = static_cast<float>(ammoText.getCharacterSize());
+            float numLines = 2.f;
+            float totalTextHeight = (charSize * numLines) * 1.1f;
+            float positionY = viewSize.y - totalTextHeight - 10.f;
+            ammoText.setPosition({10.f, positionY});
+
+            coinText.setString(std::to_string(player->getCoinCount()));
+
+            float coinTextWidth = coinText.getGlobalBounds().size.x;
+            float coinIconWidth = coinIconSprite.getGlobalBounds().size.x;
+
+            coinIconSprite.setPosition({viewSize.x - coinIconWidth - 100.f, 15.f});
+            coinText.setPosition({viewSize.x - coinTextWidth - 20.f, 10.f});
+
+            player->drawUI(window);
+            window.draw(ammoText);
+            window.draw(coinText);
+            window.draw(coinIconSprite);
+
+            if (currentState == GameState::Playing) {
+                window.draw(crosshairSprite);
             }
-            return false;
-        });
 
-        window.setView(uiView);
-
-        crosshairSprite.setPosition(static_cast<sf::Vector2f>(mousePositionWindow));
-        ammoText.setOrigin({0.f, 0.f});
-
-        sf::Vector2f viewSize = static_cast<sf::Vector2f>(window.getSize());
-
-        auto charSize = static_cast<float>(ammoText.getCharacterSize());
-        float numLines = 2.f;
-        float totalTextHeight = (charSize * numLines) * 1.1f;
-        float positionY = viewSize.y - totalTextHeight - 10.f;
-        ammoText.setPosition({10.f, positionY});
-
-        coinText.setString(std::to_string(player->getCoinCount()));
-
-        float coinTextWidth = coinText.getGlobalBounds().size.x;
-        float coinIconWidth = coinIconSprite.getGlobalBounds().size.x;
-
-        coinIconSprite.setPosition({viewSize.x - coinIconWidth - 100.f, 15.f});
-        coinText.setPosition({viewSize.x - coinTextWidth - 20.f, 10.f});
-
-        player->drawUI(window);
-        window.draw(ammoText);
-        window.draw(coinText);
-        window.draw(coinIconSprite);
-
-        if (currentState == GameState::Playing) {
-            window.draw(crosshairSprite);
+            if (currentState == GameState::Paused) {
+                upgradeMenu.draw(window, uiView);
+            }
         }
+        else if (currentState == GameState::MainMenu) {
+            window.setView(uiView);
+            sf::Vector2f viewSize = uiView.getSize();
+            menuTitle.setPosition({viewSize.x / 2.f - menuTitle.getGlobalBounds().size.x / 2.f, 200.f});
+            menuStart.setPosition({viewSize.x / 2.f - menuStart.getGlobalBounds().size.x / 2.f, 350.f});
+            menuExit.setPosition({viewSize.x / 2.f - menuExit.getGlobalBounds().size.x / 2.f, 420.f});
 
-        if (currentState == GameState::Paused) {
-            upgradeMenu.draw(window, uiView);
+            window.draw(menuTitle);
+            window.draw(menuStart);
+            window.draw(menuExit);
+        }
+        else if (currentState == GameState::GameOver) {
+            window.setView(uiView);
+            sf::Vector2f viewSize = uiView.getSize();
+            gameOverTitle.setPosition({viewSize.x / 2.f - gameOverTitle.getGlobalBounds().size.x / 2.f, 200.f});
+            gameOverRestart.setPosition({viewSize.x / 2.f - gameOverRestart.getGlobalBounds().size.x / 2.f, 350.f});
+
+            window.draw(gameOverTitle);
+            window.draw(gameOverRestart);
         }
 
         std::erase_if(activeSounds, [](const sf::Sound &s) {

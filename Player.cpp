@@ -815,3 +815,7 @@ std::string Player::upgradeMaxHealth() {
     }
     return "Bani insuficienti!";
 }
+
+bool Player::isDead() const {
+    return m_health.isDead();
+}

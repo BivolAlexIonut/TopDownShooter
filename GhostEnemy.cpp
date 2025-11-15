@@ -499,6 +499,10 @@ void GhostEnemy::updateHealthBar() {
     m_healthBarForeground.setPosition(barPos);
 }
 
+[[nodiscard]] std::unique_ptr<EnemyBase> GhostEnemy::clone() const {
+    return std::make_unique<GhostEnemy>(*this);
+}
+
 int GhostEnemy::getCoinValue() const
 {
     return 7;

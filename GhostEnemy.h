@@ -40,6 +40,7 @@ public:
     [[nodiscard]] bool hasJustDied() const override;
     void acknowledgeDeath() override;
     [[nodiscard]] int getCoinValue() const override;
+    [[nodiscard]] std::unique_ptr<EnemyBase> clone() const override;
 
 private:
     void updateAnimation();

@@ -32,7 +32,7 @@ public:
 
     [[nodiscard]] bool hasJustDied() const override;
     void acknowledgeDeath() override;
-    [[nodiscard]] std::unique_ptr<EnemyBase> clone() const;
+    [[nodiscard]] std::unique_ptr<EnemyBase> clone() const override;
     [[nodiscard]] int getCoinValue() const override;
 
 private:

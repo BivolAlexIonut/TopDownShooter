@@ -1,7 +1,5 @@
 #pragma once
-#ifndef __clangd__
 #include <SFML/Graphics.hpp>
-#endif
 #include <SFML/Audio.hpp>
 #include <utility>
 #include <string>
@@ -54,6 +52,7 @@ public:
     [[nodiscard]] int getCurrentWeaponIndex() const;
     [[nodiscard]] int getWeaponCount() const;
     [[nodiscard]] std::string getWeaponName(int weaponIndex) const;
+    [[nodiscard]] bool isDead() const;
 
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
 
