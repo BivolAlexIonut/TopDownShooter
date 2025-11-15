@@ -27,21 +27,6 @@ public:
 
     static bool initAssets();
 
-    void update(sf::Time dt, sf::Vector2f playerPosition, const GameMap& gameMap) override;
-    void draw(sf::RenderWindow& window) override;
-    void setPosition(sf::Vector2f position) override;
-    sf::Vector2f getPosition() const override;
-    sf::FloatRect getBounds() const override;
-    bool isAttacking() const override;
-    bool didAttackLand() override;
-    sf::FloatRect getAttackHitbox() const override;
-    void takeDamage(float damage) override;
-    bool isDead() const override;
-    [[nodiscard]] bool hasJustDied() const override;
-    void acknowledgeDeath() override;
-    [[nodiscard]] int getCoinValue() const override;
-    [[nodiscard]] std::unique_ptr<EnemyBase> clone() const override;
-
 private:
     void updateAnimation();
     void updateHealthBar();
@@ -80,4 +65,21 @@ private:
     sf::Clock m_moveTimer;
     float m_moveCooldown;
     bool m_wasMoving;
+
+protected:
+
+    void doUpdate(sf::Time dt, sf::Vector2f playerPosition, const GameMap &gameMap) override;
+    void doDraw(sf::RenderWindow& window) override;
+    void doSetPosition(sf::Vector2f position) override;
+    [[nodiscard]] sf::Vector2f doGetPosition() const override;
+    [[nodiscard]] sf::FloatRect doGetBounds() const override;
+    [[nodiscard]] bool doIsAttacking() const override;
+    bool doDidAttackLand() override;
+    [[nodiscard]] sf::FloatRect doGetAttackHitbox() const override;
+    void doTakeDamage(float damage) override;
+    [[nodiscard]] bool doIsDead() const override;
+    [[nodiscard]] bool doHasJustDied() const override;
+    void doAcknowledgeDeath() override;
+    [[nodiscard]] int doGetCoinValue() const override;
+    [[nodiscard]] std::unique_ptr<EnemyBase> doClone() const override;
 };

@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
 #include "GameExceptions.h"
 #include "RandomGenerator.h"
@@ -124,7 +125,7 @@ GhostEnemy::GhostEnemy(const std::map<std::string, sf::SoundBuffer> &soundBuffer
 }
 
 
-void GhostEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap& gameMap)
+void GhostEnemy::doUpdate(sf::Time dt, sf::Vector2f playerPosition, const GameMap& gameMap)
 {
     if (m_currentState == State::DYING)
     {
@@ -185,11 +186,12 @@ void GhostEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap&
                     m_lockedAttackDirection = AttackDirection::DOWN;
                 }
             }
-            const sf::FloatRect mapBounds = gameMap.getPixelBounds();
+
+            sf::FloatRect mapBounds = gameMap.getPixelBounds();
             teleportDest.x = std::clamp(teleportDest.x, mapBounds.position.x + 1.f, (mapBounds.position.x + mapBounds.size.x) - 1.f);
             teleportDest.y = std::clamp(teleportDest.y, mapBounds.position.y + 1.f, (mapBounds.position.y + mapBounds.size.y) - 1.f);
 
-            setPosition(teleportDest);
+            doSetPosition(teleportDest);
         }
         else if (length < attackRange)
         {
@@ -221,7 +223,7 @@ void GhostEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap&
         velocity = normalizedDirection * m_speed;
 
         sf::Vector2f frameVelocity = velocity * dt.asSeconds();
-        sf::FloatRect bounds = getBounds();
+        sf::FloatRect bounds = doGetBounds();
         bounds.position.x += frameVelocity.x;
         float topY = bounds.position.y;
         float bottomY = bounds.position.y + bounds.size.y;
@@ -239,7 +241,7 @@ void GhostEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap&
         }
         m_sprite.move({frameVelocity.x, 0.f});
 
-        bounds = getBounds();
+        bounds = doGetBounds();
         bounds.position.y += frameVelocity.y;
         float leftX = bounds.position.x;
         float rightX = bounds.position.x + bounds.size.x;
@@ -363,7 +365,7 @@ void GhostEnemy::updateAnimation()
     }
 }
 
-void GhostEnemy::draw(sf::RenderWindow& window) {
+void GhostEnemy::doDraw(sf::RenderWindow& window) {
     window.draw(m_sprite);
     if (m_currentState != State::DYING) {
         window.draw(m_healthBarBackground);
@@ -371,15 +373,15 @@ void GhostEnemy::draw(sf::RenderWindow& window) {
     }
 }
 
-void GhostEnemy::setPosition(sf::Vector2f position) {
+void GhostEnemy::doSetPosition(sf::Vector2f position) {
     m_sprite.setPosition(position);
 }
 
-sf::Vector2f GhostEnemy::getPosition() const {
+sf::Vector2f GhostEnemy::doGetPosition() const {
     return m_sprite.getPosition();
 }
 
-sf::FloatRect GhostEnemy::getBounds() const {
+sf::FloatRect GhostEnemy::doGetBounds() const {
 
     if (m_currentState == State::DYING)
         return {};
@@ -393,11 +395,11 @@ sf::FloatRect GhostEnemy::getBounds() const {
     };
 }
 
-bool GhostEnemy::isAttacking() const {
+bool GhostEnemy::doIsAttacking() const {
     return m_currentState == State::ATTACKING;
 }
 
-bool GhostEnemy::didAttackLand() {
+bool GhostEnemy::doDidAttackLand() {
     if (m_didAttackLand) {
         m_didAttackLand = false;
         return true;
@@ -405,9 +407,9 @@ bool GhostEnemy::didAttackLand() {
     return false;
 }
 
-sf::FloatRect GhostEnemy::getAttackHitbox() const
+sf::FloatRect GhostEnemy::doGetAttackHitbox() const
 {
-    sf::Vector2f enemyPos = getPosition();
+    sf::Vector2f enemyPos = doGetPosition();
     const float attackWidth = 64.f;
     const float attackLength = 200.f;
     const float attackOffset = 30.f;
@@ -450,7 +452,7 @@ sf::FloatRect GhostEnemy::getAttackHitbox() const
     return {hitboxTopLeft, hitboxSize};
 }
 
-void GhostEnemy::takeDamage(float damage) {
+void GhostEnemy::doTakeDamage(float damage) {
     if (m_currentState == State::DYING) return;
     m_health.takeDamage(damage);
 
@@ -473,15 +475,15 @@ void GhostEnemy::takeDamage(float damage) {
     }
 }
 
-bool GhostEnemy::isDead() const {
+bool GhostEnemy::doIsDead() const {
     return m_isReadyForRemoval;
 }
 
-bool GhostEnemy::hasJustDied() const {
+bool GhostEnemy::doHasJustDied() const {
     return m_justDied;
 }
 
-void GhostEnemy::acknowledgeDeath() {
+void GhostEnemy::doAcknowledgeDeath() {
     m_justDied = false;
 }
 
@@ -499,11 +501,11 @@ void GhostEnemy::updateHealthBar() {
     m_healthBarForeground.setPosition(barPos);
 }
 
-[[nodiscard]] std::unique_ptr<EnemyBase> GhostEnemy::clone() const {
-    return std::make_unique<GhostEnemy>(*this);
-}
-
-int GhostEnemy::getCoinValue() const
+int GhostEnemy::doGetCoinValue() const
 {
     return 7;
+}
+
+[[nodiscard]] std::unique_ptr<EnemyBase> GhostEnemy::doClone() const {
+    return std::make_unique<GhostEnemy>(*this);
 }

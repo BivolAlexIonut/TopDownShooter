@@ -18,23 +18,6 @@ public:
     explicit DevilEnemy(const std::map<std::string, sf::SoundBuffer>& soundBuffers);
     static bool initAssets(const std::string& basePath);
 
-    void update(sf::Time dt, sf::Vector2f playerPosition, const GameMap& gameMap) override;
-    void draw(sf::RenderWindow& window) override;
-    void setPosition(sf::Vector2f position) override;
-    [[nodiscard]] sf::Vector2f getPosition() const override;
-    [[nodiscard]] sf::FloatRect getBounds() const override;
-
-    void takeDamage(float damage) override;
-    [[nodiscard]] bool isDead() const override;
-    [[nodiscard]] bool isAttacking() const override;
-    bool didAttackLand() override;
-    [[nodiscard]] sf::FloatRect getAttackHitbox() const override;
-
-    [[nodiscard]] bool hasJustDied() const override;
-    void acknowledgeDeath() override;
-    [[nodiscard]] std::unique_ptr<EnemyBase> clone() const override;
-    [[nodiscard]] int getCoinValue() const override;
-
 private:
     void updateAnimation();
     void updateHealthBar();
@@ -69,4 +52,23 @@ private:
     sf::Clock m_moveTimer;
     float m_moveCooldown;
     bool m_wasMoving;
+
+protected:
+
+    void doUpdate(sf::Time dt, sf::Vector2f playerPosition, const GameMap& gameMap) override;
+    void doDraw(sf::RenderWindow& window) override;
+    void doSetPosition(sf::Vector2f position) override;
+    [[nodiscard]] sf::Vector2f doGetPosition() const override;
+    [[nodiscard]] sf::FloatRect doGetBounds() const override;
+
+    void doTakeDamage(float damage) override;
+    [[nodiscard]] bool doIsDead() const override;
+    [[nodiscard]] bool doIsAttacking() const override;
+    bool doDidAttackLand() override;
+    [[nodiscard]] sf::FloatRect doGetAttackHitbox() const override;
+
+    [[nodiscard]] bool doHasJustDied() const override;
+    void doAcknowledgeDeath() override;
+    [[nodiscard]] std::unique_ptr<EnemyBase> doClone() const override;
+    [[nodiscard]] int doGetCoinValue() const override;
 };

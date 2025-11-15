@@ -1,32 +1,103 @@
 #pragma once
-#ifndef __clangd__
 #include <SFML/Graphics.hpp>
-#endif
 #include "GameMap.h"
-
+#include <memory>
 
 class EnemyBase
 {
 public:
     virtual ~EnemyBase() = default;
 
-    virtual void update(sf::Time dt, sf::Vector2f playerPosition,const GameMap &gameMap) = 0;
-    virtual void draw(sf::RenderWindow& window) = 0;
-    virtual void setPosition(sf::Vector2f position) = 0;
+    void update(sf::Time dt, sf::Vector2f playerPosition, const GameMap &gameMap)
+    {
+        if (isDead()) return;
+        doUpdate(dt, playerPosition, gameMap);
+    }
 
-    [[nodiscard]] virtual sf::Vector2f getPosition() const = 0;
-    [[nodiscard]] virtual sf::FloatRect getBounds() const = 0;
+    void draw(sf::RenderWindow& window)
+    {
+        doDraw(window);
+    }
 
-    [[nodiscard]] virtual bool isAttacking() const = 0;
-    virtual bool didAttackLand() = 0;
-    [[nodiscard]] virtual sf::FloatRect getAttackHitbox() const = 0;
+    void setPosition(sf::Vector2f position)
+    {
+        doSetPosition(position);
+    }
 
-    virtual void takeDamage(float damage) = 0;
-    [[nodiscard]] virtual bool isDead() const = 0;
+    [[nodiscard]] sf::Vector2f getPosition() const
+    {
+        return doGetPosition();
+    }
+    [[nodiscard]] sf::FloatRect getBounds() const
+    {
+        if (isDead()) return {};
+        return doGetBounds();
+    }
 
-    [[nodiscard]] virtual bool hasJustDied() const = 0;
-    virtual void acknowledgeDeath() = 0;
-    [[nodiscard]] virtual int getCoinValue() const = 0;
+    [[nodiscard]] bool isAttacking() const
+    {
+        return doIsAttacking();
+    }
 
-    [[nodiscard]] virtual std::unique_ptr<EnemyBase> clone() const = 0;
+    bool didAttackLand()
+    {
+        return doDidAttackLand();
+    }
+
+    [[nodiscard]] sf::FloatRect getAttackHitbox() const
+    {
+        return doGetAttackHitbox();
+    }
+
+    void takeDamage(float damage)
+    {
+        if (isDead()) return;
+        doTakeDamage(damage);
+    }
+
+    [[nodiscard]] bool isDead() const
+    {
+        return doIsDead();
+    }
+
+    [[nodiscard]] bool hasJustDied() const
+    {
+        return doHasJustDied();
+    }
+
+    void acknowledgeDeath()
+    {
+        doAcknowledgeDeath();
+    }
+
+    [[nodiscard]] std::unique_ptr<EnemyBase> clone() const
+    {
+        return doClone();
+    }
+
+    [[nodiscard]] int getCoinValue() const
+    {
+        return doGetCoinValue();
+    }
+
+protected:
+
+    virtual void doUpdate(sf::Time dt, sf::Vector2f playerPosition, const GameMap &gameMap) = 0;
+    virtual void doDraw(sf::RenderWindow& window) = 0;
+    virtual void doSetPosition(sf::Vector2f position) = 0;
+
+    [[nodiscard]] virtual sf::Vector2f doGetPosition() const = 0;
+    [[nodiscard]] virtual sf::FloatRect doGetBounds() const = 0;
+
+    [[nodiscard]] virtual bool doIsAttacking() const = 0;
+    virtual bool doDidAttackLand() = 0;
+    [[nodiscard]] virtual sf::FloatRect doGetAttackHitbox() const = 0;
+
+    virtual void doTakeDamage(float damage) = 0;
+    [[nodiscard]] virtual bool doIsDead() const = 0;
+
+    [[nodiscard]] virtual bool doHasJustDied() const = 0;
+    virtual void doAcknowledgeDeath() = 0;
+    [[nodiscard]] virtual std::unique_ptr<EnemyBase> doClone() const = 0;
+    [[nodiscard]] virtual int doGetCoinValue() const = 0;
 };

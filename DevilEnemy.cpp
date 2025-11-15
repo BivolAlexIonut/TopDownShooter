@@ -2,12 +2,14 @@
 #include "GameExceptions.h"
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
 #include "RandomGenerator.h"
 
 std::map<DevilEnemy::State, sf::Texture> DevilEnemy::s_textures;
 
-void DevilEnemy::setupAnimation(std::vector<sf::IntRect> &frames, int frameCount) {
+void DevilEnemy::setupAnimation(std::vector<sf::IntRect>& frames, int frameCount)
+{
     const int yPos = 0;
     const int frameW = 81;
     const int frameH = 71;
@@ -18,7 +20,8 @@ void DevilEnemy::setupAnimation(std::vector<sf::IntRect> &frames, int frameCount
     }
 }
 
-bool DevilEnemy::initAssets(const std::string &basePath) {
+bool DevilEnemy::initAssets(const std::string& basePath)
+{
     if (!s_textures[State::IDLE].loadFromFile(basePath + "IDLE.png")) {
         throw AssetLoadException(basePath + "IDLE.png");
     }
@@ -44,7 +47,8 @@ DevilEnemy::DevilEnemy(const std::map<std::string, sf::SoundBuffer> &soundBuffer
       m_currentFrame(0), m_frameTime(0.1f), m_speed(150.f), m_damageFrame(6),
       m_didAttackLand(false),
       m_health(120.f, 120.f),
-      m_isReadyForRemoval(false), m_justDied(false), m_moveCooldown(0.45f), m_wasMoving(false) {
+      m_isReadyForRemoval(false),m_justDied(false),m_moveCooldown(0.45f), m_wasMoving(false)
+{
     if (soundBuffers.count("devil_move")) {
         m_moveSound.setBuffer(soundBuffers.at("devil_move"));
         m_moveSound.setVolume(20.f);
@@ -79,7 +83,8 @@ DevilEnemy::DevilEnemy(const std::map<std::string, sf::SoundBuffer> &soundBuffer
 }
 
 
-void DevilEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap &gameMap) {
+void DevilEnemy::doUpdate(sf::Time dt, sf::Vector2f playerPosition, const GameMap& gameMap)
+{
     if (m_currentState == State::DYING) {
         updateAnimation();
         return;
@@ -106,13 +111,14 @@ void DevilEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap 
     const float attackCooldown = 6.f;
 
     if (m_currentState != State::ATTACKING) {
-        if (length <= attackRange && length >= idealRangeMin && m_shootTimer.getElapsedTime().asSeconds() >
-            attackCooldown) {
+        if (length <= attackRange && length >= idealRangeMin && m_shootTimer.getElapsedTime().asSeconds() > attackCooldown) {
             m_currentState = State::ATTACKING;
             m_shootTimer.restart();
-        } else if (length < moveRange) {
+        }
+        else if (length < moveRange) {
             m_currentState = State::FLYING;
-        } else {
+        }
+        else {
             m_currentState = State::IDLE;
         }
     }
@@ -126,8 +132,9 @@ void DevilEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap 
         }
     }
 
+
     sf::Vector2f frameVelocity = velocity * dt.asSeconds();
-    sf::FloatRect bounds = getBounds();
+    sf::FloatRect bounds = doGetBounds();
 
     bounds.position.x += frameVelocity.x;
     float topY = bounds.position.y;
@@ -146,7 +153,7 @@ void DevilEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap 
     }
     m_sprite.move({frameVelocity.x, 0.f});
 
-    bounds = getBounds();
+    bounds = doGetBounds();
     bounds.position.y += frameVelocity.y;
     float leftX = bounds.position.x;
     float rightX = bounds.position.x + bounds.size.x;
@@ -163,6 +170,7 @@ void DevilEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap 
         }
     }
     m_sprite.move({0.f, frameVelocity.y});
+
 
     if (directionToPlayer.x > 1.0f) {
         m_sprite.setScale(sf::Vector2f(-1.2f, 1.2f));
@@ -193,7 +201,8 @@ void DevilEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap 
     updateHealthBar();
 }
 
-void DevilEnemy::updateAnimation() {
+void DevilEnemy::updateAnimation()
+{
     if (m_currentState != m_previousState) {
         m_currentFrame = 0;
         m_previousState = m_currentState;
@@ -218,7 +227,8 @@ void DevilEnemy::updateAnimation() {
             if (m_currentState == State::ATTACKING || m_currentState == State::HURT) {
                 m_currentState = State::FLYING;
                 m_currentFrame = 0;
-            } else if (m_currentState == State::DYING) {
+            }
+            else if (m_currentState == State::DYING) {
                 m_currentFrame = static_cast<int>(frameCount - 1);
                 m_isReadyForRemoval = true;
             } else {
@@ -234,7 +244,8 @@ void DevilEnemy::updateAnimation() {
     }
 }
 
-void DevilEnemy::updateHealthBar() {
+void DevilEnemy::updateHealthBar()
+{
     float healthPercent = m_health.getPercentage();
     float barWidth = m_healthBarBackground.getSize().x;
     m_healthBarForeground.setSize({barWidth * healthPercent, m_healthBarForeground.getSize().y});
@@ -249,7 +260,7 @@ void DevilEnemy::updateHealthBar() {
     m_healthBarForeground.setPosition(barPos);
 }
 
-void DevilEnemy::draw(sf::RenderWindow &window) {
+void DevilEnemy::doDraw(sf::RenderWindow& window) {
     window.draw(m_sprite);
     if (m_currentState != State::DYING && m_currentState != State::HURT) {
         window.draw(m_healthBarBackground);
@@ -257,7 +268,7 @@ void DevilEnemy::draw(sf::RenderWindow &window) {
     }
 }
 
-void DevilEnemy::takeDamage(float damage) {
+void DevilEnemy::doTakeDamage(float damage) {
     if (m_currentState == State::DYING) return;
     m_health.takeDamage(damage);
 
@@ -268,7 +279,8 @@ void DevilEnemy::takeDamage(float damage) {
         m_animationTimer.restart();
         m_sprite.setTexture(s_textures[State::DYING]);
     } else {
-        if (m_currentState != State::HURT) {
+        if (m_currentState != State::HURT)
+        {
             m_currentState = State::HURT;
             m_currentFrame = 0;
             m_animationTimer.restart();
@@ -277,14 +289,15 @@ void DevilEnemy::takeDamage(float damage) {
     }
 }
 
-void DevilEnemy::setPosition(sf::Vector2f position) { m_sprite.setPosition(position); }
-sf::Vector2f DevilEnemy::getPosition() const { return m_sprite.getPosition(); }
-bool DevilEnemy::isDead() const { return m_isReadyForRemoval; }
-bool DevilEnemy::hasJustDied() const { return m_justDied; }
-void DevilEnemy::acknowledgeDeath() { m_justDied = false; }
-bool DevilEnemy::isAttacking() const { return m_currentState == State::ATTACKING; }
+void DevilEnemy::doSetPosition(sf::Vector2f position) { m_sprite.setPosition(position); }
+sf::Vector2f DevilEnemy::doGetPosition() const { return m_sprite.getPosition(); }
+bool DevilEnemy::doIsDead() const { return m_isReadyForRemoval; }
+bool DevilEnemy::doHasJustDied() const { return m_justDied; }
+void DevilEnemy::doAcknowledgeDeath() { m_justDied = false; }
+bool DevilEnemy::doIsAttacking() const { return m_currentState == State::ATTACKING; }
 
-sf::FloatRect DevilEnemy::getBounds() const {
+sf::FloatRect DevilEnemy::doGetBounds() const {
+
     if (m_currentState == State::DYING)
         return {};
 
@@ -294,7 +307,7 @@ sf::FloatRect DevilEnemy::getBounds() const {
     return {{pos.x - boxWidth / 2.f, pos.y - boxHeight / 2.f}, {boxWidth, boxHeight}};
 }
 
-bool DevilEnemy::didAttackLand() {
+bool DevilEnemy::doDidAttackLand() {
     if (m_didAttackLand) {
         m_didAttackLand = false;
         return true;
@@ -302,14 +315,14 @@ bool DevilEnemy::didAttackLand() {
     return false;
 }
 
-sf::FloatRect DevilEnemy::getAttackHitbox() const {
+sf::FloatRect DevilEnemy::doGetAttackHitbox() const {
     return {{-1.f, -1.f}, {-1.f, -1.f}};
 }
 
-[[nodiscard]] std::unique_ptr<EnemyBase> DevilEnemy::clone() const {
+[[nodiscard]] std::unique_ptr<EnemyBase> DevilEnemy::doClone() const {
     return std::make_unique<DevilEnemy>(*this);
 }
 
-int DevilEnemy::getCoinValue() const {
+int DevilEnemy::doGetCoinValue() const {
     return 10;
 }

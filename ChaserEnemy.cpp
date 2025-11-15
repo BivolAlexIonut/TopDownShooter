@@ -109,7 +109,7 @@ ChaserEnemy::ChaserEnemy(const std::map<std::string, sf::SoundBuffer>& soundBuff
 }
 
 
-void ChaserEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap& gameMap)
+void ChaserEnemy::doUpdate(sf::Time dt, sf::Vector2f playerPosition, const GameMap& gameMap)
 {
     if (m_currentState == State::DYING)
     {
@@ -164,7 +164,7 @@ void ChaserEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap
     }
 
     sf::Vector2f frameVelocity = velocity * dt.asSeconds();
-    sf::FloatRect bounds = getBounds();
+    sf::FloatRect bounds = doGetBounds();
 
     bounds.position.x += frameVelocity.x;
     float topY = bounds.position.y;
@@ -183,7 +183,7 @@ void ChaserEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap
     }
     m_sprite.move({frameVelocity.x, 0.f});
 
-    bounds = getBounds();
+    bounds = doGetBounds();
     bounds.position.y += frameVelocity.y;
     float leftX = bounds.position.x;
     float rightX = bounds.position.x + bounds.size.x;
@@ -201,7 +201,7 @@ void ChaserEnemy::update(sf::Time dt, sf::Vector2f playerPosition, const GameMap
     }
     m_sprite.move({0.f, frameVelocity.y});
 
-    sf::Vector2f dir = playerPosition - getPosition();
+    sf::Vector2f dir = playerPosition - doGetPosition();
     m_currentAngleRad = std::atan2(dir.y, dir.x);
     float angleInDegrees = m_currentAngleRad * (180.f / 3.14159265f);
     m_sprite.setRotation(sf::degrees(angleInDegrees));
@@ -249,7 +249,7 @@ void ChaserEnemy::updateHealthBar()
     m_healthBarForeground.setPosition(barPos);
 }
 
-sf::FloatRect ChaserEnemy::getBounds() const {
+sf::FloatRect ChaserEnemy::doGetBounds() const {
 
     if (m_currentState == State::DYING)
         return {};
@@ -257,7 +257,7 @@ sf::FloatRect ChaserEnemy::getBounds() const {
     const float boxWidth = 30.f;
     const float boxHeight = 30.f;
 
-    sf::Vector2f pos = getPosition();
+    sf::Vector2f pos = doGetPosition();
 
     return {
             {pos.x - boxWidth / 2.f, pos.y - boxHeight / 2.f},
@@ -265,7 +265,7 @@ sf::FloatRect ChaserEnemy::getBounds() const {
     };
 }
 
-void ChaserEnemy::draw(sf::RenderWindow& window){
+void ChaserEnemy::doDraw(sf::RenderWindow& window){
     window.draw(m_sprite);
     if (m_currentState != State::DYING)
     {
@@ -286,7 +286,7 @@ void ChaserEnemy::draw(sf::RenderWindow& window){
     }
 }
 
-void ChaserEnemy::takeDamage(float damage) {
+void ChaserEnemy::doTakeDamage(float damage) {
     if (m_currentState == State::DYING) return;
 
     m_health.takeDamage(damage);
@@ -306,31 +306,31 @@ void ChaserEnemy::takeDamage(float damage) {
     }
 }
 
-bool ChaserEnemy::isDead() const {
+bool ChaserEnemy::doIsDead() const {
     return m_isReadyForRemoval;
 }
 
-void ChaserEnemy::setPosition(sf::Vector2f position) {
+void ChaserEnemy::doSetPosition(sf::Vector2f position) {
     m_sprite.setPosition(position);
 }
 
-sf::Vector2f ChaserEnemy::getPosition() const {
+sf::Vector2f ChaserEnemy::doGetPosition() const {
     return m_sprite.getPosition();
 }
 
-bool ChaserEnemy::hasJustDied() const {
+bool ChaserEnemy::doHasJustDied() const {
     return m_justDied;
 }
 
-void ChaserEnemy::acknowledgeDeath() {
+void ChaserEnemy::doAcknowledgeDeath() {
     m_justDied = false;
 }
 
-bool ChaserEnemy::isAttacking() const {
+bool ChaserEnemy::doIsAttacking() const {
     return m_currentState == State::ATTACKING;
 }
 
-bool ChaserEnemy::didAttackLand() {
+bool ChaserEnemy::doDidAttackLand() {
     if (m_didAttackLand) {
         m_didAttackLand = false;
         return true;
@@ -338,14 +338,14 @@ bool ChaserEnemy::didAttackLand() {
     return false;
 }
 
-sf::FloatRect ChaserEnemy::getAttackHitbox() const {
+sf::FloatRect ChaserEnemy::doGetAttackHitbox() const {
     constexpr float hitboxWidth = 100.f;
     constexpr float hitboxHeight = 30.f;
     constexpr float attackDistance = 60.f;
 
     sf::Vector2f direction(std::cos(m_currentAngleRad), std::sin(m_currentAngleRad));
 
-    sf::Vector2f hitboxCenter = getPosition() + direction * attackDistance;
+    sf::Vector2f hitboxCenter = doGetPosition() + direction * attackDistance;
 
     return {
         {hitboxCenter.x - hitboxWidth / 2.f, hitboxCenter.y - hitboxHeight / 2.f},
@@ -397,11 +397,11 @@ void ChaserEnemy::updateAnimation()
     }
 }
 
-[[nodiscard]] std::unique_ptr<EnemyBase> ChaserEnemy::clone() const {
+[[nodiscard]] std::unique_ptr<EnemyBase> ChaserEnemy::doClone() const {
     return std::make_unique<ChaserEnemy>(*this);
 }
 
-int ChaserEnemy::getCoinValue() const
+int ChaserEnemy::doGetCoinValue() const
 {
     return 5;
 }
