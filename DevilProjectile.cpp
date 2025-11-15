@@ -22,7 +22,7 @@ DevilProjectile::DevilProjectile(sf::Vector2f startPos, sf::Vector2f direction) 
     if (length != 0.f) {
         direction /= length;
     }
-    float speed = 900.f;
+    float speed = 1200.f;
     m_velocity = direction * speed;
 
     float angleRad = std::atan2(direction.y, direction.x);

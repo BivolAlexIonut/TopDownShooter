@@ -46,7 +46,7 @@ DevilEnemy::DevilEnemy(const std::map<std::string, sf::SoundBuffer> &soundBuffer
       m_previousState(m_currentState),
       m_currentFrame(0), m_frameTime(0.1f), m_speed(150.f), m_damageFrame(6),
       m_didAttackLand(false),
-      m_health(120.f, 120.f),
+      m_health(300.f, 300.f),
       m_isReadyForRemoval(false),m_justDied(false),m_moveCooldown(0.45f), m_wasMoving(false)
 {
     if (soundBuffers.count("devil_move")) {
@@ -108,7 +108,7 @@ void DevilEnemy::doUpdate(sf::Time dt, sf::Vector2f playerPosition, const GameMa
     const float attackRange = 450.f;
     const float idealRangeMin = 400.f;
     const float moveRange = 700.f;
-    const float attackCooldown = 6.f;
+    const float attackCooldown = 4.f;
 
     if (m_currentState != State::ATTACKING) {
         if (length <= attackRange && length >= idealRangeMin && m_shootTimer.getElapsedTime().asSeconds() > attackCooldown) {
@@ -324,5 +324,5 @@ sf::FloatRect DevilEnemy::doGetAttackHitbox() const {
 }
 
 int DevilEnemy::doGetCoinValue() const {
-    return 10;
+    return 23;
 }

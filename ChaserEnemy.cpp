@@ -1,7 +1,6 @@
 #include "ChaserEnemy.h"
 #include "GameExceptions.h"
 #include <cmath>
-#include <stdexcept>
 #include <iostream>
 
 #include "RandomGenerator.h"
@@ -32,7 +31,7 @@ ChaserEnemy::ChaserEnemy(const std::map<std::string, sf::SoundBuffer>& soundBuff
       m_sprite(ChaserEnemy::s_texture),
       m_currentState(State::IDLE),
       m_currentFrame(0), m_frameTime(0.05f), m_didAttackLand(false), m_damageFrame(8), m_currentAngleRad(0.f),
-      m_health(100.f, 100.f), m_previousState(m_currentState), m_alertSprite(ChaserEnemy::s_alertTexture),
+      m_health(150.f, 150.f), m_previousState(m_currentState), m_alertSprite(ChaserEnemy::s_alertTexture),
         m_alertDuration(0.8f),m_isReadyForRemoval(false),m_justDied(false),m_moveCooldown(0.45f), m_wasMoving(false)
     {
 
@@ -403,5 +402,5 @@ void ChaserEnemy::updateAnimation()
 
 int ChaserEnemy::doGetCoinValue() const
 {
-    return 5;
+    return 14;
 }

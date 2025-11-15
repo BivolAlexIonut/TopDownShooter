@@ -81,7 +81,7 @@ int main() {
             throw AssetLoadException("pistol.ogg");
         }
         if (!soundBuffers["chaser_hurt"].loadFromFile(
-            "/home/alex/TopDownShooter/assets/sounds/enemies/chaser/Orc_Damage.wav")) {
+            "assets/sounds/enemies/chaser/Orc_Damage.wav")) {
             throw AssetLoadException("Orc_Damage.wav");
         }
         if (!soundBuffers["ghost_hurt"].loadFromFile("assets/sounds/enemies/ghost/Ghost_Death.wav")) {
