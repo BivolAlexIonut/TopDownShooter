@@ -30,6 +30,8 @@ Schimba Arma Urmatoare: E
 Schimba Arma Anterioara: Q
 Reincarca: R
 Exit: BACKSPACE
+Meniu: TAB
+Navigare meniu: ARROWS
 
 ### Folosiți template-ul corespunzător grupei voastre!
 
