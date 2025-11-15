@@ -63,12 +63,12 @@ protected:
 
     void doTakeDamage(float damage) override;
     [[nodiscard]] bool doIsDead() const override;
-    [[nodiscard]] bool doIsAttacking() const override;
+    [[maybe_unused]] [[nodiscard]] bool doIsAttacking() const override;
     bool doDidAttackLand() override;
     [[nodiscard]] sf::FloatRect doGetAttackHitbox() const override;
 
     [[nodiscard]] bool doHasJustDied() const override;
     void doAcknowledgeDeath() override;
-    [[nodiscard]] std::unique_ptr<EnemyBase> doClone() const override;
+    [[maybe_unused]] [[nodiscard]] std::unique_ptr<EnemyBase> doClone() const override;
     [[nodiscard]] int doGetCoinValue() const override;
 };

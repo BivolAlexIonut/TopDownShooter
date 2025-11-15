@@ -34,7 +34,7 @@ public:
         return doGetBounds();
     }
 
-    [[nodiscard]] bool isAttacking() const
+    [[maybe_unused]] [[nodiscard]] bool isAttacking() const
     {
         return doIsAttacking();
     }
@@ -70,7 +70,7 @@ public:
         doAcknowledgeDeath();
     }
 
-    [[nodiscard]] std::unique_ptr<EnemyBase> clone() const
+    [[maybe_unused]] [[nodiscard]] std::unique_ptr<EnemyBase> clone() const
     {
         return doClone();
     }

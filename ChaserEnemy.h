@@ -73,8 +73,8 @@ protected:
     [[nodiscard]] bool doHasJustDied() const override;
     void doAcknowledgeDeath() override;
     [[nodiscard]] int doGetCoinValue() const override;
-    [[nodiscard]] std::unique_ptr<EnemyBase> doClone() const override;
-    bool doIsAttacking() const override;
+    [[maybe_unused]] [[nodiscard]] std::unique_ptr<EnemyBase> doClone() const override;
+    [[maybe_unused]] bool doIsAttacking() const override;
     bool doDidAttackLand() override;
     sf::FloatRect doGetAttackHitbox() const override;
 };
