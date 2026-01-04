@@ -20,6 +20,7 @@
 #include "DevilEnemy.h"
 #include "DevilProjectile.h"
 #include "UpgradeMenu.h"
+#include "EnemyManager.h"
 
 std::map<std::string, sf::SoundBuffer> soundBuffers;
 std::list<sf::Sound> activeSounds;
@@ -168,7 +169,7 @@ int main() {
     backgroundMusic.setVolume(60.f);
     backgroundMusic.setLooping(true);
 
-    std::vector<std::unique_ptr<EnemyBase> > enemies;
+    std::vector<EnemyManager> enemies;
     constexpr int MAX_ENEMIES = 10;
     const float RESPAWN_DELAY = 6.0f;
     sf::Clock respawnTimer;
@@ -337,11 +338,11 @@ int main() {
 
                             float randType = RandomGenerator::getFloat(0.f, 1.f);
                             if (randType < 0.2f) {
-                                enemies.push_back(std::make_unique<ChaserEnemy>(soundBuffers));
+                                enemies.emplace_back(std::make_unique<ChaserEnemy>(soundBuffers));
                             } else if (randType < 0.4f) {
-                                enemies.push_back(std::make_unique<GhostEnemy>(soundBuffers));
+                                enemies.emplace_back(std::make_unique<GhostEnemy>(soundBuffers));
                             } else {
-                                enemies.push_back(std::make_unique<DevilEnemy>(soundBuffers));
+                                enemies.emplace_back(std::make_unique<DevilEnemy>(soundBuffers));
                             }
                             enemies.back()->setPosition(randomPos);
                         }
@@ -511,11 +512,11 @@ int main() {
 
                         float randType = RandomGenerator::getFloat(0.f, 1.f);
                         if (randType < 0.2f) {
-                            enemies.push_back(std::make_unique<ChaserEnemy>(soundBuffers));
+                            enemies.emplace_back(std::make_unique<ChaserEnemy>(soundBuffers));
                         } else if (randType < 0.4f) {
-                            enemies.push_back(std::make_unique<GhostEnemy>(soundBuffers));
+                            enemies.emplace_back(std::make_unique<GhostEnemy>(soundBuffers));
                         } else {
-                            enemies.push_back(std::make_unique<DevilEnemy>(soundBuffers));
+                            enemies.emplace_back(std::make_unique<DevilEnemy>(soundBuffers));
                         }
                         enemies.back()->setPosition(randomPos);
                     }

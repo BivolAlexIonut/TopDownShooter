@@ -80,6 +80,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         DevilEnemy.cpp
         UpgradeMenu.h
         UpgradeMenu.cpp
+        EnemyManager.h
+        EnemyManager.cpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

@@ -216,7 +216,7 @@ int GameMap::getTileIDAt(sf::Vector2f worldPosition) const
 }
 
 int GameMap::getTileID(sf::Vector2u tileCoords) const {
-    if (tileCoords.x > m_mapSize.x || tileCoords.y > m_mapSize.y) {
+    if (tileCoords.x >= m_mapSize.x || tileCoords.y >= m_mapSize.y) {
         return 0;
     }
     return m_tileIDs[tileCoords.y * m_mapSize.x + tileCoords.x];
