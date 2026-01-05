@@ -1,28 +1,49 @@
 #pragma once
-#include "EnemyBase.h"
+#include <vector>
 #include <memory>
+#include <list>
+#include <map>
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
+#include "EnemyBase.h"
+#include "Player.h"
+#include "GameMap.h"
+#include "Bullet.h"
+#include "Effect.h"
+#include "Coin.h"
+#include "DevilProjectile.h"
 
 class EnemyManager {
 public:
-    EnemyManager() = default;
-    explicit EnemyManager(std::unique_ptr<EnemyBase> enemy);
-    EnemyManager(const EnemyManager& other);
-    EnemyManager& operator=(const EnemyManager& other);
-    EnemyManager(EnemyManager&& other) noexcept = default;
-    EnemyManager& operator=(EnemyManager&& other) noexcept = default;
+    explicit EnemyManager(std::map<std::string, sf::SoundBuffer>& soundBuffers);
 
-    ~EnemyManager() = default;
+    void reset();
+    void update(float dt, const Player& player, const GameMap& map,
+                std::list<sf::Sound>& activeSounds,
+                std::vector<std::unique_ptr<Coin>>& coins,
+                std::vector<std::unique_ptr<DevilProjectile>>& enemyProjectiles,
+                const sf::FloatRect& mapBounds);
 
-    EnemyBase* operator->();
-    const EnemyBase* operator->() const;
-    EnemyBase& operator*();
-    const EnemyBase& operator*() const;
-    
-    [[nodiscard]] EnemyBase* get();
-    [[nodiscard]] const EnemyBase* get() const;
+    void draw(sf::RenderWindow& window);
 
-    explicit operator bool() const;
+    void handleBulletCollisions(std::vector<Bullet>& bullets,
+                                std::list<sf::Sound>& activeSounds,
+                                std::vector<std::unique_ptr<Effect>>& effects,
+                                const sf::Texture& ghostImpactTexture,
+                                const std::vector<sf::IntRect>& ghostImpactFrames,
+                                const sf::Texture& bloodEffectTexture,
+                                const std::vector<sf::IntRect>& bloodEffectFrames);
+
+    [[nodiscard]] const std::vector<std::unique_ptr<EnemyBase>>& getEnemies() const;
+    [[nodiscard]] std::vector<std::unique_ptr<EnemyBase>>& getEnemies();
 
 private:
-    std::unique_ptr<EnemyBase> m_enemy;
+    void spawnEnemy(const sf::FloatRect& mapBounds, const GameMap& gameMap);
+
+    std::vector<std::unique_ptr<EnemyBase>> m_enemies;
+    std::map<std::string, sf::SoundBuffer>& m_soundBuffers;
+
+    sf::Clock m_respawnTimer;
+    const float m_respawnDelay = 6.0f;
+    const size_t m_maxEnemies = 10;
 };

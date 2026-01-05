@@ -1,5 +1,4 @@
 #include "GhostEnemy.h"
-#include <stdexcept>
 #include <cmath>
 #include <iostream>
 #include <algorithm>
