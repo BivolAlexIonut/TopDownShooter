@@ -31,6 +31,7 @@ Schimba Arma Anterioara: Q
 Reincarca: R
 Exit: BACKSPACE
 Meniu: TAB
+Folosire abilitate de pickup(health sau ammo): X(hold)
 Navigare meniu: ARROWS
 Cumparare abilitati: ENTER
 
