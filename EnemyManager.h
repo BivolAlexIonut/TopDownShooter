@@ -9,7 +9,7 @@
 #include "Player.h"
 #include "GameMap.h"
 #include "Bullet.h"
-#include "Effect.h"
+#include "EffectManager.h"
 #include "Coin.h"
 #include "DevilProjectile.h"
 
@@ -28,7 +28,7 @@ public:
 
     void handleBulletCollisions(std::vector<Bullet>& bullets,
                                 std::list<sf::Sound>& activeSounds,
-                                std::vector<std::unique_ptr<Effect>>& effects,
+                                EffectManager& effectManager,
                                 const sf::Texture& ghostImpactTexture,
                                 const std::vector<sf::IntRect>& ghostImpactFrames,
                                 const sf::Texture& bloodEffectTexture,

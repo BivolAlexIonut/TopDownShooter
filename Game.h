@@ -4,14 +4,14 @@
 #include <memory>
 #include <vector>
 #include <list>
-#include <map>
+#include <optional>
 #include "GameMap.h"
 #include "Player.h"
 #include "EnemyManager.h"
-#include "Bullet.h"
-#include "Effect.h"
-#include "Coin.h"
-#include "DevilProjectile.h"
+#include "ResourceManager.h"
+#include "ProjectileManager.h"
+#include "PickableManager.h"
+#include "EffectManager.h"
 #include "UpgradeMenu.h"
 
 enum class GameState { MainMenu, Playing, Paused, GameOver };
@@ -25,7 +25,6 @@ private:
     void processEvents();
     void update(sf::Time dt);
     void render();
-    void loadAssets();
     void restartGame();
 
     sf::RenderWindow m_window;
@@ -35,49 +34,34 @@ private:
 
     GameState m_state;
 
-    // Resurse
-    std::map<std::string, sf::SoundBuffer> m_soundBuffers;
-    sf::Music m_backgroundMusic;
-    sf::Font m_ammoFont;
-    
-    // Texturi
-    sf::Texture m_crosshairTexture;
-    sf::Texture m_coinIconTexture;
-    sf::Texture m_ghostImpactTexture;
-    sf::Texture m_bloodEffectTexture;
-    
-    // Sprites
-    sf::Sprite m_crosshairSprite;
-    sf::Sprite m_coinIconSprite;
-    sf::Text m_ammoText;
-    sf::Text m_coinText;
-    
-    // Menu Text
-    sf::Text m_menuTitle;
-    sf::Text m_menuStart;
-    sf::Text m_menuExit;
-    sf::Text m_gameOverTitle;
-    sf::Text m_gameOverRestart;
-
-    // Game object
-    GameMap m_gameMap;
-    std::unique_ptr<Player> m_player;
+    ResourceManager m_resources;
+    ProjectileManager m_projectileManager;
+    PickableManager m_pickableManager;
+    EffectManager m_effectManager;
     EnemyManager m_enemyManager;
+    
+    std::unique_ptr<Player> m_player;
+    GameMap m_gameMap;
     UpgradeMenu m_upgradeMenu;
 
-    std::vector<Bullet> m_bullets;
-    std::vector<std::unique_ptr<Effect>> m_effects;
-    std::vector<std::unique_ptr<Coin>> m_coins;
-    std::vector<std::unique_ptr<DevilProjectile>> m_enemyProjectiles;
+    std::optional<sf::Sprite> m_crosshairSprite;
+    std::optional<sf::Sprite> m_coinIconSprite;
+    std::optional<sf::Text> m_ammoText;
+    std::optional<sf::Text> m_coinText;
+    
+    std::optional<sf::Text> m_menuTitle;
+    std::optional<sf::Text> m_menuStart;
+    std::optional<sf::Text> m_menuExit;
+    std::optional<sf::Text> m_gameOverTitle;
+    std::optional<sf::Text> m_gameOverRestart;
+
     std::list<sf::Sound> m_activeSounds;
 
-    // Variabile logice
     sf::FloatRect m_mapBounds;
     sf::Clock m_shootTimer;
     sf::Clock m_playerDamageTimer;
     const float m_playerIframeDuration = 0.3f;
     
-    // Animation frames
     std::vector<sf::IntRect> m_ghostImpactFrames;
     std::vector<sf::IntRect> m_bloodEffectFrames;
 };

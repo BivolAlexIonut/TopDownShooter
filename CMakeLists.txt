@@ -60,6 +60,14 @@ add_executable(${MAIN_EXECUTABLE_NAME}
     main.cpp
         Game.cpp
         Game.h
+        ResourceManager.cpp
+        ResourceManager.h
+        ProjectileManager.cpp
+        ProjectileManager.h
+        PickableManager.cpp
+        PickableManager.h
+        EffectManager.cpp
+        EffectManager.h
         Bullet.cpp
         GameMap.cpp
         Health.cpp
