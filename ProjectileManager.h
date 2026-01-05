@@ -19,7 +19,6 @@ public:
     void addEnemyProjectile(std::unique_ptr<DevilProjectile> projectile);
 
     std::vector<Bullet>& getBullets();
-    std::vector<std::unique_ptr<DevilProjectile>>& getEnemyProjectiles();
 
 private:
     std::vector<Bullet> m_bullets;

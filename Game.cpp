@@ -4,6 +4,8 @@
 #include "ChaserEnemy.h"
 #include "GhostEnemy.h"
 #include "DevilEnemy.h"
+#include <iostream>
+#include <cmath>
 #include <algorithm>
 
 Game::Game()
@@ -168,7 +170,7 @@ void Game::update(sf::Time dt) {
         
         std::vector<std::unique_ptr<Coin>> newCoins;
         std::vector<std::unique_ptr<DevilProjectile>> newProjectiles;
-        m_enemyManager.update(dt.asSeconds(), *m_player, m_gameMap, m_activeSounds, newCoins, newProjectiles, m_mapBounds);
+        m_enemyManager.update(dt.asSeconds(), *m_player, m_gameMap, m_activeSounds, newCoins, newProjectiles, m_mapBounds, m_playerDamageTimer, m_playerIframeDuration);
         
         for (auto& coin : newCoins) m_pickableManager.addCoin(std::move(coin));
         for (auto& proj : newProjectiles) m_projectileManager.addEnemyProjectile(std::move(proj));

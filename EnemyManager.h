@@ -18,11 +18,13 @@ public:
     explicit EnemyManager(std::map<std::string, sf::SoundBuffer>& soundBuffers);
 
     void reset();
-    void update(float dt, const Player& player, const GameMap& map,
+    void update(float dt, Player& player, const GameMap& map,
                 std::list<sf::Sound>& activeSounds,
                 std::vector<std::unique_ptr<Coin>>& coins,
                 std::vector<std::unique_ptr<DevilProjectile>>& enemyProjectiles,
-                const sf::FloatRect& mapBounds);
+                const sf::FloatRect& mapBounds,
+                sf::Clock& playerDamageTimer,
+                float playerIframeDuration);
 
     void draw(sf::RenderWindow& window);
 

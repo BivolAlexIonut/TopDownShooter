@@ -5,6 +5,7 @@
 #include "RandomGenerator.h"
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 
 EnemyManager::EnemyManager(std::map<std::string, sf::SoundBuffer>& soundBuffers)
     : m_soundBuffers(soundBuffers)
@@ -16,11 +17,13 @@ void EnemyManager::reset() {
     m_respawnTimer.restart();
 }
 
-void EnemyManager::update(float dt, const Player& player, const GameMap& map,
+void EnemyManager::update(float dt, Player& player, const GameMap& map,
                           std::list<sf::Sound>& activeSounds,
                           std::vector<std::unique_ptr<Coin>>& coins,
                           std::vector<std::unique_ptr<DevilProjectile>>& enemyProjectiles,
-                          const sf::FloatRect& mapBounds) {
+                          const sf::FloatRect& mapBounds,
+                          sf::Clock& playerDamageTimer,
+                          float playerIframeDuration) {
 
     // Logica de spawnare
     if (m_respawnTimer.getElapsedTime().asSeconds() > m_respawnDelay) {
@@ -40,6 +43,8 @@ void EnemyManager::update(float dt, const Player& player, const GameMap& map,
 
             if (enemy->didAttackLand()) {
                 sf::FloatRect attackBox = enemy->getAttackHitbox();
+                
+                // Atac la distanta (proiectil) - DevilEnemy
                 if (attackBox.size.x < 0) {
                     sf::Vector2f spawnPos = enemy->getPosition();
                     sf::Vector2f dir = player.getPosition() - spawnPos;
@@ -48,6 +53,33 @@ void EnemyManager::update(float dt, const Player& player, const GameMap& map,
                     activeSounds.emplace_back(m_soundBuffers["devil_attack"]);
                     activeSounds.back().setPitch(2.f);
                     activeSounds.back().play();
+                } 
+                // Atac Melee - ChaserEnemy / GhostEnemy
+                else {
+                    if (attackBox.findIntersection(player.getCollisionBounds()) &&
+                        playerDamageTimer.getElapsedTime().asSeconds() > playerIframeDuration) {
+                        
+                        sf::Vector2f knockbackDir = player.getPosition() - enemy->getPosition();
+                        float length = std::sqrt(knockbackDir.x * knockbackDir.x + knockbackDir.y * knockbackDir.y);
+                        if (length != 0.f) knockbackDir /= length; else knockbackDir = {1.f, 0.f};
+
+                        player.takeDamage(10.f, knockbackDir);
+                        activeSounds.emplace_back(m_soundBuffers["player_hurt"]);
+                        activeSounds.back().setPitch(RandomGenerator::getFloat(0.5f, 1.2f));
+                        activeSounds.back().setVolume(80.f);
+                        activeSounds.back().play();
+                        playerDamageTimer.restart();
+
+                        if (dynamic_cast<ChaserEnemy *>(enemy.get())) {
+                            activeSounds.emplace_back(m_soundBuffers["chaser_attack"]);
+                            activeSounds.back().setVolume(20.f);
+                            activeSounds.back().play();
+                        } else if (dynamic_cast<GhostEnemy *>(enemy.get())) {
+                            activeSounds.emplace_back(m_soundBuffers["ghost_attack"]);
+                            activeSounds.back().setVolume(20.f);
+                            activeSounds.back().play();
+                        }
+                    }
                 }
             }
         }
@@ -94,7 +126,7 @@ void EnemyManager::handleBulletCollisions(std::vector<Bullet>& bullets,
                     float damage = bullet.getDamage();
                     enemy->takeDamage(damage);
 
-                    std::string hurtKey = "";
+                    std::string hurtKey;
                     if (dynamic_cast<ChaserEnemy*>(enemy.get())) hurtKey = "chaser_hurt";
                     else if (dynamic_cast<GhostEnemy*>(enemy.get())) hurtKey = "ghost_hurt";
                     else if (dynamic_cast<DevilEnemy*>(enemy.get())) hurtKey = "devil_hurt";

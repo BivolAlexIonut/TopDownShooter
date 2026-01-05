@@ -65,7 +65,3 @@ void ProjectileManager::addEnemyProjectile(std::unique_ptr<DevilProjectile> proj
 std::vector<Bullet>& ProjectileManager::getBullets() {
     return m_bullets;
 }
-
-std::vector<std::unique_ptr<DevilProjectile>>& ProjectileManager::getEnemyProjectiles() {
-    return m_enemyProjectiles;
-}
