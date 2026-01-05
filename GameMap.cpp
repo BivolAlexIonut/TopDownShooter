@@ -25,7 +25,7 @@ bool GameMap::load(const std::string &mapPath, const std::string &tilesetPath, f
         throw MapLoadException(mapPath, "Nu am putut citi tile dimensions.");
     }
 
-    //citesc id-s dintr un vector temporar
+    //citesc id-s dintr-un vector temporar
     std::vector<int> tileIDs;
     int tileID;
     unsigned int totalTiles = m_mapSize.x * m_mapSize.y;
@@ -42,7 +42,7 @@ bool GameMap::load(const std::string &mapPath, const std::string &tilesetPath, f
     f.close();
 
     // Numar cate tiles sunt peste podea pentru a putea incarca si alte texturi in afara de
-    //cea a podeleip
+    //cea a podelei
     size_t objectTileCount = 0;
     for (const int id: tileIDs) {
         if (id > 1) //Aici verific daca textura este sau nu podea si numar
@@ -102,11 +102,11 @@ bool GameMap::load(const std::string &mapPath, const std::string &tilesetPath, f
             tileVertices[4].texCoords = floorBotRightTex;
             tileVertices[5].texCoords = floorBotLeftTex;
 
-            vertexIndex++; // tec la urmatorul set de 6 varfuri
+            vertexIndex++; // trec la urmatorul set de 6 varfuri
         }
     }
 
-    //Acum desenex obiectele care sunt deasupra podelei
+    //Acum desenez obiectele care sunt deasupra podelei
     for (unsigned int y = 0; y < m_mapSize.y; ++y) {
         for (unsigned int x = 0; x < m_mapSize.x; ++x) {
             int currentTileID = tileIDs[y * m_mapSize.x + x];
