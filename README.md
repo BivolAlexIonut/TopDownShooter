@@ -15,11 +15,11 @@ Marimea magaziei si munitia de rezerva.
 Timpul de reincarcare.
 
 Cadenta de tragere (cooldown).
-Reincarcare Vizuala: Sistem de reincarcare functional, cu animatie vizuala si sunet(inca nu e implementat).
+Reincarcare Vizuala: Sistem de reincarcare functional, cu animatie vizuala si sunet.
 Control Fluid: Miscare clasica (W, A, S, D) si tintire precisa cu mouse-ul, unde jucatorul se roteste urmarind cursorul.
 Interfata (UI) Adaptabila: Afiseaza arma curenta si munitia ramasa, fiind ancorata de ecran. Interfata se adapteaza corect la redimensionarea ferestrei si la modul fullscreen.
 Harti Bazate pe Tile-uri: Incarca niveluri complexe din fisiere text si un tileset grafic.
-Camera si Gloante: Jocul foloseste o camera (sf::View) care urmareste jucatorul si un sistem de management al gloantelor.
+Camera si Gloante: Jocul foloseste o camera care urmareste jucatorul si un sistem de management al gloantelor.
 
 Controale
 
@@ -32,6 +32,10 @@ Reincarca: R
 Exit: BACKSPACE
 Meniu: TAB
 Navigare meniu: ARROWS
+Cumparare abilitati: ENTER
+
+Assets nu imi apartin.
+Sursa assets:https://itch.io/
 
 ### Folosiți template-ul corespunzător grupei voastre!
 
