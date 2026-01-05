@@ -21,19 +21,19 @@ Interfata (UI) Adaptabila: Afiseaza arma curenta si munitia ramasa, fiind ancora
 Harti Bazate pe Tile-uri: Incarca niveluri complexe din fisiere text si un tileset grafic.
 Camera si Gloante: Jocul foloseste o camera care urmareste jucatorul si un sistem de management al gloantelor.
 
-Controale
-
-Miscare: W, A, S, D
-Tintire: Mouse
-Trage: Click Stanga
-Schimba Arma Urmatoare: E
-Schimba Arma Anterioara: Q
-Reincarca: R
-Exit: BACKSPACE
-Meniu: TAB
-Folosire abilitate de pickup(health sau ammo): X(hold)
-Navigare meniu: ARROWS
-Cumparare abilitati: ENTER
+Controale  
+  
+*Miscare: W, A, S, D  
+*Tintire: Mouse  
+*Trage: Click Stanga  
+*Schimba Arma Urmatoare: E  
+*Schimba Arma Anterioara: Q  
+*Reincarca: R  
+*Exit: BACKSPACE  
+*Meniu: TAB  
+*Folosire abilitate de pickup(health sau ammo): X(hold)  
+*Navigare meniu: ARROWS  
+*Cumparare abilitati: ENTER  
 
 Assets nu imi apartin.
 Sursa assets:https://itch.io/
