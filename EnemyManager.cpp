@@ -165,6 +165,3 @@ void EnemyManager::spawnEnemy(const sf::FloatRect& mapBounds, const GameMap& gam
     else m_enemies.emplace_back(std::make_unique<DevilEnemy>(m_soundBuffers));
     m_enemies.back()->setPosition(pos);
 }
-
-const std::vector<std::unique_ptr<EnemyBase>>& EnemyManager::getEnemies() const { return m_enemies; }
-std::vector<std::unique_ptr<EnemyBase>>& EnemyManager::getEnemies() { return m_enemies; }

@@ -36,9 +36,6 @@ public:
                                 const sf::Texture& bloodEffectTexture,
                                 const std::vector<sf::IntRect>& bloodEffectFrames);
 
-    [[nodiscard]] const std::vector<std::unique_ptr<EnemyBase>>& getEnemies() const;
-    [[nodiscard]] std::vector<std::unique_ptr<EnemyBase>>& getEnemies();
-
 private:
     void spawnEnemy(const sf::FloatRect& mapBounds, const GameMap& gameMap);
 
