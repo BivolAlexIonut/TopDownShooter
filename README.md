@@ -35,9 +35,13 @@ Controale
 *Navigare meniu: ARROWS  
 *Cumparare abilitati: ENTER  
 
-Assets nu imi apartin.
-Sursa assets:https://itch.io/
-
+Assets nu imi apartin.  
+Sursa assets:https://itch.io/  
+Pentru inamici am folosit packul : https://admurin.itch.io/monster-pack-96  
+Pentru animatii am folosit : https://admurin.itch.io/monster-pack-96  
+Pentru mapa,caracter,arme am folosit : https://laplas-games-inc.itch.io/top-down-shooter-asset-pack  
+Tot pentru mapa am folosit un tile map editor : https://thorbjorn.itch.io/tiled  
+  
 ### Folosiți template-ul corespunzător grupei voastre!
 
 | Laborant  | Link template                                |
