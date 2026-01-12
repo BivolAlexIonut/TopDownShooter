@@ -35,12 +35,29 @@ Controale
 *Navigare meniu: ARROWS  
 *Cumparare abilitati: ENTER  
 
-Assets nu imi apartin.  
-Sursa assets:https://itch.io/  
-Pentru inamici am folosit packul : https://admurin.itch.io/monster-pack-96  
-Pentru animatii am folosit : https://admurin.itch.io/monster-pack-96  
-Pentru mapa,caracter,arme am folosit : https://laplas-games-inc.itch.io/top-down-shooter-asset-pack  
-Tot pentru mapa am folosit un tile map editor : https://thorbjorn.itch.io/tiled  
+# Asset Credits & Acknowledgements
+
+Acest proiect folosește resurse grafice create de terți, disponibile gratuit pe platforma Itch.io. Mai jos este lista detaliată a resurselor și autorilor lor.
+
+## 🎨 Grafică (Visual Assets)
+
+| Resursa în Joc | Nume Pachet Original | Autor | Sursă (Link) | Modificări Aduse |
+| :--- | :--- | :--- | :--- | :--- |
+| **Inamici** (Chaser, Ghost, Devil) | Monster Pack 96 | **Admurin** | [Link Itch.io](https://admurin.itch.io/monster-pack-96) | Animații integrate în State Machine |
+| **Bomber Enemy** | Monster Pack 96 | **Admurin** | [Link Itch.io](https://admurin.itch.io/monster-pack-96) | **Recolored** (Roșu) prin cod C++ |
+| **Player Character** | Top Down Shooter Asset Pack | **Laplas Games Inc.** | [Link Itch.io](https://laplas-games-inc.itch.io/top-down-shooter-asset-pack) | - |
+| **Harta & Tileset** | Top Down Shooter Asset Pack | **Laplas Games Inc.** | [Link Itch.io](https://laplas-games-inc.itch.io/top-down-shooter-asset-pack) | Nivel construit manual |
+| **Arme (Weapons)** | Top Down Shooter Asset Pack | **Laplas Games Inc.** | [Link Itch.io](https://laplas-games-inc.itch.io/top-down-shooter-asset-pack) | - |
+
+## 🛠️ Unelte Software Utilizate (Tools)
+
+| Unealtă | Scop | Link |
+| :--- | :--- | :--- |
+| **Tiled Map Editor** | Crearea și exportul nivelului (`level1.txt`) | [thorbjorn.itch.io/tiled](https://thorbjorn.itch.io/tiled) |
+| **CLion / Visual Studio** | IDE C++ | - |
+| **SFML 3.0** | Bibliotecă Grafică | [sfml-dev.org](https://www.sfml-dev.org/) |
+
+---
   
 ### Folosiți template-ul corespunzător grupei voastre!
 
