@@ -44,7 +44,6 @@ Acest proiect folosește resurse grafice create de terți, disponibile gratuit p
 | Resursa în Joc | Nume Pachet Original | Autor | Sursă (Link) | Modificări Aduse |
 | :--- | :--- | :--- | :--- | :--- |
 | **Inamici** (Chaser, Ghost, Devil) | Monster Pack 96 | **Admurin** | [Link Itch.io](https://admurin.itch.io/monster-pack-96) | Animații integrate în State Machine |
-| **Bomber Enemy** | Monster Pack 96 | **Admurin** | [Link Itch.io](https://admurin.itch.io/monster-pack-96) | **Recolored** (Roșu) prin cod C++ |
 | **Player Character** | Top Down Shooter Asset Pack | **Laplas Games Inc.** | [Link Itch.io](https://laplas-games-inc.itch.io/top-down-shooter-asset-pack) | - |
 | **Harta & Tileset** | Top Down Shooter Asset Pack | **Laplas Games Inc.** | [Link Itch.io](https://laplas-games-inc.itch.io/top-down-shooter-asset-pack) | Nivel construit manual |
 | **Arme (Weapons)** | Top Down Shooter Asset Pack | **Laplas Games Inc.** | [Link Itch.io](https://laplas-games-inc.itch.io/top-down-shooter-asset-pack) | - |
