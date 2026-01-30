@@ -11,7 +11,6 @@
 Game::Game()
     : m_window(sf::VideoMode({1280, 720}), "Top-Down Shooter")
     , m_state(GameState::MainMenu)
-    , m_enemyManager(m_resources.getSoundBuffers())
 {
     m_window.setFramerateLimit(60);
     m_window.setMouseCursorVisible(false);
@@ -20,52 +19,50 @@ Game::Game()
     m_uiView.setSize(static_cast<sf::Vector2f>(m_window.getSize()));
     m_uiView.setCenter(static_cast<sf::Vector2f>(m_window.getSize()) / 2.f);
 
-    m_resources.loadAll();
+    ResourceManager::getInstance().loadAll();
 
-    // Configurare UI folosind std::optional emplace
-    m_crosshairSprite.emplace(m_resources.getTexture("crosshair"));
+    m_crosshairSprite.emplace(ResourceManager::getInstance().getTexture("crosshair"));
     m_crosshairSprite->setTextureRect(sf::IntRect({20, 30}, {13, 13}));
     m_crosshairSprite->setOrigin({6.5f, 6.5f});
     m_crosshairSprite->setScale({2.f, 2.f});
 
-    m_coinIconSprite.emplace(m_resources.getTexture("coin"));
+    m_coinIconSprite.emplace(ResourceManager::getInstance().getTexture("coin"));
     m_coinIconSprite->setTextureRect(sf::IntRect({0, 0}, {20, 20}));
     m_coinIconSprite->setScale({1.5f, 1.5f});
 
-    m_ammoText.emplace(m_resources.getFont());
+    m_ammoText.emplace(ResourceManager::getInstance().getFont());
     m_ammoText->setCharacterSize(48);
     m_ammoText->setFillColor(sf::Color::Black);
 
-    m_coinText.emplace(m_resources.getFont());
+    m_coinText.emplace(ResourceManager::getInstance().getFont());
     m_coinText->setCharacterSize(48);
     m_coinText->setFillColor(sf::Color(240, 180, 0));
 
-    m_menuTitle.emplace(m_resources.getFont());
+    m_menuTitle.emplace(ResourceManager::getInstance().getFont());
     m_menuTitle->setString("TOP-DOWN SHOOTER");
     m_menuTitle->setCharacterSize(72);
     m_menuTitle->setFillColor(sf::Color::White);
 
-    m_menuStart.emplace(m_resources.getFont());
+    m_menuStart.emplace(ResourceManager::getInstance().getFont());
     m_menuStart->setString("Apasati ENTER pentru a incepe");
     m_menuStart->setCharacterSize(48);
     m_menuStart->setFillColor(sf::Color::Yellow);
 
-    m_menuExit.emplace(m_resources.getFont());
+    m_menuExit.emplace(ResourceManager::getInstance().getFont());
     m_menuExit->setString("Apasati ESCAPE pentru a iesi");
     m_menuExit->setCharacterSize(48);
     m_menuExit->setFillColor(sf::Color::White);
 
-    m_gameOverTitle.emplace(m_resources.getFont());
+    m_gameOverTitle.emplace(ResourceManager::getInstance().getFont());
     m_gameOverTitle->setString("GAME OVER");
     m_gameOverTitle->setCharacterSize(72);
     m_gameOverTitle->setFillColor(sf::Color::Red);
 
-    m_gameOverRestart.emplace(m_resources.getFont());
+    m_gameOverRestart.emplace(ResourceManager::getInstance().getFont());
     m_gameOverRestart->setString("Apasati R pentru a reveni la meniu");
     m_gameOverRestart->setCharacterSize(48);
     m_gameOverRestart->setFillColor(sf::Color::Yellow);
 
-    // Initializare statica pentru clasele de inamici
     const std::string devilBasePath = "assets/enemies/Flying Demon 2D Pixel Art/Sprites/with_outline/";
     const std::string devilProjectilePath = "assets/enemies/Flying Demon 2D Pixel Art/Sprites/projectile.png";
     ChaserEnemy::initAssets();
@@ -89,7 +86,7 @@ void Game::restartGame() {
         throw MapLoadException("level1.txt", "Eroare la incarcare");
     }
     m_mapBounds = m_gameMap.getPixelBounds();
-    m_player = std::make_unique<Player>(1640 * mapScale, 1360 * mapScale, m_resources.getSoundBuffers());
+    m_player = std::make_unique<Player>(1640 * mapScale, 1360 * mapScale, ResourceManager::getInstance().getSoundBuffers());
     
     m_enemyManager.reset();
     m_projectileManager.clear();
@@ -100,8 +97,8 @@ void Game::restartGame() {
     m_shootTimer.restart();
     m_playerDamageTimer.restart();
 
-    if (m_resources.getBackgroundMusic().getStatus() != sf::SoundStream::Status::Playing)
-        m_resources.getBackgroundMusic().play();
+    if (ResourceManager::getInstance().getBackgroundMusic().getStatus() != sf::SoundStream::Status::Playing)
+        ResourceManager::getInstance().getBackgroundMusic().play();
 
     m_state = GameState::Playing;
 }
@@ -141,8 +138,8 @@ void Game::processEvents() {
                 if (key == sf::Keyboard::Key::R) {
                     auto reload = m_player->reload();
                     if (!reload.first.empty()) {
-                        m_activeSounds.emplace_back(m_resources.getSoundBuffer(reload.first));
-                        m_activeSounds.back().setPitch(m_resources.getSoundBuffer(reload.first).getDuration().asSeconds() / reload.second);
+                        m_activeSounds.emplace_back(ResourceManager::getInstance().getSoundBuffer(reload.first));
+                        m_activeSounds.back().setPitch(ResourceManager::getInstance().getSoundBuffer(reload.first).getDuration().asSeconds() / reload.second);
                         m_activeSounds.back().play();
                     }
                 }
@@ -159,14 +156,14 @@ void Game::update(sf::Time dt) {
             m_shootTimer.getElapsedTime().asSeconds() > m_player->getCurrentWeaponCooldown() && 
             m_player->canShoot(mouseWorld)) {
             m_projectileManager.addBullet(m_player->shoot(mouseWorld));
-            m_activeSounds.emplace_back(m_resources.getSoundBuffer(m_player->getShootSoundKey()));
-            m_activeSounds.back().setPitch(RandomGenerator::getFloat(0.95f, 1.05f));
+            m_activeSounds.emplace_back(ResourceManager::getInstance().getSoundBuffer(m_player->getShootSoundKey()));
+            m_activeSounds.back().setPitch(RandomGenerator::get<float>(0.95f, 1.05f));
             m_activeSounds.back().play();
             m_shootTimer.restart();
         }
 
         m_player->update(dt.asSeconds(), mouseWorld, m_gameMap);
-        m_projectileManager.update(dt.asSeconds(), m_gameMap, *m_player, m_playerDamageTimer, m_playerIframeDuration, m_activeSounds, m_resources.getSoundBuffer("player_hurt"));
+        m_projectileManager.update(dt.asSeconds(), m_gameMap, *m_player, m_playerDamageTimer, m_playerIframeDuration, m_activeSounds, ResourceManager::getInstance().getSoundBuffer("player_hurt"));
         
         std::vector<std::unique_ptr<Coin>> newCoins;
         std::vector<std::unique_ptr<DevilProjectile>> newProjectiles;
@@ -177,20 +174,19 @@ void Game::update(sf::Time dt) {
 
         m_enemyManager.handleBulletCollisions(m_projectileManager.getBullets(), m_activeSounds, 
             m_effectManager,
-            m_resources.getTexture("ghost_impact"), m_ghostImpactFrames, 
-            m_resources.getTexture("blood_effect"), m_bloodEffectFrames);
+            ResourceManager::getInstance().getTexture("ghost_impact"), m_ghostImpactFrames, 
+            ResourceManager::getInstance().getTexture("blood_effect"), m_bloodEffectFrames);
 
-        m_pickableManager.update(dt.asSeconds(), *m_player, m_activeSounds, m_resources.getSoundBuffer("coin_pickup"));
+        m_pickableManager.update(dt.asSeconds(), *m_player, m_activeSounds, ResourceManager::getInstance().getSoundBuffer("coin_pickup"));
         m_effectManager.update();
 
-        // Camera
         sf::Vector2f center = m_player->getPosition();
         sf::Vector2f size = m_camera.getSize();
         center.x = std::clamp(center.x, size.x/2.f, m_mapBounds.size.x - size.x/2.f);
         center.y = std::clamp(center.y, size.y/2.f, m_mapBounds.size.y - size.y/2.f);
         m_camera.setCenter(center);
 
-        if (m_player->isDead()) { m_state = GameState::GameOver; m_resources.getBackgroundMusic().stop(); }
+        if (m_player->isDead()) { m_state = GameState::GameOver; ResourceManager::getInstance().getBackgroundMusic().stop(); }
     } else if (m_state == GameState::Paused) m_upgradeMenu.update(*m_player);
 
     std::erase_if(m_activeSounds, [](const sf::Sound& s) { return s.getStatus() == sf::Sound::Status::Stopped; });

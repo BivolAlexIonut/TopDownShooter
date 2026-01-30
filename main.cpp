@@ -3,8 +3,7 @@
 
 int main() {
     try {
-        Game game;
-        game.run();
+        Game::getInstance().run();
     } catch (const std::exception& e) {
         std::cerr << "EROARE FATALA: " << e.what() << std::endl;
         return -1;

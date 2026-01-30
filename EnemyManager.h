@@ -12,10 +12,11 @@
 #include "EffectManager.h"
 #include "Coin.h"
 #include "DevilProjectile.h"
+#include "EnemyFactory.h"
 
 class EnemyManager {
 public:
-    explicit EnemyManager(std::map<std::string, sf::SoundBuffer>& soundBuffers);
+    EnemyManager();
 
     void reset();
     void update(float dt, Player& player, const GameMap& map,
@@ -40,7 +41,6 @@ private:
     void spawnEnemy(const sf::FloatRect& mapBounds, const GameMap& gameMap);
 
     std::vector<std::unique_ptr<EnemyBase>> m_enemies;
-    std::map<std::string, sf::SoundBuffer>& m_soundBuffers;
 
     sf::Clock m_respawnTimer;
     const float m_respawnDelay = 6.0f;

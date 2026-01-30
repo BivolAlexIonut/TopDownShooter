@@ -3,10 +3,11 @@
 #include <SFML/Audio.hpp>
 #include <map>
 #include <string>
+#include "Singleton.h"
 
-class ResourceManager {
+class ResourceManager : public Singleton<ResourceManager> {
+    friend class Singleton<ResourceManager>;
 public:
-    ResourceManager();
     void loadAll();
 
     sf::SoundBuffer& getSoundBuffer(const std::string& name);
@@ -16,6 +17,7 @@ public:
     sf::Music& getBackgroundMusic();
 
 private:
+    ResourceManager();
     std::map<std::string, sf::SoundBuffer> m_sounds;
     std::map<std::string, sf::Texture> m_textures;
     sf::Font m_font;

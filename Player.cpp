@@ -444,13 +444,13 @@ void Player::update(float dt, sf::Vector2f mousePosition, GameMap &gameMap) {
         if (isMoving) {
             if (!m_wasMoving) {
                 std::cout << "DEBUG: Primul pas!" << std::endl;
-                m_stepSound.setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
+                m_stepSound.setPitch(RandomGenerator::get<float>(0.9f, 1.1f));
                 m_stepSound.play();
                 m_stepTimer.restart();
             } else {
                 if (m_stepTimer.getElapsedTime().asSeconds() > m_stepCooldown) {
                     std::cout << "DEBUG: Pas urmator (dupa cooldown)!" << std::endl;
-                    m_stepSound.setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
+                    m_stepSound.setPitch(RandomGenerator::get<float>(0.9f, 1.1f));
                     m_stepSound.play();
                     m_stepTimer.restart();
                 }

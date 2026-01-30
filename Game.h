@@ -13,15 +13,17 @@
 #include "PickableManager.h"
 #include "EffectManager.h"
 #include "UpgradeMenu.h"
+#include "Singleton.h"
 
 enum class GameState { MainMenu, Playing, Paused, GameOver };
 
-class Game {
+class Game : public Singleton<Game> {
+    friend class Singleton<Game>;
 public:
-    Game();
     void run();
 
 private:
+    Game();
     void processEvents();
     void update(sf::Time dt);
     void render();
@@ -34,7 +36,6 @@ private:
 
     GameState m_state;
 
-    ResourceManager m_resources;
     ProjectileManager m_projectileManager;
     PickableManager m_pickableManager;
     EffectManager m_effectManager;

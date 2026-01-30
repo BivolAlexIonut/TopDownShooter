@@ -76,7 +76,6 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         ChaserEnemy.cpp
         EnemyBase.h
         RandomGenerator.h
-        RandomGenerator.cpp
         Effect.cpp
         Effect.h
         GhostEnemy.h
@@ -92,6 +91,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         UpgradeMenu.cpp
         EnemyManager.h
         EnemyManager.cpp
+        Singleton.h
+        EnemyFactory.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

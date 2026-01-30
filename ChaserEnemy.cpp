@@ -209,13 +209,13 @@ void ChaserEnemy::doUpdate(sf::Time dt, sf::Vector2f playerPosition, const GameM
 
     if (isMoving) {
         if (!m_wasMoving) {
-            m_moveSound.setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
+            m_moveSound.setPitch(RandomGenerator::get<float>(0.9f, 1.1f));
             m_moveSound.setVolume(10.f);
             m_moveSound.play();
             m_moveTimer.restart();
         } else {
             if (m_moveTimer.getElapsedTime().asSeconds() > m_moveCooldown) {
-                m_moveSound.setPitch(RandomGenerator::getFloat(0.9f, 1.1f));
+                m_moveSound.setPitch(RandomGenerator::get<float>(0.9f, 1.1f));
                 m_moveSound.setVolume(10.f);
                 m_moveSound.play();
                 m_moveTimer.restart();

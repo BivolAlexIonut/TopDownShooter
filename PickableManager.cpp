@@ -21,7 +21,7 @@ void PickableManager::update(float dt, Player& player, std::list<sf::Sound>& act
     std::erase_if(m_coins, [&](const auto& coin) {
         if (player.getCollisionBounds().findIntersection(coin->getBounds())) {
             activeSounds.emplace_back(pickupSound);
-            activeSounds.back().setPitch(RandomGenerator::getFloat(1.1f, 1.3f));
+            activeSounds.back().setPitch(RandomGenerator::get<float>(1.1f, 1.3f));
             activeSounds.back().setVolume(100.f);
             activeSounds.back().play();
             player.addCoins(1);

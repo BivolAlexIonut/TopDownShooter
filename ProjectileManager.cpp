@@ -31,7 +31,7 @@ void ProjectileManager::update(float dt, const GameMap& map, Player& player, sf:
 
             player.takeDamage(15.f, knockbackDir);
             activeSounds.emplace_back(hurtSound);
-            activeSounds.back().setPitch(RandomGenerator::getFloat(0.5f, 1.2f));
+            activeSounds.back().setPitch(RandomGenerator::get<float>(0.5f, 1.2f));
             activeSounds.back().setVolume(80.f);
             activeSounds.back().play();
             damageTimer.restart();
